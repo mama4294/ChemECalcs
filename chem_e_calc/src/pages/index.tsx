@@ -12,8 +12,8 @@ const Home: NextPage = () => {
       </Head>
 
       <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
-        <h1 className="text-5xl font-extrabold leading-normal text-gray-700 md:text-[5rem]">
-          Chem<span className="text-purple-300">E</span> Calculator
+        <h1 className="text-5xl font-extrabold leading-normal text-base md:text-[5rem] text-primary">
+          Chem<span className="text-secondary">E</span> Calculator
         </h1>
         <div className="mt-3 grid gap-3 pt-3 text-center md:grid-cols-3 lg:w-2/3">
           <CalcCard
@@ -52,9 +52,9 @@ const CalcCard = ({
 }: CalcCardProps) => {
   return (
     <Link href={link}>
-    <section className="flex flex-col justify-center rounded border-2 border-gray-500 p-6 shadow-xl duration-500 motion-safe:hover:scale-105 cursor-pointer" >
-      <h2 className="text-lg text-gray-700">{name}</h2>
-      <p className="text-sm text-gray-600">{description}</p>
+    <section className="flex flex-col justify-center rounded border-2 border-primary p-6 shadow-xl duration-500 motion-safe:hover:scale-105 cursor-pointer" >
+      <h2 className="text-lg text-primary">{name}</h2>
+      <p className="text-sm text-secondary">{description}</p>
     </section>
         </Link>
   );
