@@ -9,7 +9,8 @@ type Props = {
 const BaseLayout:React.FC<Props> = ({children}) =>{
     return(
         <>
-        <div className="min-h-screen flex flex-col">
+        {/* <div data-theme="garden" className="min-h-screen flex flex-col"> */}
+        <div  className="min-h-screen flex flex-col">
         <Navbar/>
             <main className="flex-grow ">
             {children}

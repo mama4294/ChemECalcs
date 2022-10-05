@@ -12,10 +12,10 @@ const Home: NextPage = () => {
       </Head>
 
       <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
-        <h1 className="text-5xl font-extrabold leading-normal text-base md:text-[5rem] text-primary">
-          Chem<span className="text-secondary">E</span> Calculator
+        <h1 className="text-5xl font-extrabold leading-normal md:text-[5rem] text-neutral-focus">
+          Chem<span className="text-accent">E</span> Calculator
         </h1>
-        <div className="mt-3 grid gap-3 pt-3 text-center md:grid-cols-3 lg:w-2/3">
+        <div className="mt-3 grid gap-9 pt-3 text-center md:grid-cols-3 lg:w-2/3">
           <CalcCard
             name="Fluid Flow"
             description="Calculators for fluid dynamics"
@@ -52,10 +52,12 @@ const CalcCard = ({
 }: CalcCardProps) => {
   return (
     <Link href={link}>
-    <section className="flex flex-col justify-center rounded border-2 border-primary p-6 shadow-xl duration-500 motion-safe:hover:scale-105 cursor-pointer" >
-      <h2 className="text-lg text-primary">{name}</h2>
-      <p className="text-sm text-secondary">{description}</p>
-    </section>
+    <section className="card w-56 shadow-xl motion-safe:hover:scale-105 duration-500 cursor-pointer bg-neutral-content text-neutral">
+    <div className="card-body">
+      <h2 className="card-title justify-center ">{name}</h2>
+      <p>{description}</p>
+    </div>
+  </section>
         </Link>
   );
 };
