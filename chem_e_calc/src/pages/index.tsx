@@ -27,9 +27,9 @@ const Home: NextPage = () => {
             link="/heattransfer"
           />
           <CalcCard
-            name="Equipment"
-            description="Calculators for equipment properties"
-            link="/equipment"
+            name="Geomentry"
+            description="Calculators for geometric properties"
+            link="/geometry"
           />
         </div>
       </main>
@@ -52,7 +52,7 @@ const CalcCard = ({
 }: CalcCardProps) => {
   return (
     <Link href={link}>
-    <section className="card w-56 shadow-xl motion-safe:hover:scale-105 duration-500 cursor-pointer bg-neutral-content text-neutral">
+    <section className="card w-56 shadow-nuetral shadow-2xl motion-safe:hover:scale-105 duration-500 cursor-pointer bg-base-300-content text-base-content">
     <div className="card-body">
       <h2 className="card-title justify-center ">{name}</h2>
       <p>{description}</p>

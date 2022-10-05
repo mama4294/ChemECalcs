@@ -29,10 +29,17 @@ const Navbar = () =>{
                         </li>
                 </ul>
                 </li>
-                <li><a>Equipment</a></li>
+                <li>
+                <Link href={"/geometry"}>
+                    <a>Geomentry</a>
+                </Link>   
+                    </li>
             </ul>
             </div>
+            <Link href={"/"}>
             <a className="btn normal-case text-xl">ChemE Calcs</a>
+                </Link>   
+
         </div>
          {/* Desktop Menu */}
         <div className="navbar-center hidden lg:flex text-neutral-content">
@@ -50,7 +57,12 @@ const Navbar = () =>{
                     <li><a>Thermodynamics</a></li>
                 </ul>
             </li>
-            <li><a>Equipment</a></li>
+            <li>
+            <Link href={"/geometry"}>
+                    <a>Geomentry</a>
+                </Link>   
+                
+                </li>
             </ul>
         </div>
         <div className="navbar-end">
