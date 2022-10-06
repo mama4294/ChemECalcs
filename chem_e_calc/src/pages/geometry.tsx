@@ -1,6 +1,8 @@
 import Link from "next/link"
-import { type } from "os"
 import { useState } from "react"
+import { units, Units, convertUnits } from "../../utils/units"
+
+
 
 const Geometry = () =>{
     return(
@@ -39,10 +41,12 @@ const SectionContainer = () =>{
     {
         id: 1,
         name: 'diameter',
+        unitType: 'length',
         type: 'number',
         placeholder: 'enter value',
         label: "Diameter",
         displayValue: {value: 68, unit: "ft"},
+        convertedValue: {value: 0, unit: "m"},
         solveable: true,
         selectiontext: "Solve for Diameter",
         selected: false,
@@ -50,10 +54,12 @@ const SectionContainer = () =>{
     {
         id: 2,
         name: 'height',
+        unitType: 'length',
         type: 'number',
         placeholder: 'enter value',
         label: "Height",
         displayValue: {value: 68, unit: "ft"},
+        convertedValue: {value: 0, unit: "m"},
         solveable: true,
         selectiontext: "Solve for Height",
         selected: false,
@@ -61,10 +67,12 @@ const SectionContainer = () =>{
     {
         id: 3,
         name: 'volume',
+        unitType: 'volume',
         type: 'number',
         placeholder: 'enter value',
         label: "Volume",
         displayValue: {value: 682, unit: "gal"},
+        convertedValue: {value: 0, unit: "m3"},
         solveable: true,
         selectiontext: "Solve for Voluem",
         selected: true,
@@ -81,8 +89,12 @@ const changeSolveSelection = (id: number):void =>{
 
 const changeUnit = (id: number, unit: string):void =>{
     const newArr = values.map((o)=>{
-        const existingValue = o.displayValue.value
-        if(o.id === id) return {...o, displayValue: {value: existingValue, unit: unit}}
+        if(o.id === id){
+            const existingValue = o.displayValue.value
+            const convertedValue = convertUnits({value: existingValue, fromUnit: unit, toUnit: o.convertedValue.unit})
+            console.log(`${existingValue} ${unit} is ${convertedValue} ${o.convertedValue.unit}`)
+            return {...o, displayValue: {value: existingValue, unit: unit}}
+        } 
         else return o;
     })
     setValues(newArr)
@@ -90,8 +102,23 @@ const changeUnit = (id: number, unit: string):void =>{
 
 const changeValue = (id: number, value: number):void =>{
     const newArr = values.map((o)=>{
-        const existingUnit = o.displayValue.unit
-        if(o.id === id) return {...o, displayValue: {value: value, unit: existingUnit}}
+        if(o.id === id){
+            const existingUnit = o.displayValue.unit
+            return {...o, displayValue: {value: value, unit: existingUnit}}
+        } 
+        else return o;
+    })
+    setValues(newArr)
+}
+
+
+//Fix this
+const updateConvertedValue = (id: number, value: number):void =>{
+    const newArr = values.map((o)=>{
+        if(o.id === id){
+            const convertedUnit = o.convertedValue.unit
+            return {...o, convertedValue: {value: value, unit: convertedUnit}}
+        } 
         else return o;
     })
     setValues(newArr)
@@ -122,7 +149,7 @@ type InputFieldProps = {
 
 
 const InputField = ({data, onChangeUnit, onChangeValue}:InputFieldProps) =>{
-    const {id, label, placeholder, type, selected, displayValue} = data
+    const {id, label, placeholder, type, selected, displayValue, unitType} = data
     const {value, unit} = displayValue;
 
     return(
@@ -133,10 +160,9 @@ const InputField = ({data, onChangeUnit, onChangeValue}:InputFieldProps) =>{
         <label className="input-group">
             <input className="input input-bordered w-full" type={type} value={value} placeholder={placeholder} disabled={selected} onChange={(e)=>onChangeValue(id, Number(e.target.value))}/>
             <select className="select input-bordered bg-base-200 text-base-content" value={unit} onChange={(e)=>onChangeUnit(id, e.target.value)}>
-                <option>ft</option>
-                <option>in</option>
-                <option>cm</option>
-                <option>m</option>
+                {units[unitType as keyof Units].map((unitOption: string)=>{
+                    return <option>{unitOption}</option>
+                })}
             </select>
      </label>
     </div>
@@ -147,10 +173,16 @@ const InputField = ({data, onChangeUnit, onChangeValue}:InputFieldProps) =>{
 type InputType = {
     id: number
     name: string,
+    unitType: string,
     type: string,
     placeholder: string,
     label: string,
     displayValue: 
+    {
+        value: number,
+        unit: string
+    },
+    convertedValue: 
     {
         value: number,
         unit: string
