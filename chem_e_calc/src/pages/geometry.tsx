@@ -24,9 +24,6 @@ const Geometry = () =>{
              {/* Calculator */}
              <div className="flex flex-wrap gap-8">
                 <SectionContainer/>
-                <SectionContainer/>
-                <SectionContainer/>
-                <SectionContainer/>
              </div>
 
         </div>
@@ -38,41 +35,17 @@ export default Geometry
 
 const SectionContainer = () =>{
 
-    const [solveSelection, setSolveSelection]=useState<SolveSelection[]>([
-        {
-            id:1,
-            label:"Volume",
-            active: false
-        },
-        {
-            id:2,
-            label:"Height",
-            active: true
-        },
-        {
-            id:3,
-            label:"Diameter",
-            active: false
-        }
-    ])
-
-    const changeSolveSelection = (id: number):void =>{
-        const newArr = solveSelection.map((option)=>{
-            if(option.id === id) return {...option, active: true}
-            else return {...option, active: false}
-        })
-        setSolveSelection(newArr)
-    }
-
-    const [data, setData] = useState([
+    const [values, setValues] = useState<InputType[]>([
     {
         id: 1,
         name: 'diameter',
         type: 'number',
         placeholder: 'enter value',
         label: "Diameter",
-        value: 68,
-        disabled: false,
+        displayValue: {value: 68, unit: "ft"},
+        solveable: true,
+        selectiontext: "Solve for Diameter",
+        selected: false,
     },
     {
         id: 2,
@@ -80,8 +53,10 @@ const SectionContainer = () =>{
         type: 'number',
         placeholder: 'enter value',
         label: "Height",
-        value: 12,
-        disabled: false,
+        displayValue: {value: 68, unit: "ft"},
+        solveable: true,
+        selectiontext: "Solve for Height",
+        selected: false,
     },
     {
         id: 3,
@@ -89,21 +64,48 @@ const SectionContainer = () =>{
         type: 'number',
         placeholder: 'enter value',
         label: "Volume",
-        value: 222,
-        disabled: true,
+        displayValue: {value: 682, unit: "gal"},
+        solveable: true,
+        selectiontext: "Solve for Voluem",
+        selected: true,
     },
 ])
 
+const changeSolveSelection = (id: number):void =>{
+    const newArr = values.map((o)=>{
+        if(o.id === id) return {...o, selected: true}
+        else return {...o, selected: false}
+    })
+    setValues(newArr)
+}
+
+const changeUnit = (id: number, unit: string):void =>{
+    const newArr = values.map((o)=>{
+        const existingValue = o.displayValue.value
+        if(o.id === id) return {...o, displayValue: {value: existingValue, unit: unit}}
+        else return o;
+    })
+    setValues(newArr)
+}
+
+const changeValue = (id: number, value: number):void =>{
+    const newArr = values.map((o)=>{
+        const existingUnit = o.displayValue.unit
+        if(o.id === id) return {...o, displayValue: {value: value, unit: existingUnit}}
+        else return o;
+    })
+    setValues(newArr)
+}
 
     return(
         <div className = "bg-base-100 p-4 rounded w-full md:w-[calc(50%_-_2rem)] lg:w-w-[calc(33.33%_-_2rem)] shadow-lg ">
         <div>
-            <h2 className="mb-4 text-xl">Data</h2>
-            <SolveFor options={solveSelection} onChange={changeSolveSelection}/>
+            <h2 className="mb-4 text-xl">Calculator</h2>
+            <SolveForDropdown options={values} onChange={changeSolveSelection}/>
             <div className="flex flex-col mb-8">
-                {data.map((input)=>{
+                {values.map((input)=>{
                     return(
-                       <InputField key={input.id} {...input}/>
+                       <InputField key={input.id} data={input} onChangeUnit={changeUnit} onChangeValue={changeValue} />
                     )
                 })}       
             </div>
@@ -112,25 +114,26 @@ const SectionContainer = () =>{
     )
 }
 
-
-type Input = {
-    label: string,
-    placeholder: string,
-    type: string,
-    [x:string]: any;
+type InputFieldProps = {
+    data: InputType,
+    onChangeUnit: (id: number, unit: string) => void,
+    onChangeValue: (id: number, value: number) => void,
 }
 
-const InputField = ({label, placeholder, type, ...inputProps}:Input) =>{
+
+const InputField = ({data, onChangeUnit, onChangeValue}:InputFieldProps) =>{
+    const {id, label, placeholder, type, selected, displayValue} = data
+    const {value, unit} = displayValue;
+
     return(
     <div className="form-control w-full">
         <label className="label">
             <span className="label-text">{label}</span>
         </label>
         <label className="input-group">
-            <input type={type} placeholder={placeholder} className="input input-bordered w-full" {...inputProps}/>
-            {/* <span>L</span> */}
-            <select className="select input-bordered bg-base-200 text-base-content">
-                <option selected>ft</option>
+            <input className="input input-bordered w-full" type={type} value={value} placeholder={placeholder} disabled={selected} onChange={(e)=>onChangeValue(id, Number(e.target.value))}/>
+            <select className="select input-bordered bg-base-200 text-base-content" value={unit} onChange={(e)=>onChangeUnit(id, e.target.value)}>
+                <option>ft</option>
                 <option>in</option>
                 <option>cm</option>
                 <option>m</option>
@@ -141,30 +144,37 @@ const InputField = ({label, placeholder, type, ...inputProps}:Input) =>{
     )
 }
 
-type SolveSelection = {
+type InputType = {
     id: number
-    label:string,
-    active: boolean
+    name: string,
+    type: string,
+    placeholder: string,
+    label: string,
+    displayValue: 
+    {
+        value: number,
+        unit: string
+    }
+    solveable: boolean,
+    selectiontext: string,
+    selected: boolean,
 }
 
 type SolveForProps = {
-    options: SolveSelection[],
+    options: InputType[],
     onChange: (id:number) => void,
 }
 
-const SolveFor = ({options, onChange}:SolveForProps) =>{
+
+const SolveForDropdown = ({options, onChange}: SolveForProps) =>{
+
+    const selectedValueId = options.find((option) => option.selected === true)?.id
 
     return(
-        <div>
-            <div>Solve for</div>
-            <div className="btn-group">
-                {options.map((option)=>{
-                    const {label, active, id} = option
-                    return(
-                        <button className={`btn ${active ? "btn-active": ""}`} onClick={()=>onChange(id)}>{label}</button>
-                    )
-                })}
-            </div>
-        </div>
+        <select className="select input-bordered bg-base-200 text-base-content w-full" value={selectedValueId} onChange={(e)=>onChange(Number(e.target.value))}>
+            {options.map((option)=>{
+                if(option.solveable)return( <option key={option.id} value={option.id}>{option.label}</option>)
+            })}
+    </select>
     )
 }

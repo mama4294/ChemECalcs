@@ -15,7 +15,7 @@ const Home: NextPage = () => {
         <h1 className="text-5xl font-extrabold leading-normal md:text-[5rem] text-neutral-focus">
           Chem<span className="text-accent">E</span> Calculator
         </h1>
-        <div className="mt-3 grid gap-9 pt-3 text-center md:grid-cols-3 lg:w-2/3">
+        <div className="my-3 grid gap-9 py-3 text-center md:grid-cols-3 lg:w-2/3">
           <CalcCard
             name="Fluid Flow"
             description="Calculators for fluid dynamics"
