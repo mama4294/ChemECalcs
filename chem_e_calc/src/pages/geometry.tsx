@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { useState } from "react"
-import { units, Units, convertUnits } from "../../utils/units"
+import { useState, useEffect} from "react"
+import { units, Units, convertUnits, roundTo2 } from "../../utils/units"
+import { CalcCard } from "../components/calculators/calcCard"
 
 
 
@@ -20,12 +21,13 @@ const Geometry = () =>{
                 <h1 className="text-2xl">
                     Geometry
                 </h1>
-                <p>This calculates the volume of several geometric shapes with different units</p>
+                <p>This calculates the volume of geometric shapes with various units</p>
             </div>
 
              {/* Calculator */}
              <div className="flex flex-wrap gap-8">
-                <SectionContainer/>
+                <CalculatorContainer/>
+                <CodeContainer/>
              </div>
 
         </div>
@@ -35,7 +37,7 @@ const Geometry = () =>{
 export default Geometry
 
 
-const SectionContainer = () =>{
+const CalculatorContainer = () =>{
 
     const [values, setValues] = useState<InputType[]>([
     {
@@ -46,7 +48,7 @@ const SectionContainer = () =>{
         placeholder: 'enter value',
         label: "Diameter",
         displayValue: {value: 68, unit: "ft"},
-        convertedValue: {value: 0, unit: "m"},
+        calculatedValue: {value: convertUnits({value: 68, fromUnit:"ft", toUnit: "m" }), unit: "m"},
         solveable: true,
         selectiontext: "Solve for Diameter",
         selected: false,
@@ -59,7 +61,7 @@ const SectionContainer = () =>{
         placeholder: 'enter value',
         label: "Height",
         displayValue: {value: 68, unit: "ft"},
-        convertedValue: {value: 0, unit: "m"},
+        calculatedValue: {value: convertUnits({value: 68, fromUnit:"ft", toUnit: "m" }), unit: "m"},
         solveable: true,
         selectiontext: "Solve for Height",
         selected: false,
@@ -72,12 +74,13 @@ const SectionContainer = () =>{
         placeholder: 'enter value',
         label: "Volume",
         displayValue: {value: 682, unit: "gal"},
-        convertedValue: {value: 0, unit: "m3"},
+        calculatedValue: {value: convertUnits({value: 682, fromUnit:"gal", toUnit: "m3" }), unit: "m3"},
         solveable: true,
         selectiontext: "Solve for Voluem",
         selected: true,
     },
 ])
+
 
 const changeSolveSelection = (id: number):void =>{
     const newArr = values.map((o)=>{
@@ -88,46 +91,76 @@ const changeSolveSelection = (id: number):void =>{
 }
 
 const changeUnit = (id: number, unit: string):void =>{
+    //create a new values array with changed value
     const newArr = values.map((o)=>{
         if(o.id === id){
-            const existingValue = o.displayValue.value
-            const convertedValue = convertUnits({value: existingValue, fromUnit: unit, toUnit: o.convertedValue.unit})
-            console.log(`${existingValue} ${unit} is ${convertedValue} ${o.convertedValue.unit}`)
-            return {...o, displayValue: {value: existingValue, unit: unit}}
+            const convertedValue = convertUnits({value: o.displayValue.value, fromUnit: unit, toUnit: o.calculatedValue.unit})
+            return {...o, displayValue: {value: o.displayValue.value, unit: unit}, calculatedValue: {value: convertedValue, unit: o.calculatedValue.unit}}
+        } 
+        else return o;
+    }) 
+    
+    //Set answer 
+    const answerArr = calcVolume(newArr)
+    if(answerArr){
+        setValues(answerArr)
+    } else{
+        setValues(newArr)
+    }
+}
+
+const changeValue = (id: number, number: number):void =>{
+     //create a new values array with changed value
+    const newArr = values.map((o)=>{
+        if(o.id === id){
+            const convertedValue = convertUnits({value: number, fromUnit: o.displayValue.unit, toUnit: o.calculatedValue.unit})
+            return {...o, displayValue: {value: number, unit: o.displayValue.unit}, calculatedValue: {value: convertedValue, unit: o.calculatedValue.unit}}
         } 
         else return o;
     })
-    setValues(newArr)
-}
-
-const changeValue = (id: number, value: number):void =>{
-    const newArr = values.map((o)=>{
-        if(o.id === id){
-            const existingUnit = o.displayValue.unit
-            return {...o, displayValue: {value: value, unit: existingUnit}}
-        } 
-        else return o;
-    })
-    setValues(newArr)
+    //Set answer 
+    const answerArr = calcVolume(newArr)
+    if(answerArr){
+        setValues(answerArr)
+    } else{
+        setValues(newArr)
+    }
 }
 
 
-//Fix this
-const updateConvertedValue = (id: number, value: number):void =>{
-    const newArr = values.map((o)=>{
-        if(o.id === id){
-            const convertedUnit = o.convertedValue.unit
-            return {...o, convertedValue: {value: value, unit: convertedUnit}}
-        } 
-        else return o;
-    })
-    setValues(newArr)
+  //Calculate volume
+  const calcVolume = (inputArray: InputType[]) =>{
+    const diameterObj = inputArray.find((o)=> o.name === "diameter")
+    const heightObj = inputArray.find((o)=> o.name === "height")
+
+    const inputs = [{type: "diameter", value: diameterObj?.displayValue.value, unit: diameterObj?.displayValue.unit}, {type: "height", value: heightObj?.displayValue.value, unit: heightObj?.displayValue.unit},]
+    console.table(inputs)
+
+    if(!diameterObj || !heightObj) {
+    alert("inputs to calculator undefined")
+    return null}
+
+
+    const answerValue = Math.PI*((diameterObj.calculatedValue.value/2)**2)*heightObj.calculatedValue.value;
+    console.log("Calculated value: ", answerValue)
+    return inputArray.map((o)=>{
+        //convert calculed value to display value
+        if(o.name==="volume"){
+            const displayValue = convertUnits({value: answerValue, fromUnit: o.calculatedValue.unit, toUnit: o.displayValue.unit})
+            console.log("Display value: ", displayValue)
+            return {...o, displayValue: {value: roundTo2(displayValue), unit: o.displayValue.unit}, calculatedValue:{value: answerValue, unit: o.calculatedValue.unit}}
+        }
+            else return o;
+    }
+    )
 }
+
+
+
 
     return(
-        <div className = "bg-base-100 p-4 rounded w-full md:w-[calc(50%_-_2rem)] lg:w-w-[calc(33.33%_-_2rem)] shadow-lg ">
-        <div>
-            <h2 className="mb-4 text-xl">Calculator</h2>
+        <CalcCard title="Cylinder">
+            <>            
             <SolveForDropdown options={values} onChange={changeSolveSelection}/>
             <div className="flex flex-col mb-8">
                 {values.map((input)=>{
@@ -136,8 +169,9 @@ const updateConvertedValue = (id: number, value: number):void =>{
                     )
                 })}       
             </div>
-        </div>
-    </div>
+            </>
+        </CalcCard>
+
     )
 }
 
@@ -160,8 +194,8 @@ const InputField = ({data, onChangeUnit, onChangeValue}:InputFieldProps) =>{
         <label className="input-group">
             <input className="input input-bordered w-full" type={type} value={value} placeholder={placeholder} disabled={selected} onChange={(e)=>onChangeValue(id, Number(e.target.value))}/>
             <select className="select input-bordered bg-base-200 text-base-content" value={unit} onChange={(e)=>onChangeUnit(id, e.target.value)}>
-                {units[unitType as keyof Units].map((unitOption: string)=>{
-                    return <option>{unitOption}</option>
+                {units[unitType as keyof Units].map((unitOption: string, index)=>{
+                    return <option key={index}>{unitOption}</option>
                 })}
             </select>
      </label>
@@ -182,7 +216,7 @@ type InputType = {
         value: number,
         unit: string
     },
-    convertedValue: 
+    calculatedValue: 
     {
         value: number,
         unit: string
@@ -208,5 +242,17 @@ const SolveForDropdown = ({options, onChange}: SolveForProps) =>{
                 if(option.solveable)return( <option key={option.id} value={option.id}>{option.label}</option>)
             })}
     </select>
+    )
+}
+
+const CodeContainer = () =>{
+    return(
+        <CalcCard title="Equation">
+            <div className="mockup-code min-w-full">
+                <pre><code>V = PI()*r^2*h</code></pre> 
+                <pre><code>V = lskfja</code></pre> 
+                <pre className="text-success"><code>V = 234 gal</code></pre>
+            </div>
+        </CalcCard>
     )
 }

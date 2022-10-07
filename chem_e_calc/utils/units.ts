@@ -4,6 +4,10 @@ export const convertUnits = ({value, fromUnit, toUnit}:{value:number, fromUnit:s
     return convert(value).from(fromUnit).to(toUnit)
 }
 
+export const roundTo2 = (num: number) =>{
+    return Math.round(num * 100) / 100
+}
+
 
 export interface Units {
     mass: string[],
