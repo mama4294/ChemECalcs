@@ -1,5 +1,5 @@
-import type { NextPage } from "next";
-import Head from "next/head";
+import type { NextPage } from 'next'
+import Head from 'next/head'
 import Link from 'next/link'
 
 const Home: NextPage = () => {
@@ -12,7 +12,7 @@ const Home: NextPage = () => {
       </Head>
 
       <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
-        <h1 className="text-5xl font-extrabold leading-normal md:text-[5rem] text-neutral-focus">
+        <h1 className="text-5xl font-extrabold leading-normal text-neutral-focus md:text-[5rem]">
           Chem<span className="text-accent">E</span> Calculator
         </h1>
         <div className="my-3 grid gap-9 py-3 text-center md:grid-cols-3 lg:w-2/3">
@@ -34,30 +34,26 @@ const Home: NextPage = () => {
         </div>
       </main>
     </>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home
 
 type CalcCardProps = {
-  name: string;
-  description: string;
-  link: string;
-};
+  name: string
+  description: string
+  link: string
+}
 
-const CalcCard = ({
-  name,
-  description,
-  link,
-}: CalcCardProps) => {
+const CalcCard = ({ name, description, link }: CalcCardProps) => {
   return (
     <Link href={link}>
-    <section className="card w-56 shadow-nuetral shadow-2xl motion-safe:hover:scale-105 duration-500 cursor-pointer bg-base-300-content text-base-content">
-    <div className="card-body">
-      <h2 className="card-title justify-center ">{name}</h2>
-      <p>{description}</p>
-    </div>
-  </section>
-        </Link>
-  );
-};
+      <section className="shadow-nuetral bg-base-300-content card w-56 cursor-pointer text-base-content shadow-2xl duration-500 motion-safe:hover:scale-105">
+        <div className="card-body">
+          <h2 className="card-title justify-center ">{name}</h2>
+          <p>{description}</p>
+        </div>
+      </section>
+    </Link>
+  )
+}
