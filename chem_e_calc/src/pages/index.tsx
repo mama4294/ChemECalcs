@@ -16,21 +16,9 @@ const Home: NextPage = () => {
           Chem<span className="text-accent">E</span> Calculator
         </h1>
         <div className="my-3 grid gap-9 py-3 text-center md:grid-cols-3 lg:w-2/3">
-          <CalcCard
-            name="Fluid Flow"
-            description="Calculators for fluid dynamics"
-            link="/fluidflow"
-          />
-          <CalcCard
-            name="Heat Transfer"
-            description="Calculators for thermodynamics"
-            link="/heattransfer"
-          />
-          <CalcCard
-            name="Geomentry"
-            description="Calculators for geometric properties"
-            link="/geometry"
-          />
+          <CalcCard name="Fluid Flow" description="Calculators for fluid dynamics" link="/fluidflow" />
+          <CalcCard name="Heat Transfer" description="Calculators for thermodynamics" link="/heattransfer" />
+          <CalcCard name="Geomentry" description="Calculators for geometric properties" link="/geometry" />
         </div>
       </main>
     </>

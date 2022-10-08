@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { units, Units, convertUnits, roundTo2 } from '../../utils/units'
 import { CalcCard } from '../components/calculators/calcCard'
+import { CodeContainer } from '../components/calculators/codeCard'
 
 type OnChangeValueProps = {
   id: number
@@ -26,7 +27,7 @@ const Geometry = () => {
       solveable: true,
       selectiontext: 'Solve for Diameter',
       selected: false,
-      error: 'Must be greater than 2',
+      error: '',
     },
     {
       id: 2,
@@ -397,23 +398,5 @@ const SolveForDropdown = ({ options, onChange }: SolveForProps) => {
           )
       })}
     </select>
-  )
-}
-
-const CodeContainer = () => {
-  return (
-    <CalcCard title="Equation">
-      <div className="mockup-code min-w-full">
-        <pre>
-          <code>V = PI()*r^2*h</code>
-        </pre>
-        <pre>
-          <code>V = lskfja</code>
-        </pre>
-        <pre className="text-success">
-          <code>V = 234 gal</code>
-        </pre>
-      </div>
-    </CalcCard>
   )
 }
