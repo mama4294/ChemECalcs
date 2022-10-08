@@ -331,10 +331,11 @@ const InputField = ({ data, onChangeValue }: InputFieldProps) => {
       </label>
       <label className="input-group">
         <input
-          className={`input input-bordered w-full ${error ? 'input-error text-error' : ' text-base-content'}`}
+          className={`input input-bordered w-full text-base-content ${
+            error ? 'input-error text-error' : ' text-base-content'
+          } disabled:cursor-text disabled:bg-base-300 disabled:text-base-content`}
           type={type}
           value={value}
-          min={0}
           placeholder={placeholder}
           disabled={selected}
           onChange={e => onChangeValue({ id, number: Number(e.target.value) })}
