@@ -1,6 +1,6 @@
 type Props = {
   title?: string
-  children: JSX.Element
+  children?: JSX.Element | string
 }
 
 export const CalcCard: React.FC<Props> = ({ title, children }) => {
