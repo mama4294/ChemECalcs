@@ -26,6 +26,7 @@ const Geometry = () => {
       },
       solveable: true,
       selectiontext: 'Solve for Diameter',
+      equation: `d = 2 \\sqrt{\\frac{V}{\\pi*h}}`,
       selected: false,
       error: '',
     },
@@ -43,6 +44,7 @@ const Geometry = () => {
       },
       solveable: true,
       selectiontext: 'Solve for Height',
+      equation: `h = \\frac{V}{\\pi (\\frac{d}{2})^{2}}`,
       selected: false,
       error: '',
     },
@@ -59,7 +61,8 @@ const Geometry = () => {
         unit: 'm3',
       },
       solveable: true,
-      selectiontext: 'Solve for Voluem',
+      selectiontext: 'Solve for Volume',
+      equation: `V = \\pi (\\frac{d}{2})^{2}h`,
       selected: true,
       error: '',
     },
@@ -253,6 +256,8 @@ const Geometry = () => {
     })
   }
 
+  const equation = values.find(item => item.selected === true)?.equation || ''
+
   return (
     <div className="mx-auto mb-24 max-w-xs md:max-w-2xl lg:max-w-4xl 2xl:max-w-6xl">
       {/* Breadcrumbs */}
@@ -285,7 +290,7 @@ const Geometry = () => {
           onChangeSolveSelection={onChangeSolveSelection}
           onChangeValue={onChangeValue}
         />
-        <CodeContainer />
+        <CodeContainer equation={equation} />
         <CalcCard title="Illustraion"> </CalcCard>
       </div>
     </div>
@@ -371,6 +376,7 @@ type InputType = {
   calculatedValue: { value: number; unit: string }
   solveable: boolean
   selectiontext: string
+  equation: string
   selected: boolean
   error: string
 }
