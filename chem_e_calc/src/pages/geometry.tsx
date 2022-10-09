@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { units, Units, convertUnits, roundTo2 } from '../../utils/units'
 import { CalcCard } from '../components/calculators/calcCard'
 import { CodeContainer } from '../components/calculators/codeCard'
+import { Illustraion } from '../components/calculators/illustration'
 
 type OnChangeValueProps = {
   id: number
@@ -290,8 +291,8 @@ const Geometry = () => {
           onChangeSolveSelection={onChangeSolveSelection}
           onChangeValue={onChangeValue}
         />
+        <Illustraion />
         <CodeContainer equation={equation} />
-        <CalcCard title="Illustraion"> </CalcCard>
       </div>
     </div>
   )
