@@ -1,6 +1,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
+import Image from 'next/image'
 
 const Home: NextPage = () => {
   return (
@@ -12,6 +13,9 @@ const Home: NextPage = () => {
       </Head>
 
       <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
+        {/* <div className="absolute -z-10 h-screen w-screen ">
+          <Image src="/triangleBackground.png" layout="fill" objectFit="cover" quality={100} />
+        </div> */}
         <h1 className="text-5xl font-extrabold leading-normal text-neutral-focus md:text-[5rem]">
           Chem<span className="text-accent">E</span> Calculator
         </h1>
@@ -36,7 +40,7 @@ type CalcCardProps = {
 const CalcCard = ({ name, description, link }: CalcCardProps) => {
   return (
     <Link href={link}>
-      <section className="shadow-nuetral bg-base-300-content card w-56 cursor-pointer text-base-content shadow-2xl duration-500 motion-safe:hover:scale-105">
+      <section className="shadow-nuetral card w-56 cursor-pointer bg-base-100 text-base-content shadow-2xl duration-500 motion-safe:hover:scale-105">
         <div className="card-body">
           <h2 className="card-title justify-center ">{name}</h2>
           <p>{description}</p>
