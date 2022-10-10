@@ -1,10 +1,14 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { convertUnits, roundTo2 } from '../../../utils/units'
-import { CalculatorContainer, InputType } from '../../components/calculators/calculatorContainer'
+import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
+import { Calculator, InputType } from '../../components/calculators/calculator'
 import { CodeContainer } from '../../components/calculators/codeCard'
+import { PageContainer } from '../../components/calculators/container'
+import { CalcHeader } from '../../components/calculators/header'
 import { Illustraion } from '../../components/calculators/illustration'
 import { OnChangeValueProps } from '../../components/inputs/inputField'
+import { handleChangeSolveSelection, updateAnswer, updateArray } from '../../logic/logic'
 
 const Geometry = () => {
   const [values, setValues] = useState<InputType[]>([
@@ -65,90 +69,14 @@ const Geometry = () => {
   ])
 
   const onChangeSolveSelection = (id: number): void => {
-    const newArr = values.map(o => {
-      if (o.id === id) return { ...o, selected: true }
-      else return { ...o, selected: false }
-    })
+    const newArr = handleChangeSolveSelection({ id: id, array: values })
     setValues(newArr)
   }
 
   const onChangeValue = ({ id, unit, number }: OnChangeValueProps): void => {
     //create a new values array with changed value
-
-    const updateArray = () => {
-      if (unit) {
-        return values.map(o => {
-          if (o.id === id) {
-            const convertedValue = convertUnits({
-              value: o.displayValue.value,
-              fromUnit: unit,
-              toUnit: o.calculatedValue.unit,
-            })
-            return {
-              ...o,
-              displayValue: { value: o.displayValue.value, unit: unit },
-              calculatedValue: {
-                value: convertedValue,
-                unit: o.calculatedValue.unit,
-              },
-            }
-          } else return o
-        })
-      }
-      if (number) {
-        return values.map(o => {
-          if (o.id === id) {
-            const convertedValue = convertUnits({
-              value: number,
-              fromUnit: o.displayValue.unit,
-              toUnit: o.calculatedValue.unit,
-            })
-            return {
-              ...o,
-              displayValue: { value: number, unit: o.displayValue.unit },
-              calculatedValue: {
-                value: convertedValue,
-                unit: o.calculatedValue.unit,
-              },
-            }
-          } else return o
-        })
-      }
-      return values
-    }
-
-    const validate = (inputArray: InputType[]): InputType[] => {
-      let errors: { id: number; error: string }[] = []
-      let validatedArray = inputArray.map(o => {
-        return { ...o, error: '' }
-      })
-
-      //   const diameterObj = inputArray.find(o => o.name === 'diameter')
-      //   const heightObj = inputArray.find(o => o.name === 'height')
-
-      //   if (!diameterObj || !heightObj) {
-      //     alert('validation failed')
-      //     return inputArray
-      //   }
-
-      //   const diameter = diameterObj.calculatedValue.value
-      //   const height = heightObj.calculatedValue.value
-
-      //   //validation rules
-      //   if (diameter < height) {
-      //     errors.push({ id: diameterObj.id, error: 'Diameter must be larger than Height' })
-      //   }
-
-      //Add errors to validated array
-      return validatedArray.map(o => {
-        const errorObj = errors.find(e => e.id === o.id)
-        if (errorObj) return { ...o, error: errorObj.error }
-        else return o
-      })
-    }
-
     //Update array with new input
-    const updatedArr = updateArray()
+    const updatedArr = updateArray({ id, number, unit, array: values })
 
     //Validate new array
     const validatedArr = validate(updatedArr)
@@ -160,6 +88,36 @@ const Geometry = () => {
     } else {
       setValues(validatedArr)
     }
+  }
+
+  const validate = (inputArray: InputType[]): InputType[] => {
+    let errors: { id: number; error: string }[] = []
+    let validatedArray = inputArray.map(o => {
+      return { ...o, error: '' }
+    })
+
+    //   const diameterObj = inputArray.find(o => o.name === 'diameter')
+    //   const heightObj = inputArray.find(o => o.name === 'height')
+
+    //   if (!diameterObj || !heightObj) {
+    //     alert('validation failed')
+    //     return inputArray
+    //   }
+
+    //   const diameter = diameterObj.calculatedValue.value
+    //   const height = heightObj.calculatedValue.value
+
+    //   //validation rules
+    //   if (diameter < height) {
+    //     errors.push({ id: diameterObj.id, error: 'Diameter must be larger than Height' })
+    //   }
+
+    //Add errors to validated array
+    return validatedArray.map(o => {
+      const errorObj = errors.find(e => e.id === o.id)
+      if (errorObj) return { ...o, error: errorObj.error }
+      else return o
+    })
   }
 
   const calculateAnswer = (inputArray: InputType[]) => {
@@ -231,70 +189,32 @@ const Geometry = () => {
     return updateAnswer(inputArray, answerValue, 'diameter')
   }
 
-  const updateAnswer = (inputArray: InputType[], answerValue: number, answerName: string) => {
-    return inputArray.map(o => {
-      //convert calculed value to display value
-      if (o.name === answerName) {
-        const displayValue = convertUnits({
-          value: answerValue,
-          fromUnit: o.calculatedValue.unit,
-          toUnit: o.displayValue.unit,
-        })
-        return {
-          ...o,
-          displayValue: {
-            value: roundTo2(displayValue),
-            unit: o.displayValue.unit,
-          },
-          calculatedValue: { value: answerValue, unit: o.calculatedValue.unit },
-        }
-      } else return o
-    })
-  }
-
   const equation = values.find(item => item.selected === true)?.equation || ''
 
+  const paths = [
+    { title: 'Geometry', href: '/geometry' },
+    { title: 'Cylinder', href: '/geometry/cylinder' },
+  ]
+
   return (
-    <div className="mx-auto mb-24 max-w-xs md:max-w-2xl lg:max-w-4xl 2xl:max-w-6xl">
-      {/* Breadcrumbs */}
-      <div className="breadcrumbs text-sm">
-        <ul>
-          <li>
-            <Link href={'/'}>
-              <a>Home</a>
-            </Link>
-          </li>
-          <li>
-            <Link href={'/geometry'}>
-              <a>Geometry</a>
-            </Link>
-          </li>
-          <li>
-            <Link href={'/geometry/cylinder'}>
-              <a>Cylinder</a>
-            </Link>
-          </li>
-        </ul>
-      </div>
+    <PageContainer>
+      <>
+        <Breadcrumbs paths={paths} />
+        <CalcHeader title={'Cylinder'} text={'This calculates the volume of a cylinder'} />
 
-      {/* Page Title */}
-      <div className="mt-4 mb-8">
-        <h1 className="text-2xl">Cylinder</h1>
-        <p>This calculates the volume of a cylinder</p>
-      </div>
-
-      {/* Calculator */}
-      <div className="flex flex-wrap gap-8">
-        <CalculatorContainer
-          title="Calculator"
-          values={values}
-          onChangeSolveSelection={onChangeSolveSelection}
-          onChangeValue={onChangeValue}
-        />
-        <Illustraion />
-        <CodeContainer equation={equation} />
-      </div>
-    </div>
+        {/* Calculator */}
+        <div className="flex flex-wrap gap-8">
+          <Calculator
+            title="Calculator"
+            values={values}
+            onChangeSolveSelection={onChangeSolveSelection}
+            onChangeValue={onChangeValue}
+          />
+          <Illustraion />
+          <CodeContainer equation={equation} />
+        </div>
+      </>
+    </PageContainer>
   )
 }
 

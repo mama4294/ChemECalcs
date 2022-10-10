@@ -25,7 +25,7 @@ type CalcContainerProps = {
   onChangeValue: ({ id, unit, number }: OnChangeValueProps) => void
 }
 
-export const CalculatorContainer = ({ title, values, onChangeSolveSelection, onChangeValue }: CalcContainerProps) => {
+export const Calculator = ({ title, values, onChangeSolveSelection, onChangeValue }: CalcContainerProps) => {
   return (
     <CalcCard title={title}>
       <>

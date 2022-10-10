@@ -1,4 +1,4 @@
-import { InputType } from '../calculators/calculatorContainer'
+import { InputType } from '../calculators/calculator'
 
 type SolveForProps = {
   options: InputType[]

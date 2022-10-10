@@ -1,15 +1,15 @@
-import { InputType } from '../calculators/calculatorContainer'
+import { InputType } from '../calculators/calculator'
 import { units, Units } from '../../../utils/units'
+
+type InputFieldProps = {
+  data: InputType
+  onChangeValue: ({ id, unit, number }: OnChangeValueProps) => void
+}
 
 export type OnChangeValueProps = {
   id: number
   unit?: string
   number?: number
-}
-
-type InputFieldProps = {
-  data: InputType
-  onChangeValue: ({ id, unit, number }: OnChangeValueProps) => void
 }
 
 export const InputField = ({ data, onChangeValue }: InputFieldProps) => {
