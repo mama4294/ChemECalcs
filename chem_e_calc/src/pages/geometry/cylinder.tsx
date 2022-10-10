@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { units, Units, convertUnits, roundTo2 } from '../../utils/units'
-import { CalcCard } from '../components/calculators/calcCard'
-import { CodeContainer } from '../components/calculators/codeCard'
-import { Illustraion } from '../components/calculators/illustration'
+import { units, Units, convertUnits, roundTo2 } from '../../../utils/units'
+import { CalcCard } from '../../components/calculators/calcCard'
+import { CodeContainer } from '../../components/calculators/codeCard'
+import { Illustraion } from '../../components/calculators/illustration'
 
 type OnChangeValueProps = {
   id: number
@@ -274,19 +274,24 @@ const Geometry = () => {
               <a>Geomentry</a>
             </Link>
           </li>
+          <li>
+            <Link href={'/geometry/cylinder'}>
+              <a>Cylinder</a>
+            </Link>
+          </li>
         </ul>
       </div>
 
       {/* Page Title */}
       <div className="mt-4 mb-8">
-        <h1 className="text-2xl">Geometry</h1>
-        <p>This calculates the volume of geometric shapes with various units</p>
+        <h1 className="text-2xl">Cylinder</h1>
+        <p>This calculates the volume of a cylinder</p>
       </div>
 
       {/* Calculator */}
       <div className="flex flex-wrap gap-8">
         <CalculatorContainer
-          title="Cylinder"
+          title="Calculator"
           values={values}
           onChangeSolveSelection={onChangeSolveSelection}
           onChangeValue={onChangeValue}

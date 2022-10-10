@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import Link from 'next/link'
 import Image from 'next/image'
+import { GridCard } from '../components/GridCard'
 
 const Home: NextPage = () => {
   return (
@@ -20,9 +20,9 @@ const Home: NextPage = () => {
           Chem<span className="text-accent">E</span> Calculator
         </h1>
         <div className="my-3 grid gap-9 py-3 text-center md:grid-cols-3 lg:w-2/3">
-          <CalcCard name="Fluid Flow" description="Calculators for fluid dynamics" link="/fluidflow" />
-          <CalcCard name="Heat Transfer" description="Calculators for thermodynamics" link="/heattransfer" />
-          <CalcCard name="Geomentry" description="Calculators for geometric properties" link="/geometry" />
+          <GridCard name="Fluid Flow" description="Calculators for fluid dynamics" link="/fluidflow" />
+          <GridCard name="Heat Transfer" description="Calculators for thermodynamics" link="/heattransfer" />
+          <GridCard name="Geomentry" description="Calculators for geometric properties" link="/geometry" />
         </div>
       </main>
     </>
@@ -30,22 +30,3 @@ const Home: NextPage = () => {
 }
 
 export default Home
-
-type CalcCardProps = {
-  name: string
-  description: string
-  link: string
-}
-
-const CalcCard = ({ name, description, link }: CalcCardProps) => {
-  return (
-    <Link href={link}>
-      <section className="shadow-nuetral card w-56 cursor-pointer bg-base-100 text-base-content shadow-2xl duration-500 motion-safe:hover:scale-105">
-        <div className="card-body">
-          <h2 className="card-title justify-center ">{name}</h2>
-          <p>{description}</p>
-        </div>
-      </section>
-    </Link>
-  )
-}
