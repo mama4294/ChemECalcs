@@ -22,7 +22,7 @@ const Home: NextPage = () => {
         <div className="my-3 grid gap-9 py-3 text-center md:grid-cols-3 lg:w-2/3">
           <GridCard name="Fluid Flow" description="Calculators for fluid dynamics" link="/fluidflow" />
           <GridCard name="Heat Transfer" description="Calculators for thermodynamics" link="/heattransfer" />
-          <GridCard name="Geomentry" description="Calculators for geometric properties" link="/geometry" />
+          <GridCard name="Geometry" description="Calculators for geometric properties" link="/geometry" />
         </div>
       </main>
     </>

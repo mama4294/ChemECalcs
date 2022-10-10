@@ -14,7 +14,7 @@ const Geometry = () => {
           </li>
           <li>
             <Link href={'/geometry'}>
-              <a>Geomentry</a>
+              <a>Geometry</a>
             </Link>
           </li>
         </ul>
@@ -29,7 +29,7 @@ const Geometry = () => {
       {/* Calculator */}
       <div className="my-3 grid gap-9 py-3 text-center md:grid-cols-3">
         <GridCard name="Cylinder" description="Calculators for fluid dynamics" link="/geometry/cylinder" />
-        <GridCard name="Cube" description="Calculators for thermodynamics" link="/geometry/cube" />
+        <GridCard name="Box" description="Calculators for thermodynamics" link="/geometry/box" />
         <GridCard name="Cone" description="Calculators for geometric properties" link="/geometry/cone" />
       </div>
     </div>

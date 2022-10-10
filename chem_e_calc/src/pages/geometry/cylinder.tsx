@@ -1,15 +1,10 @@
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
-import { units, Units, convertUnits, roundTo2 } from '../../../utils/units'
-import { CalcCard } from '../../components/calculators/calcCard'
+import { useState } from 'react'
+import { convertUnits, roundTo2 } from '../../../utils/units'
+import { CalculatorContainer, InputType } from '../../components/calculators/calculatorContainer'
 import { CodeContainer } from '../../components/calculators/codeCard'
 import { Illustraion } from '../../components/calculators/illustration'
-
-type OnChangeValueProps = {
-  id: number
-  unit?: string
-  number?: number
-}
+import { OnChangeValueProps } from '../../components/inputs/inputField'
 
 const Geometry = () => {
   const [values, setValues] = useState<InputType[]>([
@@ -271,7 +266,7 @@ const Geometry = () => {
           </li>
           <li>
             <Link href={'/geometry'}>
-              <a>Geomentry</a>
+              <a>Geometry</a>
             </Link>
           </li>
           <li>
@@ -304,116 +299,3 @@ const Geometry = () => {
 }
 
 export default Geometry
-
-type CalcContainerProps = {
-  title: string
-  values: InputType[]
-  onChangeSolveSelection: (id: number) => void
-  onChangeValue: ({ id, unit, number }: OnChangeValueProps) => void
-}
-
-const CalculatorContainer = ({ title, values, onChangeSolveSelection, onChangeValue }: CalcContainerProps) => {
-  return (
-    <CalcCard title={title}>
-      <>
-        <SolveForDropdown options={values} onChange={onChangeSolveSelection} />
-        <div className="mb-8 flex flex-col">
-          {values.map(input => {
-            return <InputField key={input.id} data={input} onChangeValue={onChangeValue} />
-          })}
-        </div>
-      </>
-    </CalcCard>
-  )
-}
-
-type InputFieldProps = {
-  data: InputType
-  onChangeValue: ({ id, unit, number }: OnChangeValueProps) => void
-}
-
-const InputField = ({ data, onChangeValue }: InputFieldProps) => {
-  const { id, label, placeholder, type, selected, displayValue, unitType, error } = data
-  const { value, unit } = displayValue
-
-  return (
-    <div className="form-control w-full">
-      <label className="label">
-        <span className="label-text">{label}</span>
-      </label>
-      <label className="input-group">
-        <input
-          className={`input input-bordered w-full text-base-content ${
-            error ? 'input-error text-error' : ' text-base-content'
-          } disabled:cursor-text disabled:bg-base-300 disabled:text-base-content`}
-          type={type}
-          value={value}
-          placeholder={placeholder}
-          disabled={selected}
-          onChange={e => onChangeValue({ id, number: Number(e.target.value) })}
-        />
-        <select
-          className={`select select-bordered bg-base-200 ${error ? 'select-error text-error' : ' text-base-content'}`}
-          value={unit}
-          onChange={e => onChangeValue({ id, unit: e.target.value })}
-        >
-          {units[unitType as keyof Units].map((unitOption: string, index) => {
-            return <option key={index}>{unitOption}</option>
-          })}
-        </select>
-      </label>
-      {error && (
-        <label className="label">
-          <span className="label-text-alt text-error">{error}</span>
-        </label>
-      )}
-    </div>
-  )
-}
-
-type InputType = {
-  id: number
-  name: string
-  unitType: string
-  type: string
-  placeholder: string
-  label: string
-  displayValue: { value: number; unit: string }
-  calculatedValue: { value: number; unit: string }
-  solveable: boolean
-  selectiontext: string
-  equation: string
-  selected: boolean
-  error: string
-}
-
-type SolveForProps = {
-  options: InputType[]
-  onChange: (id: number) => void
-}
-
-const SolveForDropdown = ({ options, onChange }: SolveForProps) => {
-  const selectedValueId = options.find(option => option.selected === true)?.id
-
-  return (
-    <div className="form-control w-full">
-      <label className="label">
-        <span className="label-text">Solve for</span>
-      </label>
-      <select
-        className="select input-bordered w-full bg-base-200 text-base-content"
-        value={selectedValueId}
-        onChange={e => onChange(Number(e.target.value))}
-      >
-        {options.map(option => {
-          if (option.solveable)
-            return (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            )
-        })}
-      </select>
-    </div>
-  )
-}
