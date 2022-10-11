@@ -2,6 +2,36 @@ import Link from 'next/link'
 import { GridCard } from '../../components/GridCard'
 
 const Geometry = () => {
+  const shapes = [
+    {
+      name: 'Cylinder',
+      link: '/geometry/cylinder',
+      svg: '/cylinder.svg',
+    },
+    {
+      name: 'Box',
+      link: '/geometry/box',
+    },
+    {
+      name: 'Cone',
+      link: '/geometry/cone',
+      svg: '/cone.svg',
+    },
+    {
+      name: 'Sphere',
+      link: '/geometry/sphere',
+      svg: '/sphere.svg',
+    },
+    {
+      name: 'Pyramid',
+      link: '/geometry/pyramid',
+    },
+    {
+      name: 'Hemisphere',
+      link: '/geometry/hemisphere',
+    },
+  ]
+
   return (
     <div className="mx-auto mb-24 max-w-xs md:max-w-2xl lg:max-w-4xl 2xl:max-w-6xl">
       {/* Breadcrumbs */}
@@ -28,12 +58,9 @@ const Geometry = () => {
 
       {/* Calculator */}
       <div className="my-3 grid gap-9 py-3 text-center md:grid-cols-3">
-        <GridCard name="Cylinder" description="Calculators for fluid dynamics" link="/geometry/cylinder" />
-        <GridCard name="Box" description="Calculators for thermodynamics" link="/geometry/box" />
-        <GridCard name="Cone" description="Calculators for geometric properties" link="/geometry/cone" />
-        <GridCard name="Sphere" description="Calculators for geometric properties" link="/geometry/sphere" />
-        <GridCard name="Pyramid" description="Calculators for geometric properties" link="/geometry/pyramid" />
-        <GridCard name="Hemisphere" description="Calculators for geometric properties" link="/geometry/hemisphere" />
+        {shapes.map((shape, index) => {
+          return <GridCard key={index} name={shape.name} link={shape.link} svg={shape.svg} />
+        })}
       </div>
     </div>
   )
