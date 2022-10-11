@@ -31,6 +31,9 @@ const Geometry = () => {
         <GridCard name="Cylinder" description="Calculators for fluid dynamics" link="/geometry/cylinder" />
         <GridCard name="Box" description="Calculators for thermodynamics" link="/geometry/box" />
         <GridCard name="Cone" description="Calculators for geometric properties" link="/geometry/cone" />
+        <GridCard name="Sphere" description="Calculators for geometric properties" link="/geometry/sphere" />
+        <GridCard name="Pyramid" description="Calculators for geometric properties" link="/geometry/pyramid" />
+        <GridCard name="Hemisphere" description="Calculators for geometric properties" link="/geometry/hemisphere" />
       </div>
     </div>
   )

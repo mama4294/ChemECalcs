@@ -1,32 +1,34 @@
-import Link from 'next/link'
 import { useState } from 'react'
-import { convertUnits, roundTo2 } from '../../../utils/units'
+import { convertUnits } from '../../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
 import { Calculator, InputType } from '../../components/calculators/calculator'
-import { CodeContainer } from '../../components/calculators/codeCard'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
-import { Illustraion } from '../../components/calculators/illustration'
 import { OnChangeValueProps } from '../../components/inputs/inputField'
 import { handleChangeSolveSelection, updateAnswer, updateArray } from '../../logic/logic'
 
-const Geometry = () => {
+const Pyramid = () => {
+  const paths = [
+    { title: 'Geometry', href: '/geometry' },
+    { title: 'Box', href: '/geometry/pyramid' },
+  ]
+
   const [values, setValues] = useState<InputType[]>([
     {
       id: 1,
-      name: 'diameter',
+      name: 'width',
       unitType: 'length',
       type: 'number',
       placeholder: 'enter value',
-      label: 'Diameter',
+      label: 'Width',
       displayValue: { value: 1, unit: 'ft' },
       calculatedValue: {
         value: convertUnits({ value: 1, fromUnit: 'ft', toUnit: 'm' }),
         unit: 'm',
       },
       solveable: true,
-      selectiontext: 'Solve for Diameter',
+      selectiontext: 'Solve for Width',
       equation: `d = 2 \\sqrt{\\frac{V}{\\pi*h}}`,
       selected: false,
       error: '',
@@ -51,14 +53,32 @@ const Geometry = () => {
     },
     {
       id: 3,
+      name: 'length',
+      unitType: 'length',
+      type: 'number',
+      placeholder: 'enter value',
+      label: 'Length',
+      displayValue: { value: 1, unit: 'ft' },
+      calculatedValue: {
+        value: convertUnits({ value: 1, fromUnit: 'ft', toUnit: 'm' }),
+        unit: 'm',
+      },
+      solveable: true,
+      selectiontext: 'Solve for Length',
+      equation: `h = \\frac{V}{\\pi (\\frac{d}{2})^{2}}`,
+      selected: false,
+      error: '',
+    },
+    {
+      id: 4,
       name: 'volume',
       unitType: 'volume',
       type: 'number',
       placeholder: 'enter value',
       label: 'Volume',
-      displayValue: { value: 1, unit: 'l' },
+      displayValue: { value: 0.33, unit: 'ft3' },
       calculatedValue: {
-        value: convertUnits({ value: 22.24, fromUnit: 'l', toUnit: 'm3' }),
+        value: convertUnits({ value: 0.33, fromUnit: 'ft3', toUnit: 'm3' }),
         unit: 'm3',
       },
       solveable: true,
@@ -68,7 +88,6 @@ const Geometry = () => {
       error: '',
     },
   ])
-
   const onChangeSolveSelection = (id: number): void => {
     const newArr = handleChangeSolveSelection({ id: id, array: values })
     setValues(newArr)
@@ -79,46 +98,13 @@ const Geometry = () => {
     //Update array with new input
     const updatedArr = updateArray({ id, number, unit, array: values })
 
-    //Validate new array
-    const validatedArr = validate(updatedArr)
-
     //Set answer
-    const answerArr = calculateAnswer(validatedArr)
+    const answerArr = calculateAnswer(updatedArr)
     if (answerArr) {
       setValues(answerArr)
     } else {
-      setValues(validatedArr)
+      setValues(updatedArr)
     }
-  }
-
-  const validate = (inputArray: InputType[]): InputType[] => {
-    let errors: { id: number; error: string }[] = []
-    let validatedArray = inputArray.map(o => {
-      return { ...o, error: '' }
-    })
-
-    //   const diameterObj = inputArray.find(o => o.name === 'diameter')
-    //   const heightObj = inputArray.find(o => o.name === 'height')
-
-    //   if (!diameterObj || !heightObj) {
-    //     alert('validation failed')
-    //     return inputArray
-    //   }
-
-    //   const diameter = diameterObj.calculatedValue.value
-    //   const height = heightObj.calculatedValue.value
-
-    //   //validation rules
-    //   if (diameter < height) {
-    //     errors.push({ id: diameterObj.id, error: 'Diameter must be larger than Height' })
-    //   }
-
-    //Add errors to validated array
-    return validatedArray.map(o => {
-      const errorObj = errors.find(e => e.id === o.id)
-      if (errorObj) return { ...o, error: errorObj.error }
-      else return o
-    })
   }
 
   const calculateAnswer = (inputArray: InputType[]) => {
@@ -126,97 +112,114 @@ const Geometry = () => {
     if (!solveSelection) return []
     if (solveSelection === 'volume') return calcVolume(inputArray)
     if (solveSelection === 'height') return calcHeight(inputArray)
-    if (solveSelection === 'diameter') return calcDiameter(inputArray)
+    if (solveSelection === 'width') return calcWidth(inputArray)
+    if (solveSelection === 'length') return calcLength(inputArray)
     return []
   }
 
   const calcVolume = (inputArray: InputType[]) => {
-    const diameterObj = inputArray.find(o => o.name === 'diameter')
+    const widthObj = inputArray.find(o => o.name === 'width')
+    const lengthObj = inputArray.find(o => o.name === 'length')
     const heightObj = inputArray.find(o => o.name === 'height')
 
-    if (!diameterObj || !heightObj) {
+    if (!widthObj || !heightObj || !lengthObj) {
       alert('inputs to calculator undefined')
       return null
     }
 
-    const diameter = diameterObj.calculatedValue.value
+    const width = widthObj.calculatedValue.value
+    const length = lengthObj.calculatedValue.value
     const height = heightObj.calculatedValue.value
 
     let answerValue = 0
-    if (diameter !== 0 && height !== 0) {
-      answerValue = Math.PI * (diameter / 2) ** 2 * height
+    if (width !== 0 && height !== 0 && length !== 0) {
+      answerValue = (width * length * height) / 3
     }
 
     return updateAnswer(inputArray, answerValue, 'volume')
   }
 
   const calcHeight = (inputArray: InputType[]) => {
-    const diameterObj = inputArray.find(o => o.name === 'diameter')
+    const widthObj = inputArray.find(o => o.name === 'width')
+    const lengthObj = inputArray.find(o => o.name === 'length')
+    // const heightObj = inputArray.find(o => o.name === 'height')
     const volumeObj = inputArray.find(o => o.name === 'volume')
 
-    if (!diameterObj || !volumeObj) {
+    if (!widthObj || !volumeObj || !lengthObj) {
       alert('inputs to calculator undefined')
       return null
     }
 
-    const diameter = diameterObj.calculatedValue.value
+    const width = widthObj.calculatedValue.value
+    const length = lengthObj.calculatedValue.value
     const volume = volumeObj.calculatedValue.value
 
     let answerValue = 0
-    if (diameter !== 0 && volume !== 0) {
-      answerValue = volume / (Math.PI * (diameter / 2) ** 2)
+    if (width !== 0 && volume !== 0 && length !== 0) {
+      answerValue = (3 * volume) / (width * length)
     }
 
     return updateAnswer(inputArray, answerValue, 'height')
   }
 
-  const calcDiameter = (inputArray: InputType[]) => {
-    const heightObj = inputArray.find(o => o.name === 'height')
+  const calcWidth = (inputArray: InputType[]) => {
     const volumeObj = inputArray.find(o => o.name === 'volume')
+    const lengthObj = inputArray.find(o => o.name === 'length')
+    const heightObj = inputArray.find(o => o.name === 'height')
 
-    if (!heightObj || !volumeObj) {
+    if (!heightObj || !volumeObj || !lengthObj) {
       alert('inputs to calculator undefined')
       return null
     }
 
-    const volume = volumeObj.calculatedValue.value
     const height = heightObj.calculatedValue.value
+    const length = lengthObj.calculatedValue.value
+    const volume = volumeObj.calculatedValue.value
 
     let answerValue = 0
-    if (volume !== 0 && height !== 0) {
-      answerValue = 2 * Math.sqrt(volume / (Math.PI * height))
+    if (height !== 0 && volume !== 0 && length !== 0) {
+      answerValue = (3 * volume) / (height * length)
     }
 
-    return updateAnswer(inputArray, answerValue, 'diameter')
+    return updateAnswer(inputArray, answerValue, 'width')
   }
 
-  const equation = values.find(item => item.selected === true)?.equation || ''
+  const calcLength = (inputArray: InputType[]) => {
+    const widthObj = inputArray.find(o => o.name === 'width')
+    const volumeObj = inputArray.find(o => o.name === 'volume')
+    const heightObj = inputArray.find(o => o.name === 'height')
 
-  const paths = [
-    { title: 'Geometry', href: '/geometry' },
-    { title: 'Cylinder', href: '/geometry/cylinder' },
-  ]
+    if (!heightObj || !volumeObj || !widthObj) {
+      alert('inputs to calculator undefined')
+      return null
+    }
+
+    const height = heightObj.calculatedValue.value
+    const width = widthObj.calculatedValue.value
+    const volume = volumeObj.calculatedValue.value
+
+    let answerValue = 0
+    if (height !== 0 && volume !== 0 && width !== 0) {
+      answerValue = (3 * volume) / (height * width)
+    }
+
+    return updateAnswer(inputArray, answerValue, 'length')
+  }
 
   return (
     <PageContainer>
-      <>
-        <Breadcrumbs paths={paths} />
-        <CalcHeader title={'Cylinder'} text={'This calculates the volume of a cylinder'} />
-
-        {/* Calculator */}
-        <CalcBody>
-          <Calculator
-            title="Calculator"
-            values={values}
-            onChangeSolveSelection={onChangeSolveSelection}
-            onChangeValue={onChangeValue}
-          />
-          <Illustraion />
-          <CodeContainer equation={equation} />
-        </CalcBody>
-      </>
+      <Breadcrumbs paths={paths} />
+      <CalcHeader title={'Pyramid'} text={'This calculates the volume of a pyramid'} />
+      <CalcBody>
+        <Calculator
+          title="Calculator"
+          values={values}
+          onChangeSolveSelection={onChangeSolveSelection}
+          onChangeValue={onChangeValue}
+        />
+      </CalcBody>
     </PageContainer>
   )
 }
 
-export default Geometry
+export default Pyramid
