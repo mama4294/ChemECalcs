@@ -9,7 +9,7 @@ export const SolveForDropdown = ({ options, onChange }: SolveForProps) => {
   const selectedValueId = options.find(option => option.selected === true)?.id
 
   return (
-    <div className="form-control w-full">
+    <div className="form-control mb-2 w-full">
       <label className="label">
         <span className="label-text">Solve for</span>
       </label>

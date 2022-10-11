@@ -15,6 +15,7 @@ export type InputType = {
   selectiontext: string
   equation: string
   selected: boolean
+  focusText?: string
   error: string
 }
 

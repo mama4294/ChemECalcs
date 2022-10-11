@@ -13,15 +13,15 @@ export type OnChangeValueProps = {
 }
 
 export const InputField = ({ data, onChangeValue }: InputFieldProps) => {
-  const { id, label, placeholder, type, selected, displayValue, unitType, error } = data
+  const { id, label, placeholder, type, selected, displayValue, unitType, error, focusText } = data
   const { value, unit } = displayValue
 
   return (
-    <div className="form-control w-full">
+    <div className="group form-control mb-2 w-full">
       <label className="label">
         <span className="label-text">{label}</span>
       </label>
-      <label className="input-group">
+      <label className="peer input-group">
         <input
           className={`input input-bordered w-full text-base-content ${
             error ? 'input-error text-error' : ' text-base-content'
@@ -42,8 +42,15 @@ export const InputField = ({ data, onChangeValue }: InputFieldProps) => {
           })}
         </select>
       </label>
+
+      <label className="label hidden py-0 group-focus-within:block">
+        <span className={`label-text-alt ${error ? 'text-error' : ' text-base-content'}`}>
+          {selected ? 'Calculated Value' : focusText}
+        </span>
+      </label>
+
       {error && (
-        <label className="label">
+        <label className="peer label py-0">
           <span className="label-text-alt text-error">{error}</span>
         </label>
       )}
