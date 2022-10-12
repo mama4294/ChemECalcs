@@ -1,37 +1,13 @@
 import Link from 'next/link'
 import { GridCard } from '../../components/GridCard'
+import { IconBox } from '../../icons/IconBox'
+import { IconCone } from '../../icons/iconCone'
+import { IconCylinder } from '../../icons/iconCylinder'
+import { IconHemisphere } from '../../icons/iconHemiphere'
+import { IconPyramid } from '../../icons/iconPyramid'
+import { IconSphere } from '../../icons/iconSphere'
 
 const Geometry = () => {
-  const shapes = [
-    {
-      name: 'Cylinder',
-      link: '/geometry/cylinder',
-      svg: '/cylinder.svg',
-    },
-    {
-      name: 'Box',
-      link: '/geometry/box',
-    },
-    {
-      name: 'Cone',
-      link: '/geometry/cone',
-      svg: '/cone.svg',
-    },
-    {
-      name: 'Sphere',
-      link: '/geometry/sphere',
-      svg: '/sphere.svg',
-    },
-    {
-      name: 'Pyramid',
-      link: '/geometry/pyramid',
-    },
-    {
-      name: 'Hemisphere',
-      link: '/geometry/hemisphere',
-    },
-  ]
-
   return (
     <div className="mx-auto mb-24 max-w-xs md:max-w-2xl lg:max-w-4xl 2xl:max-w-6xl">
       {/* Breadcrumbs */}
@@ -58,9 +34,24 @@ const Geometry = () => {
 
       {/* Calculator */}
       <div className="my-3 grid gap-9 py-3 text-center md:grid-cols-3">
-        {shapes.map((shape, index) => {
-          return <GridCard key={index} name={shape.name} link={shape.link} svg={shape.svg} />
-        })}
+        <GridCard name="Cylinder" link="/geometry/cylinder">
+          <IconCylinder />
+        </GridCard>
+        <GridCard name="Box" link="/geometry/box">
+          <IconBox />
+        </GridCard>
+        <GridCard name="Cone" link="/geometry/cone">
+          <IconCone />
+        </GridCard>
+        <GridCard name="Sphere" link="/geometry/sphere">
+          <IconSphere />
+        </GridCard>
+        <GridCard name="Pyramid" link="/geometry/pyramid">
+          <IconPyramid />
+        </GridCard>
+        <GridCard name="Hemisphere" link="/geometry/hemisphere">
+          <IconHemisphere />
+        </GridCard>
       </div>
     </div>
   )

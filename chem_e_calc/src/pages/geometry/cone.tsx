@@ -2,10 +2,14 @@ import { useState } from 'react'
 import { convertUnits } from '../../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
+import { CalcCard } from '../../components/calculators/calcCard'
 import { Calculator, InputType } from '../../components/calculators/calculator'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
+import { Illustraion } from '../../components/calculators/illustration'
 import { OnChangeValueProps } from '../../components/inputs/inputField'
+import { IconConeUnits } from '../../icons/iconConeUnits'
+import { IconContainer } from '../../icons/IconContainer'
 import { handleChangeSolveSelection, updateAnswer, updateArray } from '../../logic/logic'
 
 const Cone = () => {
@@ -170,6 +174,11 @@ const Cone = () => {
           onChangeSolveSelection={onChangeSolveSelection}
           onChangeValue={onChangeValue}
         />
+        <CalcCard title="Cone">
+          <IconContainer>
+            <IconConeUnits />
+          </IconContainer>
+        </CalcCard>
       </CalcBody>
     </PageContainer>
   )

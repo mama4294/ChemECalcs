@@ -3,12 +3,16 @@ import { useState } from 'react'
 import { convertUnits, roundTo2 } from '../../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
+import { CalcCard } from '../../components/calculators/calcCard'
 import { Calculator, InputType } from '../../components/calculators/calculator'
 import { CodeContainer } from '../../components/calculators/codeCard'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
 import { Illustraion } from '../../components/calculators/illustration'
 import { OnChangeValueProps } from '../../components/inputs/inputField'
+import { IconBox } from '../../icons/IconBox'
+import { IconContainer } from '../../icons/IconContainer'
+import { IconCylinderUnits } from '../../icons/iconCylinderUnits'
 import { handleChangeSolveSelection, updateAnswer, updateArray } from '../../logic/logic'
 
 const Geometry = () => {
@@ -56,7 +60,7 @@ const Geometry = () => {
       type: 'number',
       placeholder: 'enter value',
       label: 'Volume',
-      displayValue: { value: 1, unit: 'l' },
+      displayValue: { value: 22.24, unit: 'l' },
       calculatedValue: {
         value: convertUnits({ value: 22.24, fromUnit: 'l', toUnit: 'm3' }),
         unit: 'm3',
@@ -211,7 +215,11 @@ const Geometry = () => {
             onChangeSolveSelection={onChangeSolveSelection}
             onChangeValue={onChangeValue}
           />
-          <Illustraion />
+          <CalcCard title="Cylinder">
+            <IconContainer>
+              <IconCylinderUnits />
+            </IconContainer>
+          </CalcCard>
           <CodeContainer equation={equation} />
         </CalcBody>
       </>

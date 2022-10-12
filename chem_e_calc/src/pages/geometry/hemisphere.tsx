@@ -2,10 +2,13 @@ import { useState } from 'react'
 import { convertUnits } from '../../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
+import { CalcCard } from '../../components/calculators/calcCard'
 import { Calculator, InputType } from '../../components/calculators/calculator'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
 import { OnChangeValueProps } from '../../components/inputs/inputField'
+import { IconContainer } from '../../icons/IconContainer'
+import { IconHemisphereUnits } from '../../icons/iconHemiphereUnits'
 import { handleChangeSolveSelection, updateAnswer, updateArray } from '../../logic/logic'
 
 const Hemisphere = () => {
@@ -127,6 +130,11 @@ const Hemisphere = () => {
           onChangeSolveSelection={onChangeSolveSelection}
           onChangeValue={onChangeValue}
         />
+        <CalcCard title="Hemisphere">
+          <IconContainer>
+            <IconHemisphereUnits />
+          </IconContainer>
+        </CalcCard>
       </CalcBody>
     </PageContainer>
   )

@@ -2,10 +2,13 @@ import { useState } from 'react'
 import { convertUnits } from '../../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
+import { CalcCard } from '../../components/calculators/calcCard'
 import { Calculator, InputType } from '../../components/calculators/calculator'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
 import { OnChangeValueProps } from '../../components/inputs/inputField'
+import { IconContainer } from '../../icons/IconContainer'
+import { IconPyramidUnits } from '../../icons/iconPyramidUnits'
 import { handleChangeSolveSelection, updateAnswer, updateArray } from '../../logic/logic'
 
 const Pyramid = () => {
@@ -217,6 +220,11 @@ const Pyramid = () => {
           onChangeSolveSelection={onChangeSolveSelection}
           onChangeValue={onChangeValue}
         />
+        <CalcCard title="Pyramid">
+          <IconContainer>
+            <IconPyramidUnits />
+          </IconContainer>
+        </CalcCard>
       </CalcBody>
     </PageContainer>
   )
