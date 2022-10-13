@@ -1,6 +1,5 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import Image from 'next/image'
 import { GridCard } from '../components/GridCard'
 
 const Home: NextPage = () => {
@@ -20,9 +19,9 @@ const Home: NextPage = () => {
           Chem<span className="text-accent">E</span> Calculator
         </h1>
         <div className="my-3 grid gap-9 py-3 text-center md:grid-cols-3 lg:w-2/3">
-          <GridCard name="Fluid Flow" description="Calculators for fluid dynamics" link="/fluidflow" />
-          <GridCard name="Heat Transfer" description="Calculators for thermodynamics" link="/heattransfer" />
+          <GridCard name="Unit Conversion" description="Convert between units" link="/conversion" />
           <GridCard name="Geometry" description="Calculators for geometric properties" link="/geometry" />
+          <GridCard name="Fluid Flow" description="Calculators for fluid dynamics" link="/fluidflow" />
         </div>
       </main>
     </>

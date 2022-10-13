@@ -13,25 +13,22 @@ const Navbar = () => {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h8m-8 6h16"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
             </svg>
           </label>
           {/* Mobile Menu */}
           <ul
             tabIndex={0}
-            className="dropdown-content menu rounded-box menu-compact mt-3 w-52 bg-neutral p-2 text-neutral-content shadow"
+            className="dropdown-content menu rounded-box menu-compact z-10 mt-3 w-52 bg-neutral p-2 text-neutral-content shadow"
           >
             <li>
-              <a>Fluid Flow</a>
+              <Link href={'/conversion'}>
+                <a className="hover:bg-neutral-focus">Unit Conversion</a>
+              </Link>
             </li>
             <li tabIndex={0}>
-              <a className="justify-between">
-                Heat Transfer
+              <a className="justify-between hover:bg-neutral-focus">
+                Geometry
                 <svg
                   className="fill-current"
                   xmlns="http://www.w3.org/2000/svg"
@@ -44,20 +41,40 @@ const Navbar = () => {
               </a>
               <ul className="rounded-box bg-neutral p-2 text-neutral-content shadow">
                 <li>
-                  <Link href={'/heatexchangers'}>
-                    <a>Heat Exchangers</a>
+                  <Link href={'/geometry/cylinder'}>
+                    <a className="hover:bg-neutral-focus">Cylinder</a>
                   </Link>
                 </li>
                 <li>
-                  <Link href={'/thermo'}>
-                    <a>Thermodynamics</a>
+                  <Link href={'/geometry/box'}>
+                    <a className="hover:bg-neutral-focus">Box</a>
+                  </Link>
+                </li>
+                <li>
+                  <Link href={'/geometry/cone'}>
+                    <a className="hover:bg-neutral-focus">Cone</a>
+                  </Link>
+                </li>
+                <li>
+                  <Link href={'/geometry/sphere'}>
+                    <a className="hover:bg-neutral-focus">Sphere</a>
+                  </Link>
+                </li>
+                <li>
+                  <Link href={'/geometry/pyramid'}>
+                    <a className="hover:bg-neutral-focus">Pyramid</a>
+                  </Link>
+                </li>
+                <li>
+                  <Link href={'/geometry/hemisphere'}>
+                    <a className="hover:bg-neutral-focus">Hemisphere</a>
                   </Link>
                 </li>
               </ul>
             </li>
             <li>
-              <Link href={'/geometry'}>
-                <a>Geomentry</a>
+              <Link href={'/fluidflow'}>
+                <a className="hover:bg-neutral-focus">Fluid Flow</a>
               </Link>
             </li>
           </ul>
@@ -68,13 +85,15 @@ const Navbar = () => {
       </div>
       {/* Desktop Menu */}
       <div className="navbar-center hidden text-neutral-content lg:flex">
-        <ul className="menu menu-horizontal p-0">
+        <ul className="menu menu-horizontal p-0 ">
           <li>
-            <a>Fluid Flow</a>
+            <Link href={'/conversion'}>
+              <a className="hover:bg-neutral-focus">Unit Conversion</a>
+            </Link>
           </li>
           <li tabIndex={0}>
-            <a>
-              Heat Transfer
+            <a className="hover:bg-neutral-focus">
+              Geometry
               <svg
                 className="fill-current"
                 xmlns="http://www.w3.org/2000/svg"
@@ -85,18 +104,42 @@ const Navbar = () => {
                 <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
               </svg>
             </a>
-            <ul className="dropdown-content rounded-box w-52 bg-neutral p-2 text-neutral-content shadow">
+            <ul className="dropdown-content rounded-box z-10 w-52 bg-neutral p-2 text-neutral-content shadow">
               <li>
-                <a>Heat Exchangers</a>
+                <Link href={'/geometry/cylinder'}>
+                  <a className="hover:bg-neutral-focus">Cylinder</a>
+                </Link>
               </li>
               <li>
-                <a>Thermodynamics</a>
+                <Link href={'/geometry/box'}>
+                  <a className="hover:bg-neutral-focus">Box</a>
+                </Link>
+              </li>
+              <li>
+                <Link href={'/geometry/cone'}>
+                  <a className="hover:bg-neutral-focus">Cone</a>
+                </Link>
+              </li>
+              <li>
+                <Link href={'/geometry/sphere'}>
+                  <a className="hover:bg-neutral-focus">Sphere</a>
+                </Link>
+              </li>
+              <li>
+                <Link href={'/geometry/pyramid'}>
+                  <a className="hover:bg-neutral-focus">Pyramid</a>
+                </Link>
+              </li>
+              <li>
+                <Link href={'/geometry/hemisphere'}>
+                  <a className="hover:bg-neutral-focus">Hemisphere</a>
+                </Link>
               </li>
             </ul>
           </li>
           <li>
-            <Link href={'/geometry'}>
-              <a>Geomentry</a>
+            <Link href={'/fluidflow'}>
+              <a className="hover:bg-neutral-focus">Fluid Flow</a>
             </Link>
           </li>
         </ul>
