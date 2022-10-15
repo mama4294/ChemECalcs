@@ -1,14 +1,6 @@
 let convert = require('convert-units')
 
-export const convertUnits = ({
-  value,
-  fromUnit,
-  toUnit,
-}: {
-  value: number
-  fromUnit: string
-  toUnit: string
-}) => {
+export const convertUnits = ({ value, fromUnit, toUnit }: { value: number; fromUnit: string; toUnit: string }) => {
   return convert(value).from(fromUnit).to(toUnit)
 }
 
@@ -30,26 +22,22 @@ export interface Units {
   power: string[]
 }
 
+export const unitOptions = [
+  {
+    id: 0,
+    name: 'mass',
+    label: 'Mass',
+  },
+  {
+    id: 1,
+    name: 'volume',
+    label: 'Volume',
+  },
+]
+
 export const units = {
   mass: ['mg', 'g', 'kg', 'oz', 'lb', 'mt', 't'],
-  volume: [
-    'mm3',
-    'cm3',
-    'ml',
-    'l',
-    'm3',
-    'km3',
-    'tsp',
-    'Tbs',
-    'in3',
-    'fl-oz',
-    'cup',
-    'pnt',
-    'qt',
-    'gal',
-    'ft3',
-    'yd3',
-  ],
+  volume: ['mm3', 'cm3', 'ml', 'l', 'm3', 'km3', 'tsp', 'Tbs', 'in3', 'fl-oz', 'cup', 'pnt', 'qt', 'gal', 'ft3', 'yd3'],
   length: ['mm', 'cm', 'm', 'in', 'ft', 'mi'],
   area: ['mm2', 'cm2', 'm2', 'ha', 'km2', 'in2', 'ft2', 'mi2'],
   flowrate: [
@@ -96,3 +84,17 @@ export const units = {
   current: ['A', 'mA', 'kA'],
   power: ['W', 'mW', 'kW', 'MW', 'GW'],
 }
+
+export const unitTypes = [
+  { value: 'mass', label: 'Mass' },
+  { value: 'volume', label: 'Volume' },
+  { value: 'length', label: 'Length' },
+  { value: 'area', label: 'Area' },
+  { value: 'flowrate', label: 'Flowrate' },
+  { value: 'temperature', label: 'Temperature' },
+  { value: 'speed', label: 'Speed' },
+  { value: 'pressure', label: 'Pressure' },
+  { value: 'voltage', label: 'Voltage' },
+  { value: 'current', label: 'Current' },
+  { value: 'power', label: 'Power' },
+]

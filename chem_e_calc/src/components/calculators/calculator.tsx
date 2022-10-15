@@ -13,7 +13,7 @@ export type InputType = {
   calculatedValue: { value: number; unit: string }
   solveable: boolean
   selectiontext: string
-  equation: string
+  equation?: string
   selected: boolean
   focusText?: string
   error: string
