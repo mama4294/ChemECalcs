@@ -14,7 +14,7 @@ export const SolveForDropdown = ({ options, onChange }: SolveForProps) => {
         <span className="label-text">Solve for</span>
       </label>
       <select
-        className="select input-bordered w-full bg-base-200 text-base-content"
+        className="select input-bordered w-full"
         value={selectedValueId}
         onChange={e => onChange(Number(e.target.value))}
       >

@@ -122,7 +122,7 @@ const UnitConversion: NextPage = () => {
                 <span className="label-text">Category</span>
               </label>
               <select
-                className="select input-bordered w-full bg-base-200 text-base-content"
+                className="select input-bordered w-full"
                 value={unitType}
                 onChange={e => handleChangeUnitType(e.target.value)}
               >
