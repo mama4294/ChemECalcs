@@ -24,7 +24,7 @@ const Cone = () => {
       name: 'diameter',
       unitType: 'length',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Diameter',
       displayValue: { value: 1, unit: 'ft' },
       calculatedValue: {
@@ -42,7 +42,7 @@ const Cone = () => {
       name: 'height',
       unitType: 'length',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Height',
       displayValue: { value: 1, unit: 'ft' },
       calculatedValue: {
@@ -60,7 +60,7 @@ const Cone = () => {
       name: 'volume',
       unitType: 'volume',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Volume',
       displayValue: { value: 0.26, unit: 'ft3' },
       calculatedValue: {
@@ -124,6 +124,7 @@ const Cone = () => {
   }
 
   const calcVolume = (inputArray: InputType[]) => {
+    console.log('solving for volume')
     const diameterObj = inputArray.find(o => o.name === 'diameter')
     const heightObj = inputArray.find(o => o.name === 'height')
 
@@ -136,7 +137,7 @@ const Cone = () => {
     const height = heightObj.calculatedValue.value
 
     let answerValue = 0
-    if (diameter !== 0 && diameter !== 0) {
+    if (diameter !== 0 && height !== 0 && height && diameter) {
       answerValue = (Math.PI * (diameter / 2) ** 2 * height) / 3
     }
 

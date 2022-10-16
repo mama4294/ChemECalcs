@@ -11,6 +11,10 @@ export type OnChangeValueProps = {
   unit?: string
   number?: number
 }
+
+const addCommas = (num: number) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+const removeNonNumeric = (num: string) => Number(num.replace(/[^0-9]/g, ''))
+
 // export const InputField = ({ data, onChangeValue }: InputFieldProps) => {
 //   const { id, label, placeholder, type, selected, displayValue, unitType, error, focusText } = data
 //   const { value, unit } = displayValue
@@ -71,10 +75,14 @@ export const InputField = ({ data, onChangeValue }: InputFieldProps) => {
         <input
           type="text"
           name={label}
-          value={String(value)}
+          value={addCommas(value)}
           id={label}
           disabled={selected}
-          onChange={e => onChangeValue({ id, number: Number(e.target.value) })}
+          onChange={e => {
+            console.log('text input', e.target.value)
+            console.log('number output', removeNonNumeric(e.target.value))
+            onChangeValue({ id, number: removeNonNumeric(e.target.value) })
+          }}
           className="disabled:border-1 input input-bordered block w-full pr-16 disabled:cursor-text "
           placeholder={placeholder}
         />

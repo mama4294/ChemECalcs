@@ -1,6 +1,5 @@
 import type { NextPage } from 'next'
 import { useState } from 'react'
-import Select from 'react-tailwindcss-select'
 // import Select from 'react-select'
 
 import { InputType } from '../components/calculators/calculator'
