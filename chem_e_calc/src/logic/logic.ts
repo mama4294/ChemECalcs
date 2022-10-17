@@ -1,4 +1,4 @@
-import { convertUnits, roundTo2 } from '../../utils/units'
+import { convertUnits, roundTo2 } from '../utils/units'
 import { InputType } from '../components/calculators/calculator'
 
 type ChangeSolveSelectionProps = {

@@ -8,7 +8,7 @@ import { CalcBody } from '../components/calculators/calcBody'
 import { CalcCard } from '../components/calculators/calcCard'
 import { PageContainer } from '../components/calculators/container'
 import { CalcHeader } from '../components/calculators/header'
-import { convertUnits, roundTo2, unitTypes, units, Units } from '../../utils/units'
+import { convertUnits, roundTo2, unitTypes, units, Units } from '../utils/units'
 import { InputField, OnChangeValueProps } from '../components/inputs/inputField'
 import { updateAnswer, updateArray } from '../logic/logic'
 
