@@ -1,3 +1,5 @@
+import { string } from 'zod'
+
 let convert = require('convert-units')
 
 export const convertUnits = ({ value, fromUnit, toUnit }: { value: number; fromUnit: string; toUnit: string }) => {
@@ -21,19 +23,6 @@ export interface Units {
   current: string[]
   power: string[]
 }
-
-export const unitOptions = [
-  {
-    id: 0,
-    name: 'mass',
-    label: 'Mass',
-  },
-  {
-    id: 1,
-    name: 'volume',
-    label: 'Volume',
-  },
-]
 
 export const units = {
   mass: ['mg', 'g', 'kg', 'oz', 'lb', 'mt', 't'],
@@ -85,7 +74,26 @@ export const units = {
   power: ['W', 'mW', 'kW', 'MW', 'GW'],
 }
 
-export const unitsObj = {
+export type UnitOption = {
+  value: string
+  label: string
+}
+
+export interface UnitOptions {
+  mass: UnitOption[]
+  volume: UnitOption[]
+  length: UnitOption[]
+  area: UnitOption[]
+  flowrate: UnitOption[]
+  temperature: UnitOption[]
+  speed: UnitOption[]
+  pressure: UnitOption[]
+  voltage: UnitOption[]
+  current: UnitOption[]
+  power: UnitOption[]
+}
+
+export const unitOptions: UnitOptions = {
   mass: [
     { value: 'mg', label: 'mg' },
     { value: 'g', label: 'g' },
