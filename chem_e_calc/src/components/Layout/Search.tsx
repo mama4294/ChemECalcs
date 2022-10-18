@@ -1,5 +1,4 @@
-import Link from 'next/link'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/router'
 
 const Search = () => {

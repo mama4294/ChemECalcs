@@ -10,7 +10,7 @@ import { PageContainer } from '../components/calculators/container'
 import { CalcHeader } from '../components/calculators/header'
 import { convertUnits, roundTo2, unitTypes, units, Units } from '../utils/units'
 import { InputField, OnChangeValueProps } from '../components/inputs/inputField'
-import { updateAnswer, updateArray } from '../logic/logic'
+import { updateArray } from '../logic/logic'
 
 const UnitConversion: NextPage = () => {
   const paths = [{ title: 'Unit Conversion', href: '/conversion' }]
