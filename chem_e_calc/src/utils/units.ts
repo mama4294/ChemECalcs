@@ -85,6 +85,126 @@ export const units = {
   power: ['W', 'mW', 'kW', 'MW', 'GW'],
 }
 
+export const unitsObj = {
+  mass: [
+    { value: 'mg', label: 'mg' },
+    { value: 'g', label: 'g' },
+    { value: 'kg', label: 'kg' },
+    { value: 'oz', label: 'oz' },
+    { value: 'lb', label: 'lb' },
+    { value: 'mt', label: 'mt' },
+    { value: 't', label: 'ton' },
+  ],
+  volume: [
+    { value: 'mm3', label: 'mm³' },
+    { value: 'cm3', label: 'cm³' },
+    { value: 'ml', label: 'ml' },
+    { value: 'l', label: 'l' },
+    { value: 'm3', label: 'm³' },
+    { value: 'km3', label: 'km³' },
+    { value: 'tsp', label: 'tsp' },
+    { value: 'Tbs', label: 'Tbs' },
+    { value: 'in3', label: 'in³' },
+    { value: 'fl-oz', label: 'fl-oz' },
+    { value: 'cup', label: 'cup' },
+    { value: 'pnt', label: 'pint' },
+    { value: 'qt', label: 'quart' },
+    { value: 'gal', label: 'gal' },
+    { value: 'ft3', label: 'ft³' },
+    { value: 'yd3', label: 'yd³' },
+  ],
+  length: [
+    { value: 'mm', label: 'mm' },
+    { value: 'cm', label: 'cm' },
+    { value: 'm', label: 'm' },
+    { value: 'in', label: 'in' },
+    { value: 'ft', label: 'ft' },
+    { value: 'mi', label: 'mile' },
+  ],
+
+  area: [
+    { value: 'mm2', label: 'mm²' },
+    { value: 'cm2', label: 'cm²' },
+    { value: 'm2', label: 'm²' },
+    { value: 'ha', label: 'ha' },
+    { value: 'km2', label: 'km²' },
+    { value: 'in2', label: 'in²' },
+    { value: 'ft2', label: 'ft²' },
+    { value: 'mi2', label: 'mi²' },
+  ],
+
+  flowrate: [
+    { value: 'mm3/s', label: 'mm³/s' },
+    { value: 'cm3/s', label: 'cm³/s' },
+    { value: 'ml/s', label: 'ml/s' },
+    { value: 'l/s', label: 'l/s' },
+    { value: 'l/min', label: 'lpm' },
+    { value: 'l/h', label: 'lph' },
+    { value: 'm3/s', label: 'm³/s' },
+    { value: 'm3/min', label: 'm³/min' },
+    { value: 'm3/h', label: 'm³/h' },
+    { value: 'in3/s', label: 'in³/s' },
+    { value: 'in3/min', label: 'in³/min' },
+    { value: 'in3/h', label: 'in³/h' },
+    { value: 'fl-oz/s', label: 'fl-oz/s' },
+    { value: 'fl-oz/min', label: 'fl-oz/min' },
+    { value: 'fl-oz/h', label: 'fl-oz/h' },
+    { value: 'gal/s', label: 'gal/s' },
+    { value: 'gal/min', label: 'gpm' },
+    { value: 'gal/h', label: 'gph' },
+    { value: 'ft3/s', label: 'ft³/s' },
+    { value: 'ft3/min', label: 'ft³/min' },
+    { value: 'ft3/h', label: 'ft³/h' },
+    { value: 'yd3/s', label: 'yd³/s' },
+    { value: 'yd3/min', label: 'yd³/min' },
+    { value: 'yd3/h', label: 'yd³/h' },
+  ],
+
+  temperature: [
+    { value: 'C', label: '°C' },
+    { value: 'F', label: '°F' },
+    { value: 'K', label: '°K' },
+    { value: 'R', label: '°R' },
+  ],
+
+  speed: [
+    { value: 'm/s', label: 'm/s' },
+    { value: 'km/s', label: 'km/s' },
+    { value: 'm/h', label: 'mph' },
+    { value: 'knot', label: 'knot' },
+    { value: 'ft/s', label: 'fps' },
+  ],
+  pressure: [
+    { value: 'Pa', label: 'Pa' },
+    { value: 'hPa', label: 'hPa' },
+    { value: 'kPa', label: 'kPa' },
+    { value: 'MPa', label: 'MPa' },
+    { value: 'bar', label: 'bar' },
+    { value: 'torr', label: 'torr' },
+    { value: 'psi', label: 'psi' },
+  ],
+
+  voltage: [
+    { value: 'V', label: 'V' },
+    { value: 'mV', label: 'mV' },
+    { value: 'kV', label: 'kV' },
+  ],
+
+  current: [
+    { value: 'A', label: 'A' },
+    { value: 'mA', label: 'mA' },
+    { value: 'kA', label: 'kA' },
+  ],
+
+  power: [
+    { value: 'W', label: 'W' },
+    { value: 'mW', label: 'mW' },
+    { value: 'kW', label: 'kW' },
+    { value: 'MW', label: 'MW' },
+    { value: 'GW', label: 'GW' },
+  ],
+}
+
 export const unitTypes = [
   { value: 'mass', label: 'Mass' },
   { value: 'volume', label: 'Volume' },
