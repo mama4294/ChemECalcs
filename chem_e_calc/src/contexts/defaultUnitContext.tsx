@@ -17,28 +17,32 @@ type DefaultUnits = {
 
 export type DefaultUnitContextType = {
   defaultUnits: DefaultUnits
-  // saveTodo: (todo: ITodo) => void;
-  // updateTodo: (id: number) => void;
+  setDefaultUnits: (newValue: DefaultUnits) => void
 }
 
-export const DefaultUnitContext = createContext<DefaultUnitContextType | null>(null)
+const initialValues = {
+  mass: { value: 'kg', label: 'kg' },
+  volume: { value: 'l', label: 'l' },
+  length: { value: 'm', label: 'm' },
+  area: { value: 'm2', label: 'm²' },
+  flowrate: { value: 'l/min', label: 'lpm' },
+  temperature: { value: 'C', label: '°C' },
+  speed: { value: 'm/s', label: 'm/s' },
+  pressure: { value: 'bar', label: 'bar' },
+  voltage: { value: 'V', label: 'V' },
+  current: { value: 'A', label: 'A' },
+  power: { value: 'W', label: 'W' },
+}
+
+export const DefaultUnitContext = createContext<DefaultUnitContextType | null>({
+  defaultUnits: initialValues,
+  setDefaultUnits: () => undefined,
+})
 
 const DefaultUnitProvider = ({ children }: { children?: React.ReactNode }) => {
-  const [defaultUnits, setDefaultUnits] = useState<DefaultUnits>({
-    mass: { value: 'kg', label: 'kg' },
-    volume: { value: 'l', label: 'l' },
-    length: { value: 'm', label: 'm' },
-    area: { value: 'm2', label: 'm²' },
-    flowrate: { value: 'l/min', label: 'lpm' },
-    temperature: { value: 'C', label: '°C' },
-    speed: { value: 'm/s', label: 'm/s' },
-    pressure: { value: 'bar', label: 'bar' },
-    voltage: { value: 'V', label: 'V' },
-    current: { value: 'A', label: 'A' },
-    power: { value: 'W', label: 'W' },
-  })
+  const [defaultUnits, setDefaultUnits] = useState<DefaultUnits>(initialValues)
 
-  return <DefaultUnitContext.Provider value={{ defaultUnits }}>{children}</DefaultUnitContext.Provider>
+  return <DefaultUnitContext.Provider value={{ defaultUnits, setDefaultUnits }}>{children}</DefaultUnitContext.Provider>
 }
 
 export default DefaultUnitProvider

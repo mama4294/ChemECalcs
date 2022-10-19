@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { DefaultUnits } from './DefaultUnits'
+import { DefaultUnitsForm } from './DefaultUnitsForm'
 import Search from './Search'
 
 const Navbar = () => {
@@ -148,7 +148,7 @@ const Navbar = () => {
       </div>
       <div className="navbar-end">
         <Search />
-        <DefaultUnits />
+        <DefaultUnitsForm />
       </div>
     </div>
   )

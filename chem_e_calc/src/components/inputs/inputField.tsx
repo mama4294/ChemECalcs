@@ -12,7 +12,13 @@ export type OnChangeValueProps = {
   number?: number
 }
 
-const addCommas = (num: number) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+const addCommas = (num: number | string) => {
+  if (num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  } else {
+    return ''
+  }
+}
 const removeNonNumeric = (num: string) => Number(num.replace(/[^0-9]/g, ''))
 
 export const InputField = ({ data, onChangeValue }: InputFieldProps) => {

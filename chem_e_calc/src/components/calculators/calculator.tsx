@@ -9,7 +9,7 @@ export type InputType = {
   type: string
   placeholder: string
   label: string
-  displayValue: { value: number; unit: string }
+  displayValue: { value: number | string; unit: string }
   calculatedValue: { value: number; unit: string }
   solveable: boolean
   selectiontext: string
