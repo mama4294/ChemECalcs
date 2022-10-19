@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import { convertUnits } from '../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
@@ -6,11 +6,11 @@ import { CalcCard } from '../../components/calculators/calcCard'
 import { Calculator, InputType } from '../../components/calculators/calculator'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
-import { Illustraion } from '../../components/calculators/illustration'
 import { OnChangeValueProps } from '../../components/inputs/inputField'
 import { IconBoxUnits } from '../../icons/IconBoxUnits'
 import { IconContainer } from '../../icons/IconContainer'
 import { handleChangeSolveSelection, updateAnswer, updateArray } from '../../logic/logic'
+import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 
 const Box = () => {
   const paths = [
@@ -18,6 +18,7 @@ const Box = () => {
     { title: 'Box', href: '/geometry/box' },
   ]
 
+  const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
   const [values, setValues] = useState<InputType[]>([
     {
       id: 1,

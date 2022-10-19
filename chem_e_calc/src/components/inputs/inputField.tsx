@@ -1,5 +1,4 @@
 import { InputType } from '../calculators/calculator'
-import { units, Units } from '../../utils/units'
 import { unitOptions, UnitOptions, UnitOption } from '../../utils/units'
 
 type InputFieldProps = {
