@@ -83,7 +83,7 @@ const Box = () => {
       label: 'Volume',
       displayValue: { value: '', unit: defaultUnits.volume },
       calculatedValue: {
-        value: convertUnits({ value: 1, fromUnit: defaultUnits.volume, toUnit: 'm3' }),
+        value: convertUnits({ value: 0, fromUnit: defaultUnits.volume, toUnit: 'm3' }),
         unit: 'm3',
       },
       solveable: true,

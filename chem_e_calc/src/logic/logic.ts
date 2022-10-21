@@ -25,7 +25,7 @@ export const updateArray = ({ id, unit, number, array }: UpdateArrayProps): Inpu
     return array.map(o => {
       if (o.id === id) {
         const convertedValue = convertUnits({
-          value: o.displayValue.value,
+          value: o.displayValue.value as number,
           fromUnit: unit,
           toUnit: o.calculatedValue.unit,
         })
@@ -33,7 +33,7 @@ export const updateArray = ({ id, unit, number, array }: UpdateArrayProps): Inpu
           ...o,
           displayValue: { value: o.displayValue.value, unit: unit },
           calculatedValue: {
-            value: convertedValue,
+            value: convertedValue as number,
             unit: o.calculatedValue.unit,
           },
         }
@@ -41,7 +41,7 @@ export const updateArray = ({ id, unit, number, array }: UpdateArrayProps): Inpu
     })
   }
 
-  if (number) {
+  if (number || number == 0) {
     return array.map(o => {
       if (o.id === id) {
         const convertedValue = convertUnits({
