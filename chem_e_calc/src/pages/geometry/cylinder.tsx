@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { convertUnits, roundTo2 } from '../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
@@ -13,20 +13,22 @@ import { OnChangeValueProps } from '../../components/inputs/inputField'
 import { IconBox } from '../../icons/IconBox'
 import { IconContainer } from '../../icons/IconContainer'
 import { IconCylinderUnits } from '../../icons/iconCylinderUnits'
-import { handleChangeSolveSelection, updateAnswer, updateArray } from '../../logic/logic'
+import { handleChangeSolveSelection, updateAnswer, updateArray, validateNotBlank } from '../../logic/logic'
+import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 
 const Geometry = () => {
+  const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
   const [values, setValues] = useState<InputType[]>([
     {
       id: 1,
       name: 'diameter',
       unitType: 'length',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Diameter',
-      displayValue: { value: 1, unit: 'ft' },
+      displayValue: { value: 1, unit: defaultUnits.length },
       calculatedValue: {
-        value: convertUnits({ value: 1, fromUnit: 'ft', toUnit: 'm' }),
+        value: convertUnits({ value: 1, fromUnit: defaultUnits.length, toUnit: 'm' }),
         unit: 'm',
       },
       solveable: true,
@@ -40,11 +42,11 @@ const Geometry = () => {
       name: 'height',
       unitType: 'length',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Height',
-      displayValue: { value: 1, unit: 'ft' },
+      displayValue: { value: 1, unit: defaultUnits.length },
       calculatedValue: {
-        value: convertUnits({ value: 1, fromUnit: 'ft', toUnit: 'm' }),
+        value: convertUnits({ value: 1, fromUnit: defaultUnits.length, toUnit: 'm' }),
         unit: 'm',
       },
       solveable: true,
@@ -58,11 +60,11 @@ const Geometry = () => {
       name: 'volume',
       unitType: 'volume',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Volume',
-      displayValue: { value: 22.24, unit: 'l' },
+      displayValue: { value: 22.24, unit: defaultUnits.volume },
       calculatedValue: {
-        value: convertUnits({ value: 22.24, fromUnit: 'l', toUnit: 'm3' }),
+        value: convertUnits({ value: 22.24, fromUnit: defaultUnits.volume, toUnit: 'm3' }),
         unit: 'm3',
       },
       solveable: true,
@@ -83,46 +85,14 @@ const Geometry = () => {
     //Update array with new input
     const updatedArr = updateArray({ id, number, unit, array: values })
 
-    //Validate new array
-    const validatedArr = validate(updatedArr)
-
     //Set answer
-    const answerArr = calculateAnswer(validatedArr)
-    if (answerArr) {
-      setValues(answerArr)
-    } else {
+    const answerArr = calculateAnswer(updatedArr)
+    const validatedArr = validateNotBlank(answerArr)
+    if (validatedArr) {
       setValues(validatedArr)
+    } else {
+      setValues(updatedArr)
     }
-  }
-
-  const validate = (inputArray: InputType[]): InputType[] => {
-    let errors: { id: number; error: string }[] = []
-    let validatedArray = inputArray.map(o => {
-      return { ...o, error: '' }
-    })
-
-    //   const diameterObj = inputArray.find(o => o.name === 'diameter')
-    //   const heightObj = inputArray.find(o => o.name === 'height')
-
-    //   if (!diameterObj || !heightObj) {
-    //     alert('validation failed')
-    //     return inputArray
-    //   }
-
-    //   const diameter = diameterObj.calculatedValue.value
-    //   const height = heightObj.calculatedValue.value
-
-    //   //validation rules
-    //   if (diameter < height) {
-    //     errors.push({ id: diameterObj.id, error: 'Diameter must be larger than Height' })
-    //   }
-
-    //Add errors to validated array
-    return validatedArray.map(o => {
-      const errorObj = errors.find(e => e.id === o.id)
-      if (errorObj) return { ...o, error: errorObj.error }
-      else return o
-    })
   }
 
   const calculateAnswer = (inputArray: InputType[]) => {

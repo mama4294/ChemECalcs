@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { convertUnits } from '../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
@@ -9,9 +9,11 @@ import { CalcHeader } from '../../components/calculators/header'
 import { OnChangeValueProps } from '../../components/inputs/inputField'
 import { IconContainer } from '../../icons/IconContainer'
 import { IconPyramidUnits } from '../../icons/iconPyramidUnits'
-import { handleChangeSolveSelection, updateAnswer, updateArray } from '../../logic/logic'
+import { handleChangeSolveSelection, updateAnswer, updateArray, validateNotBlank } from '../../logic/logic'
+import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 
 const Pyramid = () => {
+  const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
   const paths = [
     { title: 'Geometry', href: '/geometry' },
     { title: 'Box', href: '/geometry/pyramid' },
@@ -23,11 +25,11 @@ const Pyramid = () => {
       name: 'width',
       unitType: 'length',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Width',
-      displayValue: { value: 1, unit: 'ft' },
+      displayValue: { value: 1, unit: defaultUnits.length },
       calculatedValue: {
-        value: convertUnits({ value: 1, fromUnit: 'ft', toUnit: 'm' }),
+        value: convertUnits({ value: 1, fromUnit: defaultUnits.length, toUnit: 'm' }),
         unit: 'm',
       },
       solveable: true,
@@ -41,11 +43,11 @@ const Pyramid = () => {
       name: 'height',
       unitType: 'length',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Height',
-      displayValue: { value: 1, unit: 'ft' },
+      displayValue: { value: 1, unit: defaultUnits.length },
       calculatedValue: {
-        value: convertUnits({ value: 1, fromUnit: 'ft', toUnit: 'm' }),
+        value: convertUnits({ value: 1, fromUnit: defaultUnits.length, toUnit: 'm' }),
         unit: 'm',
       },
       solveable: true,
@@ -59,11 +61,11 @@ const Pyramid = () => {
       name: 'length',
       unitType: 'length',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Length',
-      displayValue: { value: 1, unit: 'ft' },
+      displayValue: { value: 1, unit: defaultUnits.length },
       calculatedValue: {
-        value: convertUnits({ value: 1, fromUnit: 'ft', toUnit: 'm' }),
+        value: convertUnits({ value: 1, fromUnit: defaultUnits.length, toUnit: 'm' }),
         unit: 'm',
       },
       solveable: true,
@@ -77,11 +79,11 @@ const Pyramid = () => {
       name: 'volume',
       unitType: 'volume',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Volume',
-      displayValue: { value: 0.33, unit: 'ft3' },
+      displayValue: { value: 0.33, unit: defaultUnits.volume },
       calculatedValue: {
-        value: convertUnits({ value: 0.33, fromUnit: 'ft3', toUnit: 'm3' }),
+        value: convertUnits({ value: 0.33, fromUnit: defaultUnits.volume, toUnit: 'm3' }),
         unit: 'm3',
       },
       solveable: true,
@@ -103,8 +105,9 @@ const Pyramid = () => {
 
     //Set answer
     const answerArr = calculateAnswer(updatedArr)
-    if (answerArr) {
-      setValues(answerArr)
+    const validatedArr = validateNotBlank(answerArr)
+    if (validatedArr) {
+      setValues(validatedArr)
     } else {
       setValues(updatedArr)
     }

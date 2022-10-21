@@ -9,7 +9,7 @@ import { CalcHeader } from '../../components/calculators/header'
 import { OnChangeValueProps } from '../../components/inputs/inputField'
 import { IconBoxUnits } from '../../icons/IconBoxUnits'
 import { IconContainer } from '../../icons/IconContainer'
-import { handleChangeSolveSelection, updateAnswer, updateArray } from '../../logic/logic'
+import { handleChangeSolveSelection, updateAnswer, updateArray, validateNotBlank } from '../../logic/logic'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 
 const Box = () => {
@@ -25,7 +25,7 @@ const Box = () => {
       name: 'width',
       unitType: 'length',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Width',
       displayValue: { value: 1, unit: defaultUnits.length },
       calculatedValue: {
@@ -43,7 +43,7 @@ const Box = () => {
       name: 'height',
       unitType: 'length',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Height',
       displayValue: { value: 1, unit: defaultUnits.length },
       calculatedValue: {
@@ -61,7 +61,7 @@ const Box = () => {
       name: 'length',
       unitType: 'length',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Length',
       displayValue: { value: 1, unit: defaultUnits.length },
       calculatedValue: {
@@ -79,7 +79,7 @@ const Box = () => {
       name: 'volume',
       unitType: 'volume',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Volume',
       displayValue: { value: '', unit: defaultUnits.volume },
       calculatedValue: {
@@ -105,8 +105,9 @@ const Box = () => {
 
     //Set answer
     const answerArr = calculateAnswer(updatedArr)
-    if (answerArr) {
-      setValues(answerArr)
+    const validated = validateNotBlank(answerArr)
+    if (validated) {
+      setValues(validated)
     } else {
       setValues(updatedArr)
     }

@@ -84,3 +84,13 @@ export const updateAnswer = (inputArray: InputType[], answerValue: number, answe
     } else return o
   })
 }
+
+export const validateNotBlank = (inputArray: InputType[] | null) => {
+  return inputArray?.map(value => {
+    if (value.selected) return { ...value, error: '' }
+    if (value.displayValue.value <= 0) {
+      return { ...value, error: 'Must not be blank' }
+    }
+    return { ...value, error: '' }
+  })
+}

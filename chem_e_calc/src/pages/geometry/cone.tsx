@@ -10,7 +10,7 @@ import { Illustraion } from '../../components/calculators/illustration'
 import { OnChangeValueProps } from '../../components/inputs/inputField'
 import { IconConeUnits } from '../../icons/iconConeUnits'
 import { IconContainer } from '../../icons/IconContainer'
-import { handleChangeSolveSelection, updateAnswer, updateArray } from '../../logic/logic'
+import { handleChangeSolveSelection, updateAnswer, updateArray, validateNotBlank } from '../../logic/logic'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 
 const Cone = () => {
@@ -89,8 +89,9 @@ const Cone = () => {
 
     //Set answer
     const answerArr = calculateAnswer(updatedArr)
-    if (answerArr) {
-      setValues(answerArr)
+    const validatedArr = validateNotBlank(answerArr)
+    if (validatedArr) {
+      setValues(validatedArr)
     } else {
       setValues(updatedArr)
     }

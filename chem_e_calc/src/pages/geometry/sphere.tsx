@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import { convertUnits } from '../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
@@ -9,9 +9,11 @@ import { CalcHeader } from '../../components/calculators/header'
 import { OnChangeValueProps } from '../../components/inputs/inputField'
 import { IconContainer } from '../../icons/IconContainer'
 import { IconSphereUnits } from '../../icons/iconSphereUnits'
-import { handleChangeSolveSelection, updateAnswer, updateArray } from '../../logic/logic'
+import { handleChangeSolveSelection, updateAnswer, updateArray, validateNotBlank } from '../../logic/logic'
+import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 
 const Sphere = () => {
+  const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
   const paths = [
     { title: 'Geometry', href: '/geometry' },
     { title: 'Sphere', href: '/geometry/sphere' },
@@ -23,11 +25,11 @@ const Sphere = () => {
       name: 'diameter',
       unitType: 'length',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Diameter',
-      displayValue: { value: 1, unit: 'ft' },
+      displayValue: { value: 1, unit: defaultUnits.length },
       calculatedValue: {
-        value: convertUnits({ value: 1, fromUnit: 'ft', toUnit: 'm' }),
+        value: convertUnits({ value: 1, fromUnit: defaultUnits.length, toUnit: 'm' }),
         unit: 'm',
       },
       solveable: true,
@@ -41,11 +43,11 @@ const Sphere = () => {
       name: 'volume',
       unitType: 'volume',
       type: 'number',
-      placeholder: 'enter value',
+      placeholder: 'Enter value',
       label: 'Volume',
-      displayValue: { value: 14.83, unit: 'l' },
+      displayValue: { value: 14.83, unit: defaultUnits.volume },
       calculatedValue: {
-        value: convertUnits({ value: 14.83, fromUnit: 'l', toUnit: 'm3' }),
+        value: convertUnits({ value: 14.83, fromUnit: defaultUnits.volume, toUnit: 'm3' }),
         unit: 'm3',
       },
       solveable: true,
@@ -68,8 +70,9 @@ const Sphere = () => {
 
     //Set answer
     const answerArr = calculateAnswer(updatedArr)
-    if (answerArr) {
-      setValues(answerArr)
+    const validatedArr = validateNotBlank(answerArr)
+    if (validatedArr) {
+      setValues(validatedArr)
     } else {
       setValues(updatedArr)
     }
