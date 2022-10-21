@@ -56,7 +56,7 @@ const Search = () => {
             <ul className="max-h-96 overflow-y-auto pb-4 text-sm">
               {filteredPages.map(page => {
                 return (
-                  <li className="cursor-pointer" onClick={() => changePage(page.href)}>
+                  <li key={page.href} className="cursor-pointer" onClick={() => changePage(page.href)}>
                     <div className="group space-x-1 px-4 py-2 hover:bg-primary">
                       <span className="font-bold group-hover:text-primary-content"> {page.title}</span>
                       <span className="text-base-content group-hover:text-primary-content">in {page.location}</span>

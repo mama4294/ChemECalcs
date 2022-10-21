@@ -1,4 +1,4 @@
-import { useRef, useState, useContext } from 'react'
+import { useRef, useState, useContext, useEffect } from 'react'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 import { unitOptions, UnitOptions, UnitOption } from '../../utils/units'
 
@@ -9,6 +9,7 @@ export const DefaultUnitsForm = () => {
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault()
     setDefaultUnits(formData)
+    localStorage.setItem('defaultUnits', JSON.stringify(formData))
     closeModalBtnRef.current?.click()
   }
 
@@ -16,7 +17,6 @@ export const DefaultUnitsForm = () => {
     const { name, value } = e.target as HTMLInputElement
     const newArr = { ...formData, [name]: value }
     setFormData(newArr)
-    console.log(`${name} changed to ${value}`)
   }
 
   const closeModalBtnRef = useRef<HTMLInputElement>(null)
@@ -37,67 +37,67 @@ export const DefaultUnitsForm = () => {
             <div className="grid grid-cols-2 gap-4  p-4 pb-8 text-center md:grid-cols-3">
               <UnitInput
                 label="Mass"
-                value={formData.temperature.value}
+                value={formData.mass}
                 onChange={handleChange}
                 options={unitOptions['mass' as keyof UnitOptions]}
               />
               <UnitInput
                 label="Volume"
-                value={formData.volume.value}
+                value={formData.volume}
                 onChange={handleChange}
                 options={unitOptions['volume' as keyof UnitOptions]}
               />
               <UnitInput
                 label="Length"
-                value={formData.length.value}
+                value={formData.length}
                 onChange={handleChange}
                 options={unitOptions['length' as keyof UnitOptions]}
               />
               <UnitInput
                 label="Area"
-                value={formData.area.value}
+                value={formData.area}
                 onChange={handleChange}
                 options={unitOptions['area' as keyof UnitOptions]}
               />
               <UnitInput
                 label="Flowrate"
-                value={formData.flowrate.value}
+                value={formData.flowrate}
                 onChange={handleChange}
                 options={unitOptions['flowrate' as keyof UnitOptions]}
               />
               <UnitInput
                 label="Temperature"
-                value={formData.temperature.value}
+                value={formData.temperature}
                 onChange={handleChange}
                 options={unitOptions['temperature' as keyof UnitOptions]}
               />
               <UnitInput
                 label="Speed"
-                value={formData.speed.value}
+                value={formData.speed}
                 onChange={handleChange}
                 options={unitOptions['speed' as keyof UnitOptions]}
               />
               <UnitInput
                 label="Pressure"
-                value={formData.pressure.value}
+                value={formData.pressure}
                 onChange={handleChange}
                 options={unitOptions['pressure' as keyof UnitOptions]}
               />
               <UnitInput
                 label="Voltage"
-                value={formData.voltage.value}
+                value={formData.voltage}
                 onChange={handleChange}
                 options={unitOptions['voltage' as keyof UnitOptions]}
               />
               <UnitInput
                 label="Current"
-                value={formData.current.value}
+                value={formData.current}
                 onChange={handleChange}
                 options={unitOptions['current' as keyof UnitOptions]}
               />
               <UnitInput
                 label="Power"
-                value={formData.power.value}
+                value={formData.power}
                 onChange={handleChange}
                 options={unitOptions['power' as keyof UnitOptions]}
               />

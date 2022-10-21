@@ -5,11 +5,11 @@ import DefaultUnitProvider from '../contexts/defaultUnitContext'
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
-    <BaseLayout>
-      <DefaultUnitProvider>
+    <DefaultUnitProvider>
+      <BaseLayout>
         <Component {...pageProps} />
-      </DefaultUnitProvider>
-    </BaseLayout>
+      </BaseLayout>
+    </DefaultUnitProvider>
   )
 }
 

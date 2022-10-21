@@ -1,18 +1,17 @@
-import React, { useState, createContext } from 'react'
-import { UnitOption } from '../utils/units'
+import React, { useState, createContext, useEffect } from 'react'
 
 type DefaultUnits = {
-  mass: UnitOption
-  volume: UnitOption
-  length: UnitOption
-  area: UnitOption
-  flowrate: UnitOption
-  temperature: UnitOption
-  speed: UnitOption
-  pressure: UnitOption
-  voltage: UnitOption
-  current: UnitOption
-  power: UnitOption
+  mass: string
+  volume: string
+  length: string
+  area: string
+  flowrate: string
+  temperature: string
+  speed: string
+  pressure: string
+  voltage: string
+  current: string
+  power: string
 }
 
 export type DefaultUnitContextType = {
@@ -21,26 +20,42 @@ export type DefaultUnitContextType = {
 }
 
 const initialValues = {
-  mass: { value: 'kg', label: 'kg' },
-  volume: { value: 'l', label: 'l' },
-  length: { value: 'm', label: 'm' },
-  area: { value: 'm2', label: 'm²' },
-  flowrate: { value: 'l/min', label: 'lpm' },
-  temperature: { value: 'C', label: '°C' },
-  speed: { value: 'm/s', label: 'm/s' },
-  pressure: { value: 'bar', label: 'bar' },
-  voltage: { value: 'V', label: 'V' },
-  current: { value: 'A', label: 'A' },
-  power: { value: 'W', label: 'W' },
+  mass: 'kg',
+  volume: 'l',
+  length: 'ft',
+  area: 'm2',
+  flowrate: 'l/min',
+  temperature: 'C',
+  speed: 'm/s',
+  pressure: 'bar',
+  voltage: 'V',
+  current: 'A',
+  power: 'W',
 }
 
-export const DefaultUnitContext = createContext<DefaultUnitContextType | null>({
+function getLocalStorage() {
+  try {
+    const localdata = window.localStorage.getItem('defaultUnits')
+    console.log('getting local storage', localdata)
+    return localdata ? JSON.parse(localdata) : initialValues
+  } catch (e) {
+    // if error, return initial value
+    console.error('error getting local data')
+    return initialValues
+  }
+}
+
+export const DefaultUnitContext = createContext<DefaultUnitContextType>({
   defaultUnits: initialValues,
   setDefaultUnits: () => undefined,
 })
 
 const DefaultUnitProvider = ({ children }: { children?: React.ReactNode }) => {
-  const [defaultUnits, setDefaultUnits] = useState<DefaultUnits>(initialValues)
+  const [defaultUnits, setDefaultUnits] = useState<DefaultUnits>(() => getLocalStorage())
+
+  useEffect(() => {
+    setDefaultUnits(getLocalStorage())
+  }, [])
 
   return <DefaultUnitContext.Provider value={{ defaultUnits, setDefaultUnits }}>{children}</DefaultUnitContext.Provider>
 }
