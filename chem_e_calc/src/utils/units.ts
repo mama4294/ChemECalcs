@@ -10,6 +10,14 @@ export const roundTo2 = (num: number) => {
   return Math.round(num * 100) / 100
 }
 
+export const dynamicRound = (number: number, points = 2): number => {
+  if (number === 0) return 0
+  const trimmed = Number(number.toFixed(points))
+  console.log('Trimmed Number', trimmed, 'Decimal Points', points)
+  if (trimmed !== 0) return trimmed
+  return dynamicRound(number, points + 1)
+}
+
 export interface Units {
   mass: string[]
   volume: string[]

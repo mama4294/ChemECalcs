@@ -8,7 +8,7 @@ import { CalcBody } from '../components/calculators/calcBody'
 import { CalcCard } from '../components/calculators/calcCard'
 import { PageContainer } from '../components/calculators/container'
 import { CalcHeader } from '../components/calculators/header'
-import { convertUnits, roundTo2, unitTypes, units, Units } from '../utils/units'
+import { convertUnits, unitTypes, units, Units, dynamicRound } from '../utils/units'
 import { InputField, OnChangeValueProps } from '../components/inputs/inputField'
 import { updateArray } from '../logic/logic'
 
@@ -18,9 +18,9 @@ const UnitConversion: NextPage = () => {
   const [unitType, setUnitType] = useState('mass')
 
   const handleChangeUnitType = (newType: string): void => {
-    const newValues = values.map(obj => {
-      const value = obj.displayValue.value
-      const newUnit = units[newType as keyof Units][0] || 'm'
+    const newValues: InputType[] = values.map(obj => {
+      const value = obj.displayValue.value as number
+      const newUnit = units[newType as keyof Units][0] as string
       return {
         ...obj,
         unitType: newType,
@@ -85,7 +85,7 @@ const UnitConversion: NextPage = () => {
     }
 
     const answerValue = convertUnits({
-      value: inputObj.displayValue.value,
+      value: inputObj.displayValue.value as number,
       fromUnit: inputObj.displayValue.unit,
       toUnit: outputObj.displayValue.unit,
     })
@@ -100,7 +100,7 @@ const UnitConversion: NextPage = () => {
         return {
           ...o,
           displayValue: {
-            value: roundTo2(answerValue),
+            value: dynamicRound(answerValue),
             unit: o.displayValue.unit,
           },
           calculatedValue: { value: answerValue, unit: o.calculatedValue.unit },
