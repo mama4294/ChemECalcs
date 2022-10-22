@@ -1,4 +1,4 @@
-import { convertUnits, roundTo2 } from '../utils/units'
+import { convertUnits, dynamicRound } from '../utils/units'
 import { InputType } from '../components/calculators/calculator'
 
 type ChangeSolveSelectionProps = {
@@ -76,7 +76,7 @@ export const updateAnswer = (inputArray: InputType[], answerValue: number, answe
       return {
         ...o,
         displayValue: {
-          value: roundTo2(displayValue),
+          value: dynamicRound(displayValue),
           unit: o.displayValue.unit,
         },
         calculatedValue: { value: answerValue, unit: o.calculatedValue.unit },
