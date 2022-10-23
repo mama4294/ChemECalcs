@@ -1,20 +1,33 @@
-import { InputType } from '../calculators/calculator'
 import { unitOptions, UnitOptions, UnitOption, addCommas, commasToNumber } from '../../utils/units'
-import { InputType as FluidFLowInputType } from '../../pages/fluidflow'
 
 type InputFieldProps = {
-  data: InputType
+  name: string
+  label: string
+  placeholder: string
+  selected: boolean
+  displayValue: {
+    value: string
+    unit: string
+  }
+  error: string
+  unitType: string
+  focusText: string
   onChangeValue: any
+  onChangeUnit: any
 }
 
-export type OnChangeValueProps = {
-  id: number
-  unit?: string
-  number?: number
-}
-
-export const InputField = ({ data, onChangeValue }: InputFieldProps) => {
-  const { id, label, placeholder, type, selected, displayValue, error, unitType, focusText } = data
+export const InputField = ({
+  name,
+  label,
+  placeholder,
+  selected,
+  displayValue,
+  error,
+  unitType,
+  focusText,
+  onChangeValue,
+  onChangeUnit,
+}: InputFieldProps) => {
   const { value, unit } = displayValue
   return (
     <div className="mb-2">
@@ -26,13 +39,11 @@ export const InputField = ({ data, onChangeValue }: InputFieldProps) => {
       >
         <input
           type="text"
-          name={label}
-          value={addCommas(value)}
+          name={name}
+          value={value}
           id={label}
           disabled={selected}
-          onChange={e => {
-            onChangeValue({ id, number: commasToNumber(e.target.value) })
-          }}
+          onChange={onChangeValue}
           className="disabled:border-1 input input-bordered block w-full pr-16 disabled:cursor-text "
           placeholder={selected ? 'N/A' : placeholder}
         />
@@ -42,10 +53,10 @@ export const InputField = ({ data, onChangeValue }: InputFieldProps) => {
           </label>
           <select
             id="unit"
-            name="unit"
+            name={name}
             className="select h-full rounded-md border-transparent bg-transparent py-0 pl-2 pr-7 text-right focus:outline-0"
             value={unit}
-            onChange={e => onChangeValue({ id, unit: e.target.value })}
+            onChange={onChangeUnit}
           >
             {unitOptions[unitType as keyof UnitOptions].map((unitOption: UnitOption, index) => {
               return (

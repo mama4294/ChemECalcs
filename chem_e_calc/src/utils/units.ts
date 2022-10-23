@@ -18,6 +18,15 @@ export const dynamicRound = (number: number, points = 2): number => {
   return dynamicRound(number, points + 1)
 }
 
+export const addCommas = (num: number | string) => {
+  if (num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  } else {
+    return ''
+  }
+}
+export const commasToNumber = (num: string) => Number(num.replace(/[^0-9]/g, ''))
+
 export interface Units {
   mass: string[]
   volume: string[]
