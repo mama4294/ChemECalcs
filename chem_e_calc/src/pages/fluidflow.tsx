@@ -7,6 +7,10 @@ import { CalcHeader } from '../components/calculators/header'
 import { InputField } from '../components/inputs/inputFieldObj'
 import { addCommas, commasToNumber, convertUnits, dynamicRound } from '../utils/units'
 
+//TODO fix commas
+//TODO fix letters in input
+//TODO add equations
+
 type State = {
   solveSelection: string
   flowrate: InputType
@@ -144,7 +148,7 @@ const calculateAnswer = (state: State): State => {
 const updateCalculatedValue = (object: InputType): InputType => {
   const { calculatedValue, displayValue } = object
   const convertedValue = convertUnits({
-    value: Number(displayValue.value),
+    value: +displayValue.value, //+ converts string to number
     fromUnit: displayValue.unit,
     toUnit: calculatedValue.unit,
   })
@@ -158,7 +162,10 @@ const updatedisplayValue = (object: InputType): InputType => {
     fromUnit: calculatedValue.unit,
     toUnit: displayValue.unit,
   })
-  return { ...object, displayValue: { value: dynamicRound(convertedValue).toString(), unit: displayValue.unit } }
+  return {
+    ...object,
+    displayValue: { value: convertedValue.toLocaleString(), unit: displayValue.unit },
+  }
 }
 
 const UnitConversion: NextPage = () => {
@@ -294,8 +301,10 @@ const UnitConversion: NextPage = () => {
   const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
 
+    const numericValue = value.replace(/[^\d.-]/g, '')
+
     const unit = state[name as keyof InputState].displayValue.unit
-    const payload = { ...state[name as keyof InputState], displayValue: { value: value, unit } }
+    const payload = { ...state[name as keyof InputState], displayValue: { value: numericValue, unit } }
     console.log('Payload', payload)
     dispatch({ type: ActionKind.UPDATE_DISPLAY_VALUE, payload })
   }
@@ -330,7 +339,7 @@ const UnitConversion: NextPage = () => {
                     label={label}
                     placeholder={placeholder}
                     selected={state.solveSelection === name}
-                    displayValue={{ value: addCommas(displayValue.value), unit: displayValue.unit }}
+                    displayValue={{ value: displayValue.value, unit: displayValue.unit }}
                     error={error}
                     unitType={unitType}
                     focusText={focusText}
