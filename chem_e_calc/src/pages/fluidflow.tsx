@@ -1,6 +1,5 @@
 import { NextPage } from 'next'
 import React, { useReducer } from 'react'
-import { object } from 'zod'
 import { Breadcrumbs } from '../components/calculators/breadcrumbs'
 import { CalcCard } from '../components/calculators/calcCard'
 import { PageContainer } from '../components/calculators/container'
@@ -10,6 +9,13 @@ import { addCommas, commasToNumber, convertUnits, dynamicRound } from '../utils/
 
 type State = {
   solveSelection: string
+  flowrate: InputType
+  outerDiameter: InputType
+  thickness: InputType
+  velocity: InputType
+}
+
+type InputState = {
   flowrate: InputType
   outerDiameter: InputType
   thickness: InputType
@@ -30,38 +36,72 @@ export type InputType = {
   error: string
 }
 
+const resetErrorMessages = (state: State): State => {
+  return {
+    ...state,
+    flowrate: { ...state.flowrate, error: '' },
+    outerDiameter: { ...state.outerDiameter, error: '' },
+    thickness: { ...state.thickness, error: '' },
+    velocity: { ...state.velocity, error: '' },
+  }
+}
+
 const calculateAnswer = (state: State): State => {
   const { velocity, thickness, outerDiameter, flowrate } = state
   const inputVelocity = velocity.calculatedValue.value //m/s
   const inputThickness = thickness.calculatedValue.value //m
   const inputDiameter = outerDiameter.calculatedValue.value //m
-  const inputFlowrate = outerDiameter.calculatedValue.value //m3/s
-  let validatedState = { ...state }
+  const inputFlowrate = flowrate.calculatedValue.value //m3/s
+  let validatedState = resetErrorMessages(state)
   switch (state.solveSelection) {
     case 'flowrate':
-      console.log('Solving for flowrate')
-
-      if (inputDiameter < inputThickness * 2) {
-        validatedState = { ...state, thickness: { ...state.thickness, error: 'Thickness too large' } }
-      } else {
-        validatedState = { ...state, thickness: { ...state.thickness, error: '' } }
+      if (inputDiameter <= inputThickness * 2) {
+        validatedState = { ...validatedState, thickness: { ...validatedState.thickness, error: 'Thickness too large' } }
       }
+      let innerDiameter = inputDiameter - 2 * inputThickness //m
+      let area = Math.PI * (innerDiameter / 2) ** 2 //m2
+      let answer = inputVelocity * area //m3/s
 
-      const innerDiameter = inputDiameter - 2 * inputThickness //m
-      const area = Math.PI * (innerDiameter / 2) ** 2 //m2
-      const answer = inputVelocity * area //m3/s
-
-      //   console.log(`OD: ${inputDiameter}, ID: ${innerDiameter}, Area: ${area}, Flowrate: ${answer}`)
-
-      const updatedAnswer = updatedisplayValue({
+      let updatedAnswer = updatedisplayValue({
         ...flowrate,
         calculatedValue: { value: answer, unit: flowrate.calculatedValue.unit },
       })
-      console.log('Flowrate', updatedAnswer.calculatedValue)
-      console.log('Flowrate', updatedAnswer.displayValue)
+
       return {
         ...validatedState,
         flowrate: updatedAnswer,
+      }
+    case 'velocity':
+      if (inputDiameter <= inputThickness * 2) {
+        validatedState = { ...validatedState, thickness: { ...validatedState.thickness, error: 'Thickness too large' } }
+      }
+      innerDiameter = inputDiameter - 2 * inputThickness //m
+      area = Math.PI * (innerDiameter / 2) ** 2 //m2
+      answer = inputFlowrate / area //m/2
+
+      updatedAnswer = updatedisplayValue({
+        ...velocity,
+        calculatedValue: { value: answer, unit: velocity.calculatedValue.unit },
+      })
+
+      return {
+        ...validatedState,
+        velocity: updatedAnswer,
+      }
+    case 'outerDiameter':
+      // innerDiameter = inputDiameter - 2 * inputThickness //m
+      area = inputFlowrate / inputVelocity //m2
+      innerDiameter = 2 * Math.sqrt(area / Math.PI) //m
+      answer = innerDiameter + 2 * inputThickness //m
+
+      updatedAnswer = updatedisplayValue({
+        ...outerDiameter,
+        calculatedValue: { value: answer, unit: outerDiameter.calculatedValue.unit },
+      })
+
+      return {
+        ...validatedState,
+        outerDiameter: updatedAnswer,
       }
     default:
       alert('Error: State reducer action not recognized')
@@ -221,16 +261,17 @@ const UnitConversion: NextPage = () => {
 
   const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    const unit = state[name].displayValue.unit
-    const payload = { ...state[name], displayValue: { value: commasToNumber(value), unit } }
+
+    const unit = state[name as keyof InputState].displayValue.unit
+    const payload = { ...state[name as keyof InputState], displayValue: { value: commasToNumber(value), unit } }
     console.log('Payload', payload)
     dispatch({ type: ActionKind.UPDATE_DISPLAY_VALUE, payload })
   }
 
   const handleChangeUnit = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    const existingValue = state[name].displayValue.value
-    const payload = { ...state[name], displayValue: { value: existingValue, unit: value } }
+    const existingValue = state[name as keyof InputState].displayValue.value
+    const payload = { ...state[name as keyof InputState], displayValue: { value: existingValue, unit: value } }
     console.log('Payload', payload)
     dispatch({ type: ActionKind.UPDATE_DISPLAY_VALUE, payload })
   }
