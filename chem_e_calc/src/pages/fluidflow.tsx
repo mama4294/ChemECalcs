@@ -27,7 +27,7 @@ export type InputType = {
   label: string
   placeholder: string
   unitType: string
-  displayValue: { value: number; unit: string }
+  displayValue: { value: string; unit: string }
   calculatedValue: { value: number; unit: string }
   solveable: boolean
   selectiontext: string
@@ -53,10 +53,23 @@ const calculateAnswer = (state: State): State => {
   const inputDiameter = outerDiameter.calculatedValue.value //m
   const inputFlowrate = flowrate.calculatedValue.value //m3/s
   let validatedState = resetErrorMessages(state)
+
   switch (state.solveSelection) {
     case 'flowrate':
       if (inputDiameter <= inputThickness * 2) {
         validatedState = { ...validatedState, thickness: { ...validatedState.thickness, error: 'Thickness too large' } }
+      }
+      if (inputDiameter < 0) {
+        validatedState = {
+          ...validatedState,
+          outerDiameter: { ...validatedState.outerDiameter, error: 'Diameter must be positive' },
+        }
+      }
+      if (inputThickness < 0) {
+        validatedState = {
+          ...validatedState,
+          thickness: { ...validatedState.thickness, error: 'Thickness must be positive' },
+        }
       }
       let innerDiameter = inputDiameter - 2 * inputThickness //m
       let area = Math.PI * (innerDiameter / 2) ** 2 //m2
@@ -74,6 +87,18 @@ const calculateAnswer = (state: State): State => {
     case 'velocity':
       if (inputDiameter <= inputThickness * 2) {
         validatedState = { ...validatedState, thickness: { ...validatedState.thickness, error: 'Thickness too large' } }
+      }
+      if (inputDiameter < 0) {
+        validatedState = {
+          ...validatedState,
+          outerDiameter: { ...validatedState.outerDiameter, error: 'Diameter must be positive' },
+        }
+      }
+      if (inputThickness < 0) {
+        validatedState = {
+          ...validatedState,
+          thickness: { ...validatedState.thickness, error: 'Thickness must be positive' },
+        }
       }
       innerDiameter = inputDiameter - 2 * inputThickness //m
       area = Math.PI * (innerDiameter / 2) ** 2 //m2
@@ -94,6 +119,13 @@ const calculateAnswer = (state: State): State => {
       innerDiameter = 2 * Math.sqrt(area / Math.PI) //m
       answer = innerDiameter + 2 * inputThickness //m
 
+      if (inputThickness < 0) {
+        validatedState = {
+          ...validatedState,
+          thickness: { ...validatedState.thickness, error: 'Thickness must be positive' },
+        }
+      }
+
       updatedAnswer = updatedisplayValue({
         ...outerDiameter,
         calculatedValue: { value: answer, unit: outerDiameter.calculatedValue.unit },
@@ -112,7 +144,7 @@ const calculateAnswer = (state: State): State => {
 const updateCalculatedValue = (object: InputType): InputType => {
   const { calculatedValue, displayValue } = object
   const convertedValue = convertUnits({
-    value: displayValue.value,
+    value: Number(displayValue.value),
     fromUnit: displayValue.unit,
     toUnit: calculatedValue.unit,
   })
@@ -126,7 +158,7 @@ const updatedisplayValue = (object: InputType): InputType => {
     fromUnit: calculatedValue.unit,
     toUnit: displayValue.unit,
   })
-  return { ...object, displayValue: { value: convertedValue, unit: displayValue.unit } }
+  return { ...object, displayValue: { value: dynamicRound(convertedValue).toString(), unit: displayValue.unit } }
 }
 
 const UnitConversion: NextPage = () => {
@@ -139,10 +171,10 @@ const UnitConversion: NextPage = () => {
       label: 'Velocity',
       placeholder: '0',
       unitType: 'speed',
-      displayValue: { value: 1, unit: 'ft/s' },
+      displayValue: { value: '5', unit: 'ft/s' },
       calculatedValue: {
         value: convertUnits({
-          value: 1,
+          value: 5,
           fromUnit: 'ft/s',
           toUnit: 'm/s',
         }),
@@ -159,7 +191,7 @@ const UnitConversion: NextPage = () => {
       label: 'Outer Diameter',
       placeholder: '0',
       unitType: 'length',
-      displayValue: { value: 1, unit: 'in' },
+      displayValue: { value: '1', unit: 'in' },
       calculatedValue: {
         value: convertUnits({
           value: 1,
@@ -179,7 +211,7 @@ const UnitConversion: NextPage = () => {
       label: 'Pipe Thickness',
       placeholder: '0',
       unitType: 'length',
-      displayValue: { value: 0.065, unit: 'in' },
+      displayValue: { value: '0.065', unit: 'in' },
       calculatedValue: {
         value: convertUnits({
           value: 0.065,
@@ -199,7 +231,7 @@ const UnitConversion: NextPage = () => {
       label: 'Flowrate',
       placeholder: '0',
       unitType: 'flowrate',
-      displayValue: { value: 0, unit: 'l/min' },
+      displayValue: { value: '0', unit: 'l/min' },
       calculatedValue: {
         value: convertUnits({
           value: 0,
@@ -263,7 +295,7 @@ const UnitConversion: NextPage = () => {
     const { name, value } = e.target
 
     const unit = state[name as keyof InputState].displayValue.unit
-    const payload = { ...state[name as keyof InputState], displayValue: { value: commasToNumber(value), unit } }
+    const payload = { ...state[name as keyof InputState], displayValue: { value: value, unit } }
     console.log('Payload', payload)
     dispatch({ type: ActionKind.UPDATE_DISPLAY_VALUE, payload })
   }
@@ -298,7 +330,7 @@ const UnitConversion: NextPage = () => {
                     label={label}
                     placeholder={placeholder}
                     selected={state.solveSelection === name}
-                    displayValue={{ value: addCommas(dynamicRound(displayValue.value)), unit: displayValue.unit }}
+                    displayValue={{ value: addCommas(displayValue.value), unit: displayValue.unit }}
                     error={error}
                     unitType={unitType}
                     focusText={focusText}

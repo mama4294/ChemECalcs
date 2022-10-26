@@ -13,7 +13,6 @@ export const roundTo2 = (num: number) => {
 export const dynamicRound = (number: number, points = 2): number => {
   if (number === 0) return 0
   const trimmed = Number(number.toFixed(points))
-  console.log('Trimmed Number', trimmed, 'Decimal Points', points)
   if (trimmed !== 0) return trimmed
   return dynamicRound(number, points + 1)
 }
@@ -25,7 +24,8 @@ export const addCommas = (num: number | string) => {
     return ''
   }
 }
-export const commasToNumber = (num: string) => Number(num.replace(/[^0-9]/g, ''))
+// export const commasToNumber = (num: string) => Number(num.replace(/[^0-9]/g, ''))
+export const commasToNumber = (num: string) => Number(num.replaceAll(',', ''))
 
 export interface Units {
   mass: string[]
