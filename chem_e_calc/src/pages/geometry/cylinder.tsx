@@ -5,7 +5,6 @@ import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
 import { CalcCard } from '../../components/calculators/calcCard'
 import { Calculator, InputType } from '../../components/calculators/calculator'
-import { CodeContainer } from '../../components/calculators/codeCard'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
 import { Illustraion } from '../../components/calculators/illustration'
@@ -190,7 +189,6 @@ const Geometry = () => {
               <IconCylinderUnits />
             </IconContainer>
           </CalcCard>
-          <CodeContainer equation={equation} />
         </CalcBody>
       </>
     </PageContainer>

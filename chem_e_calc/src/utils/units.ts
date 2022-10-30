@@ -1,7 +1,9 @@
-let convert = require('convert-units')
+import convert, { Unit } from 'convert-units'
 
 export const convertUnits = ({ value, fromUnit, toUnit }: { value: number; fromUnit: string; toUnit: string }) => {
-  return convert(value).from(fromUnit).to(toUnit)
+  return convert(value)
+    .from(fromUnit as Unit)
+    .to(toUnit as Unit)
 }
 
 export const roundTo2 = (num: number) => {
