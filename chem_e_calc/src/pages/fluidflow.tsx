@@ -1,14 +1,13 @@
 import { NextPage } from 'next'
-import React, { useReducer } from 'react'
+import React, { useContext, useEffect, useReducer } from 'react'
 import { Breadcrumbs } from '../components/calculators/breadcrumbs'
 import { CalcCard } from '../components/calculators/calcCard'
 import { PageContainer } from '../components/calculators/container'
 import { CalcHeader } from '../components/calculators/header'
 import { InputField } from '../components/inputs/inputFieldObj'
-import { addCommas, commasToNumber, convertUnits, dynamicRound } from '../utils/units'
+import { DefaultUnitContext, DefaultUnitContextType } from '../contexts/defaultUnitContext'
+import { convertUnits, UnitTypes } from '../utils/units'
 
-//TODO fix commas
-//TODO fix letters in input
 //TODO add equations
 
 type State = {
@@ -30,12 +29,10 @@ export type InputType = {
   name: string
   label: string
   placeholder: string
-  unitType: string
+  unitType: UnitTypes
   displayValue: { value: string; unit: string }
   calculatedValue: { value: number; unit: string }
-  solveable: boolean
   selectiontext: string
-  selected: boolean
   focusText: string
   error: string
 }
@@ -170,6 +167,7 @@ const updatedisplayValue = (object: InputType): InputType => {
 
 const UnitConversion: NextPage = () => {
   const paths = [{ title: 'Fluid Flow', href: '/fluidflow' }]
+  const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
 
   const initialState: State = {
     solveSelection: 'flowrate',
@@ -178,18 +176,18 @@ const UnitConversion: NextPage = () => {
       label: 'Velocity',
       placeholder: '0',
       unitType: 'speed',
-      displayValue: { value: '5', unit: 'ft/s' },
-      calculatedValue: {
-        value: convertUnits({
-          value: 5,
-          fromUnit: 'ft/s',
-          toUnit: 'm/s',
-        }),
-        unit: 'm/s',
+      displayValue: { value: '5', unit: defaultUnits.speed },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'm/s',
+          }),
+          unit: 'm/s',
+        }
       },
-      solveable: false,
       selectiontext: 'Solve for fluid velocity',
-      selected: false,
       focusText: 'Enter fluid velocity',
       error: '',
     },
@@ -198,18 +196,18 @@ const UnitConversion: NextPage = () => {
       label: 'Outer Diameter',
       placeholder: '0',
       unitType: 'length',
-      displayValue: { value: '1', unit: 'in' },
-      calculatedValue: {
-        value: convertUnits({
-          value: 1,
-          fromUnit: 'in',
-          toUnit: 'm',
-        }),
-        unit: 'm',
+      displayValue: { value: '1', unit: defaultUnits.length },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'm',
+          }),
+          unit: 'm',
+        }
       },
-      solveable: true,
       selectiontext: 'Solve for outer diameter',
-      selected: false,
       focusText: 'Enter pipe outer diameter',
       error: '',
     },
@@ -218,18 +216,18 @@ const UnitConversion: NextPage = () => {
       label: 'Pipe Thickness',
       placeholder: '0',
       unitType: 'length',
-      displayValue: { value: '0.065', unit: 'in' },
-      calculatedValue: {
-        value: convertUnits({
-          value: 0.065,
-          fromUnit: 'in',
-          toUnit: 'm',
-        }),
-        unit: 'm',
+      displayValue: { value: '0.065', unit: defaultUnits.length },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'm',
+          }),
+          unit: 'm',
+        }
       },
-      solveable: false,
       selectiontext: 'Solve for thickness',
-      selected: false,
       focusText: 'Enter pipe wall thickness',
       error: '',
     },
@@ -238,18 +236,18 @@ const UnitConversion: NextPage = () => {
       label: 'Flowrate',
       placeholder: '0',
       unitType: 'flowrate',
-      displayValue: { value: '0', unit: 'l/min' },
-      calculatedValue: {
-        value: convertUnits({
-          value: 0,
-          fromUnit: 'l/min',
-          toUnit: 'm3/s',
-        }),
-        unit: 'm3/s',
+      displayValue: { value: '0', unit: defaultUnits.flowrate },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'm3/s',
+          }),
+          unit: 'm3/s',
+        }
       },
-      solveable: true,
       selectiontext: 'Solve for flowrate',
-      selected: false,
       focusText: 'Enter fluid flowrate',
       error: '',
     },
@@ -267,13 +265,17 @@ const UnitConversion: NextPage = () => {
         payload: string
       }
     | {
-        type: ActionKind.UPDATE_DISPLAY_VALUE
+        type: ActionKind.CHANGE_VALUE
         payload: InputType
+      }
+    | {
+        type: ActionKind.REFRESH
       }
 
   enum ActionKind {
-    UPDATE_DISPLAY_VALUE = 'CHANGE_VALUE',
+    CHANGE_VALUE = 'CHANGE_VALUE',
     CHANGE_SOLVE_SELECTION = 'CHANGE_SOLVE_SELECTION',
+    REFRESH = 'REFRESH',
   }
 
   const stateReducer = (state: State, action: Action) => {
@@ -283,9 +285,11 @@ const UnitConversion: NextPage = () => {
           ...state,
           solveSelection: action.payload,
         }
-      case ActionKind.UPDATE_DISPLAY_VALUE:
+      case ActionKind.CHANGE_VALUE:
         const payloadWithCalculatedValue = updateCalculatedValue(action.payload)
         return calculateAnswer({ ...state, [action.payload.name]: payloadWithCalculatedValue })
+      case ActionKind.REFRESH:
+        return calculateAnswer({ ...state })
       default:
         alert('Error: State reducer action not recognized')
         return state
@@ -305,17 +309,24 @@ const UnitConversion: NextPage = () => {
 
     const unit = state[name as keyof InputState].displayValue.unit
     const payload = { ...state[name as keyof InputState], displayValue: { value: numericValue, unit } }
-    console.log('Payload', payload)
-    dispatch({ type: ActionKind.UPDATE_DISPLAY_VALUE, payload })
+    dispatch({ type: ActionKind.CHANGE_VALUE, payload })
   }
 
   const handleChangeUnit = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     const existingValue = state[name as keyof InputState].displayValue.value
     const payload = { ...state[name as keyof InputState], displayValue: { value: existingValue, unit: value } }
-    console.log('Payload', payload)
-    dispatch({ type: ActionKind.UPDATE_DISPLAY_VALUE, payload })
+    dispatch({ type: ActionKind.CHANGE_VALUE, payload })
   }
+
+  //Solve answer on initial page load
+  useEffect(() => {
+    const refresh = () => {
+      console.log('Refreshing')
+      dispatch({ type: ActionKind.REFRESH })
+    }
+    refresh()
+  }, [])
 
   return (
     <PageContainer>

@@ -1,5 +1,3 @@
-import { string } from 'zod'
-
 let convert = require('convert-units')
 
 export const convertUnits = ({ value, fromUnit, toUnit }: { value: number; fromUnit: string; toUnit: string }) => {
@@ -243,3 +241,16 @@ export const unitTypes = [
   { value: 'current', label: 'Current' },
   { value: 'power', label: 'Power' },
 ]
+
+export type UnitTypes =
+  | 'mass'
+  | 'volume'
+  | 'length'
+  | 'area'
+  | 'flowrate'
+  | 'temperature'
+  | 'speed'
+  | 'pressure'
+  | 'voltage'
+  | 'current'
+  | 'power'
