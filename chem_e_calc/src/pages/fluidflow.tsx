@@ -1,9 +1,11 @@
 import { NextPage } from 'next'
 import React, { useContext, useEffect, useReducer } from 'react'
 import { Breadcrumbs } from '../components/calculators/breadcrumbs'
+import { CalcBody } from '../components/calculators/calcBody'
 import { CalcCard } from '../components/calculators/calcCard'
 import { PageContainer } from '../components/calculators/container'
 import { CalcHeader } from '../components/calculators/header'
+import { Equation, InlineEquation, VariableDefinition } from '../components/Equation'
 import { InputField } from '../components/inputs/inputFieldObj'
 import { DefaultUnitContext, DefaultUnitContextType } from '../contexts/defaultUnitContext'
 import { convertUnits, UnitTypes } from '../utils/units'
@@ -332,37 +334,41 @@ const UnitConversion: NextPage = () => {
     <PageContainer>
       <Breadcrumbs paths={paths} />
       <CalcHeader title={'Fluid Flow'} text={'Calculate the fluid velocity in a pipe'} />
-      <CalcCard title={'Calculator'}>
-        <>
-          <SolveForDropdown
-            options={solveForOptions}
-            selection={state.solveSelection}
-            onChange={handleChangeSolveSelection}
-          />
-          <div className="mb-8 flex flex-col">
-            {(Object.keys(state) as (keyof State)[]).map(key => {
-              if (key != 'solveSelection') {
-                const { name, label, placeholder, displayValue, error, unitType, focusText } = state[key]
-                return (
-                  <InputField
-                    key={name}
-                    name={name}
-                    label={label}
-                    placeholder={placeholder}
-                    selected={state.solveSelection === name}
-                    displayValue={{ value: displayValue.value, unit: displayValue.unit }}
-                    error={error}
-                    unitType={unitType}
-                    focusText={focusText}
-                    onChangeValue={handleChangeValue}
-                    onChangeUnit={handleChangeUnit}
-                  />
-                )
-              }
-            })}
-          </div>
-        </>
-      </CalcCard>
+      <CalcBody>
+        <CalcCard title={'Calculator'}>
+          <>
+            <SolveForDropdown
+              options={solveForOptions}
+              selection={state.solveSelection}
+              onChange={handleChangeSolveSelection}
+            />
+            <div className="mb-8 flex flex-col">
+              {(Object.keys(state) as (keyof State)[]).map(key => {
+                if (key != 'solveSelection') {
+                  const { name, label, placeholder, displayValue, error, unitType, focusText } = state[key]
+                  return (
+                    <InputField
+                      key={name}
+                      name={name}
+                      label={label}
+                      placeholder={placeholder}
+                      selected={state.solveSelection === name}
+                      displayValue={{ value: displayValue.value, unit: displayValue.unit }}
+                      error={error}
+                      unitType={unitType}
+                      focusText={focusText}
+                      onChangeValue={handleChangeValue}
+                      onChangeUnit={handleChangeUnit}
+                    />
+                  )
+                }
+              })}
+            </div>
+          </>
+        </CalcCard>
+        <EquationCard />
+        {/* <ExampleCard data={state} /> */}
+      </CalcBody>
     </PageContainer>
   )
 }
@@ -399,3 +405,66 @@ const SolveForDropdown = ({ selection, options, onChange }: SolveForDropdown) =>
     </div>
   )
 }
+
+const EquationCard = () => {
+  return (
+    <CalcCard title="Governing Equation">
+      <>
+        <p>
+          This calculator finds the velocity of fluid in a pipe. This is useful for more advanced calculations like
+          determining the Reynolds number and pressure drop through a system. The governing equation is a function of
+          flow rate and pipe geometery
+        </p>
+        <Equation equation={`$$v = Q/A_{i}$$`} />
+        <p>The following equations are used to find the pipe geometery:</p>
+        <Equation equation={`$$d_{i} = d_{0} - 2x_{w}$$`} />
+        <Equation equation={`$$r_{i} = d_{i}/2$$`} />
+        <Equation equation={`$$A_{i} = \\pi{r_{i}^{2}}$$`} />
+        <p className="text-lg font-medium">Definitions</p>
+        <VariableDefinition equation={`$$v = $$`} definition="Fluid velocity" />
+        <VariableDefinition equation={`$$Q = $$`} definition="Fluid volumentric flow rate" />
+        <VariableDefinition equation={`$$A_{i} = $$`} definition="Inner pipe area" />
+        <VariableDefinition equation={`$$d_{i} = $$`} definition="Inner pipe diameter" />
+        <VariableDefinition equation={`$$d_{o} = $$`} definition="Inner pipe diameter" />
+        <VariableDefinition equation={`$$r_{i} = $$`} definition="Inner pipe radius" />
+      </>
+    </CalcCard>
+  )
+}
+// const ExampleCard = ({ data }: State) => {
+//   const { velocity, outerDiameter, thickness, flowrate } = data
+//   return (
+//     <CalcCard title="Calculation">
+//       <>
+//         <p className="text-sm">Convert Units</p>
+//         <>
+//           <InlineEquation equation={`$$d_{o} = $$`} />
+//           <p className="inline">
+//             <span className="text-accent"> {outerDiameter.displayValue.value}</span> {outerDiameter.displayValue.unit} =
+//           </p>
+//           <p className="inline">
+//             <span className="text-accent"> {outerDiameter.calculatedValue.value}</span>{' '}
+//             {outerDiameter.calculatedValue.unit}
+//           </p>
+//         </>
+//         <Equation equation={`$$Q = 222$$`} />
+//         <Equation equation={`$$x_{t} = 222$$`} />
+//         <p>Calculate inner pipe diameter</p>
+//         <Equation equation={`$$d_{i} = d_{0} - 2x_{w}$$`} />
+//         <Equation equation={`$$d_{i} = 1.5 - \\left(2 \\right) 0.0065$$`} />
+//         <Equation equation={`$$d_{i} = 1.3004$$`} />
+//         <p>Calculate inner pipe area</p>
+//         <Equation equation={`$$A_{i} = \\pi{r_{i}^{2}}$$`} />
+//         <Equation equation={`$$A_{i} = \\pi{\\frac{d_{i}}{2}^{2}}$$`} />
+//         <Equation equation={`$$A_{i} = \\pi{\\frac{1.3004}{2}^{2}}$$`} />
+//         <Equation equation={`$$A_{i} = 1.22933$$`} />
+//         <p>Calculate fluid velocity</p>
+//         <Equation equation={`$$v = Q/A_{i}$$`} />
+//         <Equation equation={`$$v = 1.24/1.222$$`} />
+//         <Equation equation={`$$v = 1.00$$`} />
+//         <p>Convert Units</p>
+//         <Equation equation={`$$v = 78.00 lpm$$`} />
+//       </>
+//     </CalcCard>
+//   )
+// }
