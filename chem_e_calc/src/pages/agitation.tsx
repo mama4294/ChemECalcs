@@ -5,7 +5,7 @@ import { CalcBody } from '../components/calculators/calcBody'
 import { CalcCard } from '../components/calculators/calcCard'
 import { PageContainer } from '../components/calculators/container'
 import { CalcHeader } from '../components/calculators/header'
-import { InputDropdown, InputFieldUnitless, InputFieldWithUnit } from '../components/inputs/inputFieldObj'
+import { InputDropdown, InputFieldConstant, InputFieldWithUnit } from '../components/inputs/inputFieldObj'
 import { DefaultUnitContext, DefaultUnitContextType } from '../contexts/defaultUnitContext'
 import { convertUnits } from '../utils/units'
 import { InputType } from '../types'
@@ -30,10 +30,11 @@ const Agitation: NextPage = () => {
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
 
   const initialState: State = {
-    solveSelection: 'flowrate',
+    solveSelection: 'tipSpeed',
+    baseImpellerType: 'rushton',
     baseDiameter: {
       name: 'baseDiameter',
-      label: 'Diameter',
+      label: 'Vessel Diameter',
       placeholder: '0',
       unitType: 'length',
       displayValue: { value: '5', unit: defaultUnits.length },
@@ -48,12 +49,12 @@ const Agitation: NextPage = () => {
         }
       },
       selectiontext: '',
-      focusText: 'Enter base vessel diameter',
+      focusText: 'Enter base vessel inner diameter',
       error: '',
     },
     baseHeight: {
       name: 'baseHeight',
-      label: 'Height',
+      label: 'Liquid Height',
       placeholder: '0',
       unitType: 'length',
       displayValue: { value: '10', unit: defaultUnits.length },
@@ -76,17 +77,8 @@ const Agitation: NextPage = () => {
       label: 'Shaft Speed',
       placeholder: '0',
       unitType: 'speed',
-      displayValue: { value: '250', unit: defaultUnits.speed },
-      get calculatedValue() {
-        return {
-          value: convertUnits({
-            value: Number(this.displayValue.value),
-            fromUnit: this.displayValue.unit,
-            toUnit: 'm/s',
-          }),
-          unit: 'm/s',
-        }
-      },
+      displayValue: { value: '250', unit: 'rpm' },
+      calculatedValue: { value: 250, unit: 'rpm' },
       selectiontext: '',
       focusText: 'Enter the rotations per minute of the agitator shaft',
       error: '',
@@ -111,23 +103,15 @@ const Agitation: NextPage = () => {
       focusText: 'Enter the diameter from tip to tip of the agitator',
       error: '',
     },
-    baseImpellerType: 'custom',
+
     baseFlowNumber: {
       name: 'baseFlowNumber',
       label: 'Agitator Flow Number',
       placeholder: '0',
+
       unitType: 'length',
-      displayValue: { value: '1', unit: defaultUnits.length },
-      get calculatedValue() {
-        return {
-          value: convertUnits({
-            value: Number(this.displayValue.value),
-            fromUnit: this.displayValue.unit,
-            toUnit: 'm',
-          }),
-          unit: 'm',
-        }
-      },
+      displayValue: { value: '1', unit: 'unitless' },
+      calculatedValue: { value: 1, unit: 'unitless' },
       selectiontext: '',
       focusText: 'Enter the flow number for the agitator',
       error: '',
@@ -137,24 +121,15 @@ const Agitation: NextPage = () => {
       label: 'Impeller Power Number',
       placeholder: '0',
       unitType: 'length',
-      displayValue: { value: '1', unit: defaultUnits.length },
-      get calculatedValue() {
-        return {
-          value: convertUnits({
-            value: Number(this.displayValue.value),
-            fromUnit: this.displayValue.unit,
-            toUnit: 'm',
-          }),
-          unit: 'm',
-        }
-      },
+      displayValue: { value: '1', unit: 'unitless' },
+      calculatedValue: { value: 1, unit: 'unitless' },
       selectiontext: '',
       focusText: 'Enter the power number for the agitator',
       error: '',
     },
     scaledDiameter: {
       name: 'scaledDiameter',
-      label: 'Diameter',
+      label: 'Vessel Diameter',
       placeholder: '0',
       unitType: 'length',
       displayValue: { value: '10', unit: defaultUnits.length },
@@ -169,12 +144,12 @@ const Agitation: NextPage = () => {
         }
       },
       selectiontext: '',
-      focusText: 'Enter the vessel diameter',
+      focusText: 'Enter the vessel inner diameter',
       error: '',
     },
     scaledHeight: {
       name: 'scaledHeight',
-      label: 'Height',
+      label: 'Liquid Height',
       placeholder: '0',
       unitType: 'length',
       displayValue: { value: '10', unit: defaultUnits.length },
@@ -208,19 +183,13 @@ const Agitation: NextPage = () => {
       label: 'Fluid Viscosity',
       placeholder: '0',
       unitType: 'length',
-      displayValue: { value: '3', unit: 'cp' },
-      calculatedValue: { value: 3, unit: 'cp' },
+      displayValue: { value: '3', unit: 'cP' },
+      calculatedValue: { value: 3, unit: 'cP' },
       selectiontext: '',
       focusText: 'Enter the fluid viscosity',
       error: '',
     },
   }
-
-  //   const solveForOptions: SolveType[] = [
-  //     { label: initialState.flowrate.label, value: initialState.flowrate.name },
-  //     { label: initialState.velocity.label, value: initialState.velocity.name },
-  //     { label: initialState.outerDiameter.label, value: initialState.outerDiameter.name },
-  //   ]
 
   type Action =
     | {
@@ -248,6 +217,11 @@ const Agitation: NextPage = () => {
 
   const stateReducer = (state: State, action: Action) => {
     switch (action.type) {
+      case ActionKind.CHANGE_SOLVE_SELECTION:
+        return {
+          ...state,
+          solveSelection: action.payload,
+        }
       case ActionKind.CHANGE_IMPELLER_TYPE:
         return {
           ...state,
@@ -339,18 +313,20 @@ const Agitation: NextPage = () => {
               onChangeValue={handleChangeValue}
               onChangeUnit={handleChangeUnit}
             />
-            <InputFieldWithUnit
+            <InputFieldConstant
               key={baseRPM.name}
               name={baseRPM.name}
               label={baseRPM.label}
               placeholder={baseRPM.placeholder}
               selected={false}
-              displayValue={{ value: baseRPM.displayValue.value, unit: baseRPM.displayValue.unit }}
+              displayValue={{
+                value: baseRPM.displayValue.value,
+                unit: baseRPM.displayValue.unit,
+              }}
               error={baseRPM.error}
               unitType={baseRPM.unitType}
               focusText={baseRPM.focusText}
               onChangeValue={handleChangeValue}
-              onChangeUnit={handleChangeUnit}
             />
             <InputFieldWithUnit
               key={baseImpellerDiameter.name}
@@ -376,6 +352,8 @@ const Agitation: NextPage = () => {
               value={baseImpellerType}
               options={[
                 { label: 'Rushton', value: 'rushton' },
+                { label: 'Pitched Blade', value: 'pitchedBlade' },
+                { label: 'Hydrofoil', value: 'hydrofoil' },
                 { label: 'Custom', value: 'custom' },
               ]}
               focusText={'Enter style of vessel impeller'}
@@ -384,7 +362,7 @@ const Agitation: NextPage = () => {
               }
             />
             {baseImpellerType === 'custom' && (
-              <InputFieldUnitless
+              <InputFieldConstant
                 key={baseFlowNumber.name}
                 name={baseFlowNumber.name}
                 label={baseFlowNumber.label}
@@ -401,7 +379,7 @@ const Agitation: NextPage = () => {
               />
             )}
             {baseImpellerType === 'custom' && (
-              <InputFieldUnitless
+              <InputFieldConstant
                 key={basePowerNumber.name}
                 name={basePowerNumber.name}
                 label={basePowerNumber.label}
@@ -470,7 +448,7 @@ const Agitation: NextPage = () => {
               onChangeValue={handleChangeValue}
               onChangeUnit={handleChangeUnit}
             />
-            <InputFieldWithUnit
+            <InputFieldConstant
               key={fluidViscosity.name}
               name={fluidViscosity.name}
               label={fluidViscosity.label}
@@ -484,9 +462,24 @@ const Agitation: NextPage = () => {
               unitType={fluidViscosity.unitType}
               focusText={fluidViscosity.focusText}
               onChangeValue={handleChangeValue}
-              onChangeUnit={handleChangeUnit}
             />
             <h2 className="my-4 text-xl">Scale Up Method</h2>
+            <InputDropdown
+              name={'method'}
+              label={'Method'}
+              selected={false}
+              error={''}
+              value={solveSelection}
+              options={[
+                { label: 'Constant Tip Speed', value: 'tipSpeed' },
+                { label: 'Contant P/V', value: 'p/V' },
+                { label: 'Contant Reynolds Number', value: 'Re' },
+              ]}
+              focusText={'Enter scale up method'}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({ type: ActionKind.CHANGE_SOLVE_SELECTION, payload: e.target.value })
+              }
+            />
           </div>
         </CalcCard>
 

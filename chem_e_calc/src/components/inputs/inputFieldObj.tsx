@@ -98,7 +98,7 @@ type InputFieldUnitlessProps = {
   onChangeValue: any
 }
 
-export const InputFieldUnitless = ({
+export const InputFieldConstant = ({
   name,
   label,
   placeholder,
@@ -108,7 +108,7 @@ export const InputFieldUnitless = ({
   focusText,
   onChangeValue,
 }: InputFieldUnitlessProps) => {
-  const { value } = displayValue
+  const { value, unit } = displayValue
   return (
     <div className="mb-2">
       <label htmlFor={label} className="label ">
@@ -127,7 +127,7 @@ export const InputFieldUnitless = ({
           className="disabled:border-1 input input-bordered block w-full pr-16 disabled:cursor-text "
           placeholder={selected ? 'N/A' : placeholder}
         />
-        <div className="h-{46} absolute inset-y-0 right-0 mr-4 flex items-center">Unitless</div>
+        <div className="h-{46} absolute inset-y-0 right-0 mr-4 flex items-center">{unit}</div>
       </div>
       <label className="label hidden py-0 peer-focus-within:block">
         <span className={`label-text-alt ${error ? 'text-error' : ' text-base-content'}`}>
