@@ -5,10 +5,11 @@ import { CalcBody } from '../components/calculators/calcBody'
 import { CalcCard } from '../components/calculators/calcCard'
 import { PageContainer } from '../components/calculators/container'
 import { CalcHeader } from '../components/calculators/header'
-import { Equation, InlineEquation, VariableDefinition } from '../components/Equation'
-import { InputField } from '../components/inputs/inputFieldObj'
+import { Equation, VariableDefinition } from '../components/Equation'
+import { InputFieldWithUnit } from '../components/inputs/inputFieldObj'
 import { DefaultUnitContext, DefaultUnitContextType } from '../contexts/defaultUnitContext'
-import { convertUnits, UnitTypes } from '../utils/units'
+import { InputType } from '../types'
+import { convertUnits } from '../utils/units'
 
 //TODO add equations
 
@@ -25,18 +26,6 @@ type InputState = {
   outerDiameter: InputType
   thickness: InputType
   velocity: InputType
-}
-
-export type InputType = {
-  name: string
-  label: string
-  placeholder: string
-  unitType: UnitTypes
-  displayValue: { value: string; unit: string }
-  calculatedValue: { value: number; unit: string }
-  selectiontext: string
-  focusText: string
-  error: string
 }
 
 const resetErrorMessages = (state: State): State => {
@@ -347,7 +336,7 @@ const UnitConversion: NextPage = () => {
                 if (key != 'solveSelection') {
                   const { name, label, placeholder, displayValue, error, unitType, focusText } = state[key]
                   return (
-                    <InputField
+                    <InputFieldWithUnit
                       key={name}
                       name={name}
                       label={label}

@@ -9,7 +9,9 @@ const Search = () => {
     { title: 'Hemisphere', href: '/geometry/hemisphere', location: 'geometry' },
     { title: 'Pyramid', href: '/geometry/pyramid', location: 'geometry' },
     { title: 'Sphere', href: '/geometry/sphere', location: 'geometry' },
-    { title: 'Unit Conversion', href: '/geometry/conversion', location: 'home' },
+    { title: 'Unit Conversion', href: '/conversion', location: 'home' },
+    { title: 'Fluid Flow', href: '/fluidflow', location: 'home' },
+    { title: 'Agitation', href: '/agitation', location: 'home' },
   ]
 
   const router = useRouter()
