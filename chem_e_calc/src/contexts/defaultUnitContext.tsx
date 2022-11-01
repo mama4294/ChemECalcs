@@ -1,17 +1,19 @@
 import React, { useState, createContext, useEffect } from 'react'
+import { CustomMeasureUnits } from '../utils/units'
 
 type DefaultUnits = {
-  mass: string
-  volume: string
-  length: string
-  area: string
-  flowrate: string
-  temperature: string
-  speed: string
-  pressure: string
-  voltage: string
-  current: string
-  power: string
+  mass: CustomMeasureUnits
+  volume: CustomMeasureUnits
+  length: CustomMeasureUnits
+  area: CustomMeasureUnits
+  volumeFlowRate: CustomMeasureUnits
+  temperature: CustomMeasureUnits
+  speed: CustomMeasureUnits
+  pressure: CustomMeasureUnits
+  voltage: CustomMeasureUnits
+  current: CustomMeasureUnits
+  power: CustomMeasureUnits
+  density: CustomMeasureUnits
 }
 
 export type DefaultUnitContextType = {
@@ -19,18 +21,19 @@ export type DefaultUnitContextType = {
   setDefaultUnits: (newValue: DefaultUnits) => void
 }
 
-const initialValues = {
+const initialValues: DefaultUnits = {
   mass: 'kg',
   volume: 'l',
   length: 'ft',
   area: 'm2',
-  flowrate: 'l/min',
+  volumeFlowRate: 'l/min',
   temperature: 'C',
   speed: 'm/s',
   pressure: 'bar',
   voltage: 'V',
   current: 'A',
   power: 'W',
+  density: 'kg/l',
 }
 
 function getLocalStorage() {

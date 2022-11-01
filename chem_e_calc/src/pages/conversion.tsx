@@ -8,7 +8,7 @@ import { CalcBody } from '../components/calculators/calcBody'
 import { CalcCard } from '../components/calculators/calcCard'
 import { PageContainer } from '../components/calculators/container'
 import { CalcHeader } from '../components/calculators/header'
-import { convertUnits, unitTypes, units, Units, dynamicRound } from '../utils/units'
+import { convertUnits, unitTypes, dynamicRound, unitOptions, UnitOptions, UnitOption } from '../utils/units'
 import { InputField, OnChangeValueProps } from '../components/inputs/inputField'
 import { updateArray } from '../logic/logic'
 
@@ -20,12 +20,12 @@ const UnitConversion: NextPage = () => {
   const handleChangeUnitType = (newType: string): void => {
     const newValues: InputType[] = values.map(obj => {
       const value = obj.displayValue.value as number
-      const newUnit = units[newType as keyof Units][0] as string
+      const newUnit = unitOptions[newType as keyof UnitOptions][0] as UnitOption
       return {
         ...obj,
         unitType: newType,
-        displayValue: { value: value, unit: newUnit },
-        calculatedValue: { value: value, unit: newUnit },
+        displayValue: { value: value, unit: newUnit.value },
+        calculatedValue: { value: value, unit: newUnit.value },
       }
     })
     setValues(newValues)

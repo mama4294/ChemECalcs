@@ -223,11 +223,11 @@ const UnitConversion: NextPage = () => {
       error: '',
     },
     flowrate: {
-      name: 'flowrate',
+      name: 'volumeFlowRate',
       label: 'Flowrate',
       placeholder: '0',
-      unitType: 'flowrate',
-      displayValue: { value: '0', unit: defaultUnits.flowrate },
+      unitType: 'volumeFlowRate',
+      displayValue: { value: '0', unit: defaultUnits.volumeFlowRate },
       get calculatedValue() {
         return {
           value: convertUnits({

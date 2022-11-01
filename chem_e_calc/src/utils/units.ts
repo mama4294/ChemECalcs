@@ -1,9 +1,17 @@
-import convert, { Unit } from 'convert-units'
+import configureMeasurements, { allMeasures, AllMeasuresUnits, AllMeasures, AllMeasuresSystems } from 'convert-units'
+import density, { DensityUnits } from './densityMeasure'
+
+const customMeasures = { ...allMeasures, density }
+
+export type CustomMeasureUnits = AllMeasuresUnits | DensityUnits
+export type UnitTypes = AllMeasures | 'density'
+
+const convert = configureMeasurements<UnitTypes, AllMeasuresSystems, CustomMeasureUnits>(customMeasures)
 
 export const convertUnits = ({ value, fromUnit, toUnit }: { value: number; fromUnit: string; toUnit: string }) => {
   return convert(value)
-    .from(fromUnit as Unit)
-    .to(toUnit as Unit)
+    .from(fromUnit as AllMeasuresUnits)
+    .to(toUnit as AllMeasuresUnits)
 }
 
 export const roundTo2 = (num: number) => {
@@ -39,6 +47,7 @@ export interface Units {
   voltage: string[]
   current: string[]
   power: string[]
+  density: string[]
 }
 
 export const units = {
@@ -101,13 +110,14 @@ export interface UnitOptions {
   volume: UnitOption[]
   length: UnitOption[]
   area: UnitOption[]
-  flowrate: UnitOption[]
+  volumeFlowRate: UnitOption[]
   temperature: UnitOption[]
   speed: UnitOption[]
   pressure: UnitOption[]
   voltage: UnitOption[]
   current: UnitOption[]
   power: UnitOption[]
+  density: UnitOption[]
 }
 
 export const unitOptions: UnitOptions = {
@@ -158,7 +168,7 @@ export const unitOptions: UnitOptions = {
     { value: 'mi2', label: 'mi²' },
   ],
 
-  flowrate: [
+  volumeFlowRate: [
     { value: 'mm3/s', label: 'mm³/s' },
     { value: 'cm3/s', label: 'cm³/s' },
     { value: 'ml/s', label: 'ml/s' },
@@ -228,6 +238,13 @@ export const unitOptions: UnitOptions = {
     { value: 'MW', label: 'MW' },
     { value: 'GW', label: 'GW' },
   ],
+  density: [
+    { value: 'g/ml', label: 'g/ml' },
+    { value: 'kg/l', label: 'kg/l' },
+    { value: 'kg/m3', label: 'kg/m³' },
+    { value: 'g/cm3', label: 'g/cm³' },
+    { value: 'lb/ft3', label: 'lb/ft³' },
+  ],
 }
 
 export const unitTypes = [
@@ -235,24 +252,12 @@ export const unitTypes = [
   { value: 'volume', label: 'Volume' },
   { value: 'length', label: 'Length' },
   { value: 'area', label: 'Area' },
-  { value: 'flowrate', label: 'Flowrate' },
+  { value: 'volumeFlowRate', label: 'Flowrate' },
   { value: 'temperature', label: 'Temperature' },
   { value: 'speed', label: 'Speed' },
   { value: 'pressure', label: 'Pressure' },
   { value: 'voltage', label: 'Voltage' },
   { value: 'current', label: 'Current' },
   { value: 'power', label: 'Power' },
+  { value: 'density', label: 'Density' },
 ]
-
-export type UnitTypes =
-  | 'mass'
-  | 'volume'
-  | 'length'
-  | 'area'
-  | 'flowrate'
-  | 'temperature'
-  | 'speed'
-  | 'pressure'
-  | 'voltage'
-  | 'current'
-  | 'power'

@@ -1,4 +1,4 @@
-import { useRef, useState, useContext, useEffect } from 'react'
+import { useRef, useState, useContext } from 'react'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 import { unitOptions, UnitOptions, UnitOption } from '../../utils/units'
 
@@ -61,9 +61,9 @@ export const DefaultUnitsForm = () => {
               />
               <UnitInput
                 label="Flowrate"
-                value={formData.flowrate}
+                value={formData.volumeFlowRate}
                 onChange={handleChange}
-                options={unitOptions['flowrate' as keyof UnitOptions]}
+                options={unitOptions['volumeFlowRate' as keyof UnitOptions]}
               />
               <UnitInput
                 label="Temperature"
@@ -101,6 +101,12 @@ export const DefaultUnitsForm = () => {
                 onChange={handleChange}
                 options={unitOptions['power' as keyof UnitOptions]}
               />
+              <UnitInput
+                label="Density"
+                value={formData.density}
+                onChange={handleChange}
+                options={unitOptions['density' as keyof UnitOptions]}
+              />
             </div>
             <div className="flex justify-between">
               <button className="btn btn-outline" type="button" onClick={() => closeModalBtnRef.current?.click()}>
@@ -132,7 +138,7 @@ const UnitInput = ({ label, value, onChange, options }: UnitInputType) => {
         <span className="label-text">{label}</span>
       </label>
       <select className="select select-bordered" value={value} name={name} onChange={onChange}>
-        {options.map((unitOption: UnitOption, index) => {
+        {options?.map((unitOption: UnitOption, index) => {
           return (
             <option key={index} value={unitOption.value}>
               {unitOption.label}
