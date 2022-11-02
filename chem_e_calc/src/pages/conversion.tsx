@@ -18,7 +18,7 @@ const UnitConversion: NextPage = () => {
   const [unitType, setUnitType] = useState('mass')
 
   const handleChangeUnitType = (newType: string): void => {
-    const newValues: InputType[] = values.map(obj => {
+    const newValues: InputType[] = state.map(obj => {
       const value = obj.displayValue.value as number
       const newUnit = unitOptions[newType as keyof UnitOptions][0] as UnitOption
       return {
@@ -28,11 +28,11 @@ const UnitConversion: NextPage = () => {
         calculatedValue: { value: value, unit: newUnit.value },
       }
     })
-    setValues(newValues)
+    setState(newValues)
     setUnitType(newType)
   }
 
-  const [values, setValues] = useState<InputType[]>([
+  const [state, setState] = useState<InputType[]>([
     {
       id: 1,
       name: 'input',
@@ -66,12 +66,12 @@ const UnitConversion: NextPage = () => {
   const handleChangeValue = ({ id, unit, number }: OnChangeValueProps): void => {
     console.log('Update')
 
-    const updatedArr = updateArray({ id, number, unit, array: values })
+    const updatedArr = updateArray({ id, number, unit, array: state })
     const answerArr = calculateAnswer(updatedArr)
     if (answerArr) {
-      setValues(answerArr)
+      setState(answerArr)
     } else {
-      setValues(updatedArr)
+      setState(updatedArr)
     }
   }
 
@@ -109,6 +109,17 @@ const UnitConversion: NextPage = () => {
     })
   }
 
+  const handleSwap = () => {
+    if (state[0] && state[1]) {
+      const newInput = { ...state[0], displayValue: state[1].displayValue, calculatedValue: state[1].calculatedValue }
+      const newOutput = { ...state[1], displayValue: state[0].displayValue, calculatedValue: state[0].calculatedValue }
+      setState([newInput, newOutput])
+    }
+  }
+
+  const input = state[0]
+  const output = state[1]
+
   return (
     <PageContainer>
       <Breadcrumbs paths={paths} />
@@ -134,11 +145,14 @@ const UnitConversion: NextPage = () => {
                 })}
               </select>
             </div>
-            <div className="mb-8 flex flex-col">
-              {values.map(input => {
-                console.log(input)
-                return <InputField key={input.id} data={input} onChangeValue={handleChangeValue} />
-              })}
+            <div className="mb-0 flex flex-col">
+              {input && <InputField key={input.id} data={input} onChangeValue={handleChangeValue} />}
+              <div className="flex justify-center">
+                <button className="btn btn-circle border-0 bg-transparent" onClick={handleSwap}>
+                  <SwapIcon />
+                </button>
+              </div>
+              {output && <InputField key={output.id} data={output} onChangeValue={handleChangeValue} />}
             </div>
           </>
         </CalcCard>
@@ -148,3 +162,12 @@ const UnitConversion: NextPage = () => {
 }
 
 export default UnitConversion
+
+const SwapIcon = () => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 fill-base-content" viewBox="0 0 48 48 ">
+      <path d="M32 34.02V20h-4v14.02h-6L30 42l8-7.98h-6zM18 6l-8 7.98h6V28h4V13.98h6L18 6z" />
+      <path fill="none" d="M0 0h48v48H0z" />
+    </svg>
+  )
+}
