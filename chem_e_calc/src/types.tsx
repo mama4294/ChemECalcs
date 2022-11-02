@@ -1,6 +1,6 @@
 import { UnitTypes } from './utils/units'
 
-export type InputType = {
+export type ShortInputType = {
   name: string
   label: string
   placeholder: string

@@ -8,25 +8,21 @@ import { CalcHeader } from '../components/calculators/header'
 import { Equation, VariableDefinition } from '../components/Equation'
 import { InputFieldWithUnit } from '../components/inputs/inputFieldObj'
 import { DefaultUnitContext, DefaultUnitContextType } from '../contexts/defaultUnitContext'
-import { InputType } from '../types'
+import { updateCalculatedValue } from '../logic/logic'
+import { ShortInputType } from '../types'
 import { convertUnits } from '../utils/units'
 
 //TODO add equations
 
 type State = {
   solveSelection: string
-  flowrate: InputType
-  outerDiameter: InputType
-  thickness: InputType
-  velocity: InputType
+  flowrate: ShortInputType
+  outerDiameter: ShortInputType
+  thickness: ShortInputType
+  velocity: ShortInputType
 }
 
-type InputState = {
-  flowrate: InputType
-  outerDiameter: InputType
-  thickness: InputType
-  velocity: InputType
-}
+type StateWithoutSolveSelection = Omit<State, 'solveSelection'>
 
 const resetErrorMessages = (state: State): State => {
   return {
@@ -133,17 +129,7 @@ const calculateAnswer = (state: State): State => {
   }
 }
 
-const updateCalculatedValue = (object: InputType): InputType => {
-  const { calculatedValue, displayValue } = object
-  const convertedValue = convertUnits({
-    value: +displayValue.value, //+ converts string to number
-    fromUnit: displayValue.unit,
-    toUnit: calculatedValue.unit,
-  })
-  return { ...object, calculatedValue: { value: convertedValue, unit: calculatedValue.unit } }
-}
-
-const updatedisplayValue = (object: InputType): InputType => {
+const updatedisplayValue = (object: ShortInputType): ShortInputType => {
   const { calculatedValue, displayValue } = object
   const convertedValue = convertUnits({
     value: calculatedValue.value,
@@ -257,7 +243,7 @@ const UnitConversion: NextPage = () => {
       }
     | {
         type: ActionKind.CHANGE_VALUE
-        payload: InputType
+        payload: ShortInputType
       }
     | {
         type: ActionKind.REFRESH
@@ -298,15 +284,18 @@ const UnitConversion: NextPage = () => {
 
     const numericValue = value.replace(/[^\d.-]/g, '')
 
-    const unit = state[name as keyof InputState].displayValue.unit
-    const payload = { ...state[name as keyof InputState], displayValue: { value: numericValue, unit } }
+    const unit = state[name as keyof StateWithoutSolveSelection].displayValue.unit
+    const payload = { ...state[name as keyof StateWithoutSolveSelection], displayValue: { value: numericValue, unit } }
     dispatch({ type: ActionKind.CHANGE_VALUE, payload })
   }
 
   const handleChangeUnit = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    const existingValue = state[name as keyof InputState].displayValue.value
-    const payload = { ...state[name as keyof InputState], displayValue: { value: existingValue, unit: value } }
+    const existingValue = state[name as keyof StateWithoutSolveSelection].displayValue.value
+    const payload = {
+      ...state[name as keyof StateWithoutSolveSelection],
+      displayValue: { value: existingValue, unit: value },
+    }
     dispatch({ type: ActionKind.CHANGE_VALUE, payload })
   }
 

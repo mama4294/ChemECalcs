@@ -8,22 +8,26 @@ import { CalcHeader } from '../components/calculators/header'
 import { InputDropdown, InputFieldConstant, InputFieldWithUnit } from '../components/inputs/inputFieldObj'
 import { DefaultUnitContext, DefaultUnitContextType } from '../contexts/defaultUnitContext'
 import { convertUnits } from '../utils/units'
-import { InputType } from '../types'
+import { ShortInputType } from '../types'
+import { updateCalculatedValue } from '../logic/logic'
 
 type State = {
   solveSelection: string
-  baseDiameter: InputType
-  baseHeight: InputType
-  baseRPM: InputType
-  baseImpellerDiameter: InputType
+  baseDiameter: ShortInputType
+  baseHeight: ShortInputType
+  baseRPM: ShortInputType
+  baseImpellerDiameter: ShortInputType
   baseImpellerType: string
-  baseFlowNumber: InputType
-  basePowerNumber: InputType
-  scaledDiameter: InputType
-  scaledHeight: InputType
-  fluidDensity: InputType
-  fluidViscosity: InputType
+  flowNumber: ShortInputType
+  powerNumber: ShortInputType
+  scaledDiameter: ShortInputType
+  scaledHeight: ShortInputType
+  fluidDensity: ShortInputType
+  fluidViscosity: ShortInputType
 }
+
+//type State without solveSelection and baseImpellerType
+type StateWithoutStrings = Omit<State, 'solveSelection' | 'baseImpellerType'>
 
 const Agitation: NextPage = () => {
   const paths = [{ title: 'Agitation', href: '/agitation' }]
@@ -104,7 +108,7 @@ const Agitation: NextPage = () => {
       error: '',
     },
 
-    baseFlowNumber: {
+    flowNumber: {
       name: 'baseFlowNumber',
       label: 'Agitator Flow Number',
       placeholder: '0',
@@ -116,7 +120,7 @@ const Agitation: NextPage = () => {
       focusText: 'Enter the flow number for the agitator',
       error: '',
     },
-    basePowerNumber: {
+    powerNumber: {
       name: 'basePowerNumber',
       label: 'Impeller Power Number',
       placeholder: '0',
@@ -178,9 +182,9 @@ const Agitation: NextPage = () => {
           value: convertUnits({
             value: Number(this.displayValue.value),
             fromUnit: this.displayValue.unit,
-            toUnit: 'g/ml',
+            toUnit: 'kg/m3',
           }),
-          unit: 'g/ml',
+          unit: 'kg/m3',
         }
       },
       selectiontext: '',
@@ -202,23 +206,21 @@ const Agitation: NextPage = () => {
 
   type Action =
     | {
-        type: ActionKind.CHANGE_SOLVE_SELECTION
+        type: ActionKind.CHANGE_SOLVE_SELECTION | ActionKind.CHANGE_IMPELLER_TYPE
         payload: string
       }
     | {
-        type: ActionKind.CHANGE_VALUE
-        payload: InputType
-      }
-    | {
-        type: ActionKind.CHANGE_IMPELLER_TYPE
-        payload: string
+        type: ActionKind.CHANGE_VALUE_WITH_UNIT | ActionKind.CHANGE_VALUE_WITHOUT_UNIT | ActionKind.CHANGE_UNIT
+        payload: { name: string; value: string }
       }
     | {
         type: ActionKind.REFRESH
       }
 
   enum ActionKind {
-    CHANGE_VALUE = 'CHANGE_VALUE',
+    CHANGE_VALUE_WITH_UNIT = 'CHANGE_VALUE_WITH_UNIT',
+    CHANGE_VALUE_WITHOUT_UNIT = 'CHANGE_VALUE_WITHOUT_UNIT',
+    CHANGE_UNIT = 'CHANGE_UNIT',
     CHANGE_SOLVE_SELECTION = 'CHANGE_SOLVE_SELECTION',
     CHANGE_IMPELLER_TYPE = 'CHANGE_IMPELLER_TYPE',
     REFRESH = 'REFRESH',
@@ -238,31 +240,68 @@ const Agitation: NextPage = () => {
 
   const stateReducer = (state: State, action: Action) => {
     switch (action.type) {
+      case ActionKind.REFRESH:
+        return { ...state }
       case ActionKind.CHANGE_SOLVE_SELECTION:
         return {
           ...state,
           solveSelection: action.payload,
         }
+      case ActionKind.CHANGE_VALUE_WITH_UNIT:
+        let name = action.payload.name
+        let numericValue = action.payload.value.replace(/[^\d.-]/g, '')
+        let unit = state[name as keyof StateWithoutStrings].displayValue.unit
+        let payload = { ...state[name as keyof StateWithoutStrings], displayValue: { value: numericValue, unit } }
+        let payloadWithCalculatedValue = updateCalculatedValue(payload)
+        return {
+          ...state,
+          [action.payload.name]: payloadWithCalculatedValue,
+        }
+      case ActionKind.CHANGE_VALUE_WITHOUT_UNIT:
+        name = action.payload.name
+        numericValue = action.payload.value.replace(/[^\d.-]/g, '')
+        unit = state[name as keyof StateWithoutStrings].displayValue.unit
+        payload = {
+          ...state[name as keyof StateWithoutStrings],
+          displayValue: { value: numericValue, unit },
+          calculatedValue: { value: Number(numericValue), unit },
+        }
+        return {
+          ...state,
+          [action.payload.name]: payload,
+        }
+      case ActionKind.CHANGE_UNIT:
+        name = action.payload.name
+        const existingValue = state[name as keyof StateWithoutStrings].displayValue.value
+        payload = {
+          ...state[name as keyof StateWithoutStrings],
+          displayValue: { value: existingValue, unit: action.payload.value },
+        }
+        payloadWithCalculatedValue = updateCalculatedValue(payload)
+        return {
+          ...state,
+          [action.payload.name]: payloadWithCalculatedValue,
+        }
       case ActionKind.CHANGE_IMPELLER_TYPE:
         const powerNumbers = calcPowerNumbers(action.payload)
-        const nP = powerNumbers ? powerNumbers.nP : state.basePowerNumber.calculatedValue.value
-        const nF = powerNumbers ? powerNumbers.nF : state.baseFlowNumber.calculatedValue.value
+        const nP = powerNumbers ? powerNumbers.nP : state.powerNumber.calculatedValue.value
+        const nF = powerNumbers ? powerNumbers.nF : state.flowNumber.calculatedValue.value
 
-        const basePowerNumber = {
-          ...state['basePowerNumber'],
+        const powerNumber = {
+          ...state['powerNumber'],
           displayValue: { value: nP.toString(), unit: 'unitless' },
           calculatedValue: { value: nP, unit: 'unitless' },
         }
-        const baseFlowNumber = {
-          ...state['baseFlowNumber'],
+        const flowNumber = {
+          ...state['flowNumber'],
           displayValue: { value: nF.toString(), unit: 'unitless' },
           calculatedValue: { value: nF, unit: 'unitless' },
         }
 
         return {
           ...state,
-          basePowerNumber,
-          baseFlowNumber,
+          powerNumber,
+          flowNumber,
           baseImpellerType: action.payload,
         }
       default:
@@ -273,31 +312,10 @@ const Agitation: NextPage = () => {
 
   const [state, dispatch] = useReducer(stateReducer, initialState)
 
-  const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value)
-    //   const { name, value } = e.target
-    //   const numericValue = value.replace(/[^\d.-]/g, '')
-    //   const unit = state[name as keyof InputState].displayValue.unit
-    //   const payload = { ...state[name as keyof InputState], displayValue: { value: numericValue, unit } }
-    //   dispatch({ type: ActionKind.CHANGE_VALUE, payload })
-  }
-
-  const handleChangeUnit = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value)
-    //   const { name, value } = e.target
-    //   const existingValue = state[name as keyof InputState].displayValue.value
-    //   const payload = { ...state[name as keyof InputState], displayValue: { value: existingValue, unit: value } }
-    //   dispatch({ type: ActionKind.CHANGE_VALUE, payload })
-  }
-
-  //   //Solve answer on initial page load
-  //   useEffect(() => {
-  //     const refresh = () => {
-  //       console.log('Refreshing')
-  //       dispatch({ type: ActionKind.REFRESH })
-  //     }
-  //     refresh()
-  //   }, [])
+  //Solve answer on initial page load
+  useEffect(() => {
+    console.log(state)
+  }, [state])
 
   const {
     solveSelection,
@@ -306,8 +324,8 @@ const Agitation: NextPage = () => {
     baseRPM,
     baseImpellerDiameter,
     baseImpellerType,
-    baseFlowNumber,
-    basePowerNumber,
+    flowNumber,
+    powerNumber,
     scaledDiameter,
     scaledHeight,
     fluidDensity,
@@ -317,7 +335,7 @@ const Agitation: NextPage = () => {
   return (
     <PageContainer>
       <Breadcrumbs paths={paths} />
-      <CalcHeader title={'Agitation Scaleup'} text={'Scaleup from a small scale reactor to a larger scale'} />
+      <CalcHeader title={'Agitation Scaleup'} text={'Scaleup from a small scale vessel to a larger scale'} />
       <CalcBody>
         <CalcCard title={'Base Vessel'}>
           <div className="mb-8 flex flex-col">
@@ -331,8 +349,15 @@ const Agitation: NextPage = () => {
               error={baseDiameter.error}
               unitType={baseDiameter.unitType}
               focusText={baseDiameter.focusText}
-              onChangeValue={handleChangeValue}
-              onChangeUnit={handleChangeUnit}
+              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({
+                  type: ActionKind.CHANGE_VALUE_WITH_UNIT,
+                  payload: { name: e.target.name, value: e.target.value },
+                })
+              }
+              onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
+              }
             />
             <InputFieldWithUnit
               key={baseHeight.name}
@@ -344,8 +369,15 @@ const Agitation: NextPage = () => {
               error={baseHeight.error}
               unitType={baseHeight.unitType}
               focusText={baseHeight.focusText}
-              onChangeValue={handleChangeValue}
-              onChangeUnit={handleChangeUnit}
+              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({
+                  type: ActionKind.CHANGE_VALUE_WITH_UNIT,
+                  payload: { name: e.target.name, value: e.target.value },
+                })
+              }
+              onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
+              }
             />
             <InputFieldConstant
               key={baseRPM.name}
@@ -360,7 +392,12 @@ const Agitation: NextPage = () => {
               error={baseRPM.error}
               unitType={baseRPM.unitType}
               focusText={baseRPM.focusText}
-              onChangeValue={handleChangeValue}
+              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({
+                  type: ActionKind.CHANGE_VALUE_WITHOUT_UNIT,
+                  payload: { name: e.target.name, value: e.target.value },
+                })
+              }
             />
             <InputFieldWithUnit
               key={baseImpellerDiameter.name}
@@ -375,8 +412,15 @@ const Agitation: NextPage = () => {
               error={baseImpellerDiameter.error}
               unitType={baseImpellerDiameter.unitType}
               focusText={baseImpellerDiameter.focusText}
-              onChangeValue={handleChangeValue}
-              onChangeUnit={handleChangeUnit}
+              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({
+                  type: ActionKind.CHANGE_VALUE_WITH_UNIT,
+                  payload: { name: e.target.name, value: e.target.value },
+                })
+              }
+              onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
+              }
             />
             <InputDropdown
               name={'impellerType'}
@@ -397,36 +441,46 @@ const Agitation: NextPage = () => {
             />
             {baseImpellerType === 'custom' && (
               <InputFieldConstant
-                key={baseFlowNumber.name}
-                name={baseFlowNumber.name}
-                label={baseFlowNumber.label}
-                placeholder={baseFlowNumber.placeholder}
+                key={flowNumber.name}
+                name={flowNumber.name}
+                label={flowNumber.label}
+                placeholder={flowNumber.placeholder}
                 selected={false}
                 displayValue={{
-                  value: baseFlowNumber.displayValue.value,
-                  unit: baseFlowNumber.displayValue.unit,
+                  value: flowNumber.displayValue.value,
+                  unit: flowNumber.displayValue.unit,
                 }}
-                error={baseFlowNumber.error}
-                unitType={baseFlowNumber.unitType}
-                focusText={baseFlowNumber.focusText}
-                onChangeValue={handleChangeValue}
+                error={flowNumber.error}
+                unitType={flowNumber.unitType}
+                focusText={flowNumber.focusText}
+                onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({
+                    type: ActionKind.CHANGE_VALUE_WITHOUT_UNIT,
+                    payload: { name: e.target.name, value: e.target.value },
+                  })
+                }
               />
             )}
             {baseImpellerType === 'custom' && (
               <InputFieldConstant
-                key={basePowerNumber.name}
-                name={basePowerNumber.name}
-                label={basePowerNumber.label}
-                placeholder={basePowerNumber.placeholder}
+                key={powerNumber.name}
+                name={powerNumber.name}
+                label={powerNumber.label}
+                placeholder={powerNumber.placeholder}
                 selected={false}
                 displayValue={{
-                  value: basePowerNumber.displayValue.value,
-                  unit: basePowerNumber.displayValue.unit,
+                  value: powerNumber.displayValue.value,
+                  unit: powerNumber.displayValue.unit,
                 }}
-                error={basePowerNumber.error}
-                unitType={basePowerNumber.unitType}
-                focusText={basePowerNumber.focusText}
-                onChangeValue={handleChangeValue}
+                error={powerNumber.error}
+                unitType={powerNumber.unitType}
+                focusText={powerNumber.focusText}
+                onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({
+                    type: ActionKind.CHANGE_VALUE_WITHOUT_UNIT,
+                    payload: { name: e.target.name, value: e.target.value },
+                  })
+                }
               />
             )}
           </div>
@@ -446,8 +500,15 @@ const Agitation: NextPage = () => {
               error={scaledDiameter.error}
               unitType={scaledDiameter.unitType}
               focusText={scaledDiameter.focusText}
-              onChangeValue={handleChangeValue}
-              onChangeUnit={handleChangeUnit}
+              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({
+                  type: ActionKind.CHANGE_VALUE_WITH_UNIT,
+                  payload: { name: e.target.name, value: e.target.value },
+                })
+              }
+              onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
+              }
             />
             <InputFieldWithUnit
               key={scaledHeight.name}
@@ -462,8 +523,15 @@ const Agitation: NextPage = () => {
               error={scaledHeight.error}
               unitType={scaledHeight.unitType}
               focusText={scaledHeight.focusText}
-              onChangeValue={handleChangeValue}
-              onChangeUnit={handleChangeUnit}
+              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({
+                  type: ActionKind.CHANGE_VALUE_WITH_UNIT,
+                  payload: { name: e.target.name, value: e.target.value },
+                })
+              }
+              onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
+              }
             />
             <h2 className="my-4 text-xl">Fluid Properties</h2>
             <InputFieldWithUnit
@@ -479,8 +547,15 @@ const Agitation: NextPage = () => {
               error={fluidDensity.error}
               unitType={fluidDensity.unitType}
               focusText={fluidDensity.focusText}
-              onChangeValue={handleChangeValue}
-              onChangeUnit={handleChangeUnit}
+              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({
+                  type: ActionKind.CHANGE_VALUE_WITH_UNIT,
+                  payload: { name: e.target.name, value: e.target.value },
+                })
+              }
+              onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
+              }
             />
             <InputFieldConstant
               key={fluidViscosity.name}
@@ -495,7 +570,12 @@ const Agitation: NextPage = () => {
               error={fluidViscosity.error}
               unitType={fluidViscosity.unitType}
               focusText={fluidViscosity.focusText}
-              onChangeValue={handleChangeValue}
+              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch({
+                  type: ActionKind.CHANGE_VALUE_WITHOUT_UNIT,
+                  payload: { name: e.target.name, value: e.target.value },
+                })
+              }
             />
             <h2 className="my-4 text-xl">Scale Up Method</h2>
             <InputDropdown
@@ -516,6 +596,7 @@ const Agitation: NextPage = () => {
             />
           </div>
         </CalcCard>
+        <ResultsTable state={state} />
 
         {/* <EquationCard /> */}
         {/* <ExampleCard data={state} /> */}
@@ -525,3 +606,167 @@ const Agitation: NextPage = () => {
 }
 
 export default Agitation
+
+const ResultsTable = ({ state }: { state: State }) => {
+  const {
+    solveSelection,
+    baseDiameter,
+    baseHeight,
+    baseRPM,
+    baseImpellerDiameter,
+    baseImpellerType,
+    flowNumber,
+    powerNumber,
+    scaledDiameter,
+    scaledHeight,
+    fluidDensity,
+    fluidViscosity,
+  } = state
+
+  const calculateVolume = (diameter: number, height: number) => {
+    return Math.PI * (diameter / 2) ** 2 * height
+  }
+
+  const calculateAnswer = (state: State) => {
+    const baseVolume = calculateVolume(baseDiameter.calculatedValue.value, baseHeight.calculatedValue.value) // m^3
+    const scaledVolume = calculateVolume(scaledDiameter.calculatedValue.value, scaledHeight.calculatedValue.value) // m^3
+    const baseTipSpeed = baseRPM.calculatedValue.value * baseImpellerDiameter.calculatedValue.value * Math.PI // m/s
+    let scaledTipSpeed = baseTipSpeed
+    const impellerRatio = baseImpellerDiameter.calculatedValue.value / baseDiameter.calculatedValue.value // unitless
+    const scaledImpellerDiameter = scaledDiameter.calculatedValue.value * impellerRatio // m
+
+    if (state.solveSelection === 'tipSpeed') {
+    }
+
+    const baseShaftSpeed = baseRPM.calculatedValue.value //rpm
+    const scaledShaftSpeed = scaledTipSpeed / (scaledImpellerDiameter * Math.PI) //rpm
+    const basePumpingRate =
+      ((flowNumber.calculatedValue.value * baseShaftSpeed) / 60) * baseImpellerDiameter.calculatedValue.value ** 3 // m^3/s
+    const scaledPumpingRate = ((flowNumber.calculatedValue.value * scaledShaftSpeed) / 60) * scaledImpellerDiameter ** 3 // m^3/s
+    const basePower =
+      powerNumber.calculatedValue.value *
+      fluidDensity.calculatedValue.value *
+      (baseShaftSpeed / 60) ** 3 *
+      baseDiameter.calculatedValue.value ** 5 // kW
+    const scaledPower =
+      powerNumber.calculatedValue.value *
+      fluidDensity.calculatedValue.value *
+      (scaledShaftSpeed / 60) ** 3 *
+      scaledDiameter.calculatedValue.value ** 5 // kW
+
+    const baseRe =
+      (baseImpellerDiameter.calculatedValue.value ** 2 * baseShaftSpeed * fluidDensity.calculatedValue.value) /
+      fluidViscosity.calculatedValue.value
+    const scaledRe =
+      (scaledImpellerDiameter ** 2 * scaledShaftSpeed * fluidDensity.calculatedValue.value) /
+      fluidViscosity.calculatedValue.value
+
+    const basePV = basePower / baseVolume
+    const scaledPV = scaledPower / scaledVolume
+
+    const baseVelocity = (4 * basePumpingRate) / (Math.PI * baseDiameter.calculatedValue.value ** 2)
+    const scaledVelocity = (4 * scaledPumpingRate) / (Math.PI * scaledDiameter.calculatedValue.value ** 2)
+
+    return {
+      baseVolume,
+      scaledVolume,
+      baseDiameter: baseDiameter.calculatedValue.value,
+      scaledDiameter: scaledDiameter.calculatedValue.value,
+      baseTipSpeed,
+      scaledTipSpeed,
+      baseShaftSpeed,
+      scaledShaftSpeed,
+      basePumpingRate,
+      scaledPumpingRate,
+      basePower,
+      scaledPower,
+      scaledImpellerDiameter,
+      basePV,
+      scaledPV,
+      baseRe,
+      scaledRe,
+      baseVelocity,
+      scaledVelocity,
+    }
+  }
+
+  const answer = calculateAnswer(state)
+
+  return (
+    <CalcCard title={'Results'} type={'lg'}>
+      <div className="overflow-x-auto">
+        <table className="table w-full">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Base Case</th>
+              <th>Scaled Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Vessel Volume</td>
+              <td>{answer.baseVolume.toLocaleString()} m³</td>
+              <td>{answer.scaledVolume.toLocaleString()} m³</td>
+            </tr>
+            <tr>
+              <td>Vessel Diameter</td>
+              <td>{answer.baseDiameter.toLocaleString()} m</td>
+              <td>{answer.scaledDiameter.toLocaleString()} m</td>
+            </tr>
+            <tr>
+              <td>Impeller Diameter</td>
+              <td>{state.baseImpellerDiameter.calculatedValue.value.toLocaleString()} m</td>
+              <td>{answer.scaledImpellerDiameter.toLocaleString()} m</td>
+            </tr>
+            <tr>
+              <td>Flow Number</td>
+              <td>{flowNumber.calculatedValue.value}</td>
+              <td>{flowNumber.calculatedValue.value}</td>
+            </tr>
+            <tr>
+              <td>Power Number</td>
+              <td>{powerNumber.calculatedValue.value}</td>
+              <td>{powerNumber.calculatedValue.value}</td>
+            </tr>
+            <tr>
+              <td>Shaft Speed</td>
+              <td>{answer.baseShaftSpeed.toLocaleString()} rpm</td>
+              <td>{answer.scaledShaftSpeed.toLocaleString()} rpm</td>
+            </tr>
+            <tr>
+              <td>Tip Speed</td>
+              <td>{answer.baseTipSpeed.toLocaleString()} m/s</td>
+              <td>{answer.scaledTipSpeed.toLocaleString()} m/s</td>
+            </tr>
+            <tr>
+              <td>Pumping Rate</td>
+              <td>{answer.basePumpingRate.toLocaleString()} m³/s</td>
+              <td>{answer.scaledPumpingRate.toLocaleString()} m³/s</td>
+            </tr>
+            <tr>
+              <td>Power Consumption</td>
+              <td>{answer.basePower.toLocaleString()} kW</td>
+              <td>{answer.scaledPower.toLocaleString()} kW</td>
+            </tr>
+            <tr>
+              <td>P/V</td>
+              <td>{answer.basePV.toLocaleString()} kW/m³</td>
+              <td>{answer.scaledPV.toLocaleString()} kW/m³</td>
+            </tr>
+            <tr>
+              <td>Reynold's No</td>
+              <td>{answer.baseRe.toLocaleString()}</td>
+              <td>{answer.scaledRe.toLocaleString()}</td>
+            </tr>
+            <tr>
+              <td>Bulk Velocity</td>
+              <td>{answer.baseVelocity.toLocaleString()} m/s</td>
+              <td>{answer.scaledVelocity.toLocaleString()} m/s</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </CalcCard>
+  )
+}

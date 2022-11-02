@@ -1,5 +1,6 @@
 import { convertUnits, dynamicRound } from '../utils/units'
 import { InputType } from '../components/calculators/calculator'
+import { ShortInputType } from '../types'
 
 type ChangeSolveSelectionProps = {
   id: number
@@ -93,4 +94,14 @@ export const validateNotBlank = (inputArray: InputType[] | null) => {
     }
     return { ...value, error: '' }
   })
+}
+
+export const updateCalculatedValue = (object: ShortInputType): ShortInputType => {
+  const { calculatedValue, displayValue } = object
+  const convertedValue = convertUnits({
+    value: +displayValue.value, //+ converts string to number
+    fromUnit: displayValue.unit,
+    toUnit: calculatedValue.unit,
+  })
+  return { ...object, calculatedValue: { value: convertedValue, unit: calculatedValue.unit } }
 }
