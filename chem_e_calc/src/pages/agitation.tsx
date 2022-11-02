@@ -171,9 +171,18 @@ const Agitation: NextPage = () => {
       name: 'fluidDensity',
       label: 'Fluid Density',
       placeholder: '0',
-      unitType: 'length',
-      displayValue: { value: '1000', unit: 'kg/L' },
-      calculatedValue: { value: 1000, unit: 'kg/L' },
+      unitType: 'density',
+      displayValue: { value: '1', unit: defaultUnits.density },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'g/ml',
+          }),
+          unit: 'g/ml',
+        }
+      },
       selectiontext: '',
       focusText: 'Enter the fluid denisty',
       error: '',
@@ -214,6 +223,18 @@ const Agitation: NextPage = () => {
     CHANGE_IMPELLER_TYPE = 'CHANGE_IMPELLER_TYPE',
     REFRESH = 'REFRESH',
   }
+  const calcPowerNumbers = (type: string) => {
+    switch (type) {
+      case 'hydrofoil':
+        return { nP: 1, nF: 0.63 }
+      case 'rushton':
+        return { nP: 5.5, nF: 0.72 }
+      case 'pitchedBlade':
+        return { nP: 1.37, nF: 0.68 }
+      default:
+        return null
+    }
+  }
 
   const stateReducer = (state: State, action: Action) => {
     switch (action.type) {
@@ -223,8 +244,25 @@ const Agitation: NextPage = () => {
           solveSelection: action.payload,
         }
       case ActionKind.CHANGE_IMPELLER_TYPE:
+        const powerNumbers = calcPowerNumbers(action.payload)
+        const nP = powerNumbers ? powerNumbers.nP : state.basePowerNumber.calculatedValue.value
+        const nF = powerNumbers ? powerNumbers.nF : state.baseFlowNumber.calculatedValue.value
+
+        const basePowerNumber = {
+          ...state['basePowerNumber'],
+          displayValue: { value: nP.toString(), unit: 'unitless' },
+          calculatedValue: { value: nP, unit: 'unitless' },
+        }
+        const baseFlowNumber = {
+          ...state['baseFlowNumber'],
+          displayValue: { value: nF.toString(), unit: 'unitless' },
+          calculatedValue: { value: nF, unit: 'unitless' },
+        }
+
         return {
           ...state,
+          basePowerNumber,
+          baseFlowNumber,
           baseImpellerType: action.payload,
         }
       default:
@@ -234,10 +272,6 @@ const Agitation: NextPage = () => {
   }
 
   const [state, dispatch] = useReducer(stateReducer, initialState)
-
-  //   const handleChangeSolveSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //     dispatch({ type: ActionKind.CHANGE_SOLVE_SELECTION, payload: e.target.value })
-  //   }
 
   const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log(e.target.value)
