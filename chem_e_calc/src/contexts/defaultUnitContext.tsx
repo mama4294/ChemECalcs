@@ -24,15 +24,15 @@ export type DefaultUnitContextType = {
 const initialValues: DefaultUnits = {
   mass: 'kg',
   volume: 'l',
-  length: 'ft',
+  length: 'm',
   area: 'm2',
   volumeFlowRate: 'l/min',
   temperature: 'C',
   speed: 'm/s',
   pressure: 'bar',
   voltage: 'V',
-  current: 'A',
-  power: 'W',
+  current: 'mA',
+  power: 'kW',
   density: 'kg/l',
 }
 
@@ -43,7 +43,10 @@ function getLocalStorage() {
     return localdata ? JSON.parse(localdata) : initialValues
   } catch (e) {
     // if error, return initial value
+    let message = 'Unknown Error'
+    if (e instanceof Error) message = e.message
     console.error('error getting local data')
+    console.error({ message })
     return initialValues
   }
 }

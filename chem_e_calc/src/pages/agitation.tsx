@@ -26,6 +26,11 @@ type State = {
   fluidViscosity: ShortInputType
 }
 
+//Power consumption per unit volume - Oxygen transfer rate
+//Impeller tip speed - Shear rate
+//Pumping rate - Mixing time
+//Reynolds number - heat transfer
+
 //type State without solveSelection and baseImpellerType
 type StateWithoutStrings = Omit<State, 'solveSelection' | 'baseImpellerType'>
 
@@ -114,8 +119,8 @@ const Agitation: NextPage = () => {
       placeholder: '0',
 
       unitType: 'length',
-      displayValue: { value: '1', unit: 'unitless' },
-      calculatedValue: { value: 1, unit: 'unitless' },
+      displayValue: { value: '0.72', unit: 'unitless' },
+      calculatedValue: { value: 0.72, unit: 'unitless' },
       selectiontext: '',
       focusText: 'Enter the flow number for the agitator',
       error: '',
@@ -125,8 +130,8 @@ const Agitation: NextPage = () => {
       label: 'Impeller Power Number',
       placeholder: '0',
       unitType: 'length',
-      displayValue: { value: '1', unit: 'unitless' },
-      calculatedValue: { value: 1, unit: 'unitless' },
+      displayValue: { value: '5.5', unit: 'unitless' },
+      calculatedValue: { value: 5.5, unit: 'unitless' },
       selectiontext: '',
       focusText: 'Enter the power number for the agitator',
       error: '',
@@ -588,6 +593,7 @@ const Agitation: NextPage = () => {
                 { label: 'Constant Tip Speed', value: 'tipSpeed' },
                 { label: 'Contant P/V', value: 'p/V' },
                 { label: 'Contant Reynolds Number', value: 'Re' },
+                { label: 'Contant Pumping Rate', value: 'pumping' },
               ]}
               focusText={'Enter scale up method'}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -630,42 +636,98 @@ const ResultsTable = ({ state }: { state: State }) => {
   const calculateAnswer = (state: State) => {
     const baseVolume = calculateVolume(baseDiameter.calculatedValue.value, baseHeight.calculatedValue.value) // m^3
     const scaledVolume = calculateVolume(scaledDiameter.calculatedValue.value, scaledHeight.calculatedValue.value) // m^3
-    const baseTipSpeed = baseRPM.calculatedValue.value * baseImpellerDiameter.calculatedValue.value * Math.PI // m/s
-    let scaledTipSpeed = baseTipSpeed
+    const baseTipSpeed = (baseRPM.calculatedValue.value / 60) * baseImpellerDiameter.calculatedValue.value * Math.PI // m/s
+    console.log('Base RPM: ', Math.PI)
     const impellerRatio = baseImpellerDiameter.calculatedValue.value / baseDiameter.calculatedValue.value // unitless
     const scaledImpellerDiameter = scaledDiameter.calculatedValue.value * impellerRatio // m
-
-    if (state.solveSelection === 'tipSpeed') {
-    }
-
     const baseShaftSpeed = baseRPM.calculatedValue.value //rpm
-    const scaledShaftSpeed = scaledTipSpeed / (scaledImpellerDiameter * Math.PI) //rpm
     const basePumpingRate =
-      ((flowNumber.calculatedValue.value * baseShaftSpeed) / 60) * baseImpellerDiameter.calculatedValue.value ** 3 // m^3/s
-    const scaledPumpingRate = ((flowNumber.calculatedValue.value * scaledShaftSpeed) / 60) * scaledImpellerDiameter ** 3 // m^3/s
+      flowNumber.calculatedValue.value * (baseShaftSpeed / 60) * baseImpellerDiameter.calculatedValue.value ** 3 // m^3/s
     const basePower =
-      powerNumber.calculatedValue.value *
-      fluidDensity.calculatedValue.value *
-      (baseShaftSpeed / 60) ** 3 *
-      baseDiameter.calculatedValue.value ** 5 // kW
-    const scaledPower =
-      powerNumber.calculatedValue.value *
-      fluidDensity.calculatedValue.value *
-      (scaledShaftSpeed / 60) ** 3 *
-      scaledDiameter.calculatedValue.value ** 5 // kW
+      (powerNumber.calculatedValue.value *
+        fluidDensity.calculatedValue.value *
+        (baseShaftSpeed / 60) ** 3 *
+        baseImpellerDiameter.calculatedValue.value ** 5) /
+      1000 // kW
 
     const baseRe =
-      (baseImpellerDiameter.calculatedValue.value ** 2 * baseShaftSpeed * fluidDensity.calculatedValue.value) /
-      fluidViscosity.calculatedValue.value
-    const scaledRe =
-      (scaledImpellerDiameter ** 2 * scaledShaftSpeed * fluidDensity.calculatedValue.value) /
-      fluidViscosity.calculatedValue.value
-
-    const basePV = basePower / baseVolume
-    const scaledPV = scaledPower / scaledVolume
-
+      (baseImpellerDiameter.calculatedValue.value ** 2 * (baseShaftSpeed / 60) * fluidDensity.calculatedValue.value) /
+      (fluidViscosity.calculatedValue.value / 1000) // unitless
+    const basePV = basePower / baseVolume // kW/m^3
     const baseVelocity = (4 * basePumpingRate) / (Math.PI * baseDiameter.calculatedValue.value ** 2)
-    const scaledVelocity = (4 * scaledPumpingRate) / (Math.PI * scaledDiameter.calculatedValue.value ** 2)
+
+    let scaledTipSpeed = 0
+    let scaledShaftSpeed = 0
+    let scaledPumpingRate = 0
+    let scaledPower = 0
+    let scaledRe = 0
+    let scaledPV = 0
+    let scaledVelocity = 0
+
+    if (state.solveSelection === 'tipSpeed') {
+      scaledTipSpeed = baseTipSpeed // m/s
+      scaledShaftSpeed = (scaledTipSpeed / (scaledImpellerDiameter * Math.PI)) * 60 //rpm
+      scaledPumpingRate = flowNumber.calculatedValue.value * (scaledShaftSpeed / 60) * scaledImpellerDiameter ** 3 // m^3/s
+      scaledPower =
+        (powerNumber.calculatedValue.value *
+          fluidDensity.calculatedValue.value *
+          (scaledShaftSpeed / 60) ** 3 *
+          scaledImpellerDiameter ** 5) /
+        1000 // kW
+      scaledRe =
+        (scaledImpellerDiameter ** 2 * (scaledShaftSpeed / 60) * fluidDensity.calculatedValue.value) /
+        (fluidViscosity.calculatedValue.value / 1000) // unitless
+      scaledPV = scaledPower / scaledVolume // unitless
+      scaledVelocity = (4 * scaledPumpingRate) / (Math.PI * scaledDiameter.calculatedValue.value ** 2)
+    } else if (state.solveSelection === 'p/V') {
+      scaledPV = basePV // kW/m^3
+      scaledPower = scaledPV * scaledVolume // kW
+      scaledShaftSpeed =
+        ((scaledPower * 1000) /
+          (powerNumber.calculatedValue.value * fluidDensity.calculatedValue.value * scaledImpellerDiameter ** 5)) **
+          (1 / 3) *
+        60 //rpm
+      scaledTipSpeed = (scaledShaftSpeed / 60) * scaledImpellerDiameter * Math.PI // m/s
+      scaledPumpingRate = flowNumber.calculatedValue.value * (scaledShaftSpeed / 60) * scaledImpellerDiameter ** 3 // m^3/s
+      scaledRe =
+        (scaledImpellerDiameter ** 2 * (scaledShaftSpeed / 60) * fluidDensity.calculatedValue.value) /
+        (fluidViscosity.calculatedValue.value / 1000) // unitless
+      scaledVelocity = (4 * scaledPumpingRate) / (Math.PI * scaledDiameter.calculatedValue.value ** 2)
+    } else if (state.solveSelection === 'Re') {
+      scaledRe = baseRe // unitless
+      scaledShaftSpeed =
+        ((scaledRe * (fluidViscosity.calculatedValue.value / 1000)) /
+          (fluidDensity.calculatedValue.value * scaledImpellerDiameter ** 2)) *
+        60 //rpm
+      scaledTipSpeed = (scaledShaftSpeed / 60) * scaledImpellerDiameter * Math.PI // m/s
+      scaledPumpingRate = flowNumber.calculatedValue.value * (scaledShaftSpeed / 60) * scaledImpellerDiameter ** 3 // m^3/s
+      scaledPower =
+        (powerNumber.calculatedValue.value *
+          fluidDensity.calculatedValue.value *
+          (scaledShaftSpeed / 60) ** 3 *
+          scaledImpellerDiameter ** 5) /
+        1000 // kW
+      scaledPV = scaledPower / scaledVolume // unitless
+      scaledVelocity = (4 * scaledPumpingRate) / (Math.PI * scaledDiameter.calculatedValue.value ** 2)
+    } else if (state.solveSelection === 'pumping') {
+      scaledPumpingRate = basePumpingRate // m^3/s
+      scaledShaftSpeed = (scaledPumpingRate / (flowNumber.calculatedValue.value * scaledImpellerDiameter ** 3)) * 60 //rpm
+      scaledTipSpeed = (scaledShaftSpeed / 60) * scaledImpellerDiameter * Math.PI // m/s
+      scaledPower =
+        (powerNumber.calculatedValue.value *
+          fluidDensity.calculatedValue.value *
+          (scaledShaftSpeed / 60) ** 3 *
+          scaledImpellerDiameter ** 5) /
+        1000 // kW
+      scaledRe =
+        (scaledImpellerDiameter ** 2 * (scaledShaftSpeed / 60) * fluidDensity.calculatedValue.value) /
+        (fluidViscosity.calculatedValue.value / 1000) // unitless
+      scaledPV = scaledPower / scaledVolume // unitless
+      scaledVelocity = (4 * scaledPumpingRate) / (Math.PI * scaledDiameter.calculatedValue.value ** 2)
+    }
+
+    const baseMotorPower = basePower / 0.8 // kW
+    const scaledMotorPower = scaledPower / 0.8 // kW
 
     return {
       baseVolume,
@@ -687,6 +749,8 @@ const ResultsTable = ({ state }: { state: State }) => {
       scaledRe,
       baseVelocity,
       scaledVelocity,
+      baseMotorPower,
+      scaledMotorPower,
     }
   }
 
@@ -740,6 +804,11 @@ const ResultsTable = ({ state }: { state: State }) => {
               <td>{answer.scaledTipSpeed.toLocaleString()} m/s</td>
             </tr>
             <tr>
+              <td>Reynold's No</td>
+              <td>{answer.baseRe.toLocaleString()}</td>
+              <td>{answer.scaledRe.toLocaleString()}</td>
+            </tr>
+            <tr>
               <td>Pumping Rate</td>
               <td>{answer.basePumpingRate.toLocaleString()} m³/s</td>
               <td>{answer.scaledPumpingRate.toLocaleString()} m³/s</td>
@@ -750,14 +819,14 @@ const ResultsTable = ({ state }: { state: State }) => {
               <td>{answer.scaledPower.toLocaleString()} kW</td>
             </tr>
             <tr>
+              <td>Motor Size</td>
+              <td>{answer.baseMotorPower.toLocaleString()} kW</td>
+              <td>{answer.scaledMotorPower.toLocaleString()} kW</td>
+            </tr>
+            <tr>
               <td>P/V</td>
               <td>{answer.basePV.toLocaleString()} kW/m³</td>
               <td>{answer.scaledPV.toLocaleString()} kW/m³</td>
-            </tr>
-            <tr>
-              <td>Reynold's No</td>
-              <td>{answer.baseRe.toLocaleString()}</td>
-              <td>{answer.scaledRe.toLocaleString()}</td>
             </tr>
             <tr>
               <td>Bulk Velocity</td>
