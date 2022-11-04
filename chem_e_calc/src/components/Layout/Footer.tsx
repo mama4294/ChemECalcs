@@ -1,8 +1,12 @@
 const Footer = () => {
+  const currentYear = new Date().getFullYear()
   return (
-    <footer className="footer flex h-12 items-center justify-between bg-neutral text-neutral-content ">
-      <div className="text-ghost mx-4">Matthew Malone</div>
-      <div className="text-ghost mx-4">Copyright © 2022 - All right reserved</div>
+    <footer className="text-ghost footer flex h-16 w-full items-center justify-between bg-neutral px-4 text-xs sm:text-sm">
+      <div>Matthew Malone</div>
+      <div className="flex">
+        <p>Copyright © {currentYear}</p>
+        <p>All right reserved</p>
+      </div>
     </footer>
   )
 }
