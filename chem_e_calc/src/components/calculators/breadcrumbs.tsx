@@ -11,7 +11,7 @@ type Breadcrumbs = {
 
 export const Breadcrumbs = ({ paths }: Breadcrumbs) => {
   return (
-    <div className="breadcrumbs text-sm">
+    <div className="breadcrumbs px-4 text-sm">
       <ul>
         <li>
           <Link href={'/'}>

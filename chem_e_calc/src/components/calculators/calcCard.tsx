@@ -2,14 +2,10 @@ type Props = {
   title?: string
   children?: JSX.Element | string
   [x: string]: any
-  type?: string
 }
 
-export const CalcCard: React.FC<Props> = ({ title, children, type = 'sm', ...props }) => {
-  const style =
-    type == 'sm'
-      ? 'lg:w-w-[calc(33.33%_-_2rem)] w-full rounded bg-base-100 p-4 shadow-lg md:w-[calc(50%_-_2rem)]'
-      : ' rounded bg-base-100 p-4 shadow-lg '
+export const CalcCard: React.FC<Props> = ({ title, children, ...props }) => {
+  const style = 'lg:w-w-[calc(33.33%_-_2rem)] w-full rounded bg-base-100 p-4 shadow-lg md:w-[calc(50%_-_2rem)]'
 
   return (
     <div className={style} {...props}>

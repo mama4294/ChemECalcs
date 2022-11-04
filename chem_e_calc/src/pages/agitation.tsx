@@ -10,6 +10,7 @@ import { DefaultUnitContext, DefaultUnitContextType } from '../contexts/defaultU
 import { convertUnits } from '../utils/units'
 import { ShortInputType } from '../types'
 import { updateCalculatedValue } from '../logic/logic'
+import { Equation, VariableDefinition } from '../components/Equation'
 
 type State = {
   solveSelection: string
@@ -596,6 +597,7 @@ const Agitation: NextPage = () => {
 
         {/* <EquationCard /> */}
         {/* <ExampleCard data={state} /> */}
+        <EquationCard />
       </CalcBody>
     </PageContainer>
   )
@@ -751,7 +753,7 @@ const ResultsTable = ({ state, onChangeSolveSelection }: ResultsTableProps) => {
   const answer = calculateAnswer(state)
 
   return (
-    <CalcCard title={'Results'} type={'lg'}>
+    <CalcCard title={'Results'} type={'sm'}>
       <div className="overflow-x-auto">
         {/* <h2 className="my-4 text-xl">Scale Up Method</h2> */}
         <InputDropdown
@@ -770,7 +772,7 @@ const ResultsTable = ({ state, onChangeSolveSelection }: ResultsTableProps) => {
           onChange={onChangeSolveSelection}
           topRight={<ScaleUpMathodHint />}
         />
-        <table className="mt-6 table w-full">
+        <table className="table-compact mt-6 table w-full">
           <thead>
             <tr>
               <th>Parameter</th>
@@ -781,68 +783,73 @@ const ResultsTable = ({ state, onChangeSolveSelection }: ResultsTableProps) => {
           <tbody>
             <tr>
               <td>Vessel Volume</td>
-              <td>{answer.baseVolume.toLocaleString()} m³</td>
-              <td>{answer.scaledVolume.toLocaleString()} m³</td>
+              <td>{answer.baseVolume.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m³</td>
+              <td>{answer.scaledVolume.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m³</td>
             </tr>
             <tr>
               <td>Vessel Diameter</td>
-              <td>{answer.baseDiameter.toLocaleString()} m</td>
-              <td>{answer.scaledDiameter.toLocaleString()} m</td>
+              <td>{answer.baseDiameter.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m</td>
+              <td>{answer.scaledDiameter.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m</td>
             </tr>
             <tr>
               <td>Impeller Diameter</td>
-              <td>{state.baseImpellerDiameter.calculatedValue.value.toLocaleString()} m</td>
-              <td>{answer.scaledImpellerDiameter.toLocaleString()} m</td>
+              <td>
+                {state.baseImpellerDiameter.calculatedValue.value.toLocaleString('en-US', {
+                  maximumSignificantDigits: 3,
+                })}{' '}
+                m
+              </td>
+              <td>{answer.scaledImpellerDiameter.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m</td>
             </tr>
             <tr>
               <td>Flow Number</td>
-              <td>{flowNumber.calculatedValue.value}</td>
-              <td>{flowNumber.calculatedValue.value}</td>
+              <td>{flowNumber.calculatedValue.value.toLocaleString('en-US', { maximumSignificantDigits: 3 })}</td>
+              <td>{flowNumber.calculatedValue.value.toLocaleString('en-US', { maximumSignificantDigits: 3 })}</td>
             </tr>
             <tr>
               <td>Power Number</td>
-              <td>{powerNumber.calculatedValue.value}</td>
-              <td>{powerNumber.calculatedValue.value}</td>
+              <td>{powerNumber.calculatedValue.value.toLocaleString('en-US', { maximumSignificantDigits: 3 })}</td>
+              <td>{powerNumber.calculatedValue.value.toLocaleString('en-US', { maximumSignificantDigits: 3 })}</td>
             </tr>
             <tr>
               <td>Shaft Speed</td>
-              <td>{answer.baseShaftSpeed.toLocaleString()} rpm</td>
-              <td>{answer.scaledShaftSpeed.toLocaleString()} rpm</td>
+              <td>{answer.baseShaftSpeed.toLocaleString('en-US', { maximumSignificantDigits: 1 })} rpm</td>
+              <td>{answer.scaledShaftSpeed.toLocaleString('en-US', { maximumSignificantDigits: 1 })} rpm</td>
             </tr>
             <tr>
               <td>Tip Speed</td>
-              <td>{answer.baseTipSpeed.toLocaleString()} m/s</td>
-              <td>{answer.scaledTipSpeed.toLocaleString()} m/s</td>
+              <td>{answer.baseTipSpeed.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m/s</td>
+              <td>{answer.scaledTipSpeed.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m/s</td>
             </tr>
             <tr>
               <td>Reynold's No</td>
-              <td>{answer.baseRe.toLocaleString()}</td>
-              <td>{answer.scaledRe.toLocaleString()}</td>
+              <td>{answer.baseRe.toPrecision(3)}</td>
+              <td>{answer.scaledRe.toPrecision(3)}</td>
             </tr>
             <tr>
               <td>Pumping Rate</td>
-              <td>{answer.basePumpingRate.toLocaleString()} m³/s</td>
-              <td>{answer.scaledPumpingRate.toLocaleString()} m³/s</td>
+              <td>{answer.basePumpingRate.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m³/s</td>
+              <td>{answer.scaledPumpingRate.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m³/s</td>
             </tr>
             <tr>
               <td>Power Consumption</td>
-              <td>{answer.basePower.toLocaleString()} kW</td>
-              <td>{answer.scaledPower.toLocaleString()} kW</td>
+              <td>{answer.basePower.toLocaleString('en-US', { maximumSignificantDigits: 3 })} kW</td>
+              <td>{answer.scaledPower.toLocaleString('en-US', { maximumSignificantDigits: 3 })} kW</td>
             </tr>
             <tr>
               <td>Motor Size</td>
-              <td>{answer.baseMotorPower.toLocaleString()} kW</td>
-              <td>{answer.scaledMotorPower.toLocaleString()} kW</td>
+              <td>{answer.baseMotorPower.toLocaleString('en-US', { maximumSignificantDigits: 3 })} kW</td>
+              <td>{answer.scaledMotorPower.toLocaleString('en-US', { maximumSignificantDigits: 3 })} kW</td>
             </tr>
             <tr>
               <td>P/V</td>
-              <td>{answer.basePV.toLocaleString()} kW/m³</td>
-              <td>{answer.scaledPV.toLocaleString()} kW/m³</td>
+              <td>{answer.basePV.toLocaleString('en-US', { maximumSignificantDigits: 3 })} kW/m³</td>
+              <td>{answer.scaledPV.toLocaleString('en-US', { maximumSignificantDigits: 3 })} kW/m³</td>
             </tr>
             <tr>
               <td>Bulk Velocity</td>
-              <td>{answer.baseVelocity.toLocaleString()} m/s</td>
-              <td>{answer.scaledVelocity.toLocaleString()} m/s</td>
+              <td>{answer.baseVelocity.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m/s</td>
+              <td>{answer.scaledVelocity.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m/s</td>
             </tr>
           </tbody>
         </table>
@@ -885,3 +892,38 @@ const ScaleUpMathodHint = () => (
     </div>
   </span>
 )
+
+const EquationCard = () => {
+  return (
+    <CalcCard title="Governing Equation">
+      <>
+        <p>
+          This calculator finds agitation scale up factors for a vessel given the dimentions and operating conditions of
+          a base vessel.
+        </p>
+        <br />
+        <p>Tip Speed</p>
+        <Equation equation={`$$v_{t} = \\pi d_{im} N$$`} />
+        <p>Reynolds Number</p>
+        <Equation equation={`$$Re = d_{im}^{2} N \\rho / \\mu  $$`} />
+        <p>Pumping Rate</p>
+        <Equation equation={`$$Q = N_{q} N d_{im}^{3}$$`} />
+        <p>Power Consumption</p>
+        <Equation equation={`$$P = N_{p} \\rho N^{3} d_{im}^{5}$$`} />
+        <p>Bulk Velocity</p>
+        <Equation equation={`$$b_{b} = 4 Q / \\pi d_{v}$$`} />
+
+        <p className="text-lg font-medium">Definitions</p>
+        <VariableDefinition equation={`$$v_{t} = $$`} definition="Tip speed" />
+        <VariableDefinition equation={`$$d_{im} = $$`} definition="Impeller diameter" />
+        <VariableDefinition equation={`$$N = $$`} definition="Shaft speed" />
+        <VariableDefinition equation={`$$\\rho = $$`} definition="Fluid density" />
+        <VariableDefinition equation={`$$\\mu = $$`} definition="Fluid viscosity" />
+        <VariableDefinition equation={`$$N_{q} = $$`} definition="Impeller pumping number" />
+        <VariableDefinition equation={`$$N_{p} = $$`} definition="Impeller power number" />
+        <VariableDefinition equation={`$$v_{b} = $$`} definition="Bulk velocity" />
+        <VariableDefinition equation={`$$d_{bv} = $$`} definition="Vessel diameter" />
+      </>
+    </CalcCard>
+  )
+}
