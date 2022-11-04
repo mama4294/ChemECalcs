@@ -148,7 +148,7 @@ const UnitConversion: NextPage = () => {
             <div className="mb-0 flex flex-col">
               {input && <InputField key={input.id} data={input} onChangeValue={handleChangeValue} />}
               <div className="flex justify-center">
-                <button className="btn btn-circle border-0 bg-transparent" onClick={handleSwap}>
+                <button className="btn btn-circle" onClick={handleSwap}>
                   <SwapIcon />
                 </button>
               </div>
@@ -163,11 +163,19 @@ const UnitConversion: NextPage = () => {
 
 export default UnitConversion
 
-const SwapIcon = () => {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 fill-base-content" viewBox="0 0 48 48 ">
-      <path d="M32 34.02V20h-4v14.02h-6L30 42l8-7.98h-6zM18 6l-8 7.98h6V28h4V13.98h6L18 6z" />
-      <path fill="none" d="M0 0h48v48H0z" />
-    </svg>
-  )
-}
+const SwapIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="inherit"
+    viewBox="0 0 24 24"
+    strokeWidth="1.5"
+    stroke="currentColor"
+    className="h-6 w-6"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
+    />
+  </svg>
+)

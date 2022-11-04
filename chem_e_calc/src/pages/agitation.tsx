@@ -582,27 +582,17 @@ const Agitation: NextPage = () => {
                 })
               }
             />
-            <h2 className="my-4 text-xl">Scale Up Method</h2>
-            <InputDropdown
-              name={'method'}
-              label={'Method'}
-              selected={false}
-              error={''}
-              value={solveSelection}
-              options={[
-                { label: 'Constant Tip Speed', value: 'tipSpeed' },
-                { label: 'Contant P/V', value: 'p/V' },
-                { label: 'Contant Reynolds Number', value: 'Re' },
-                { label: 'Contant Pumping Rate', value: 'pumping' },
-              ]}
-              focusText={'Enter scale up method'}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({ type: ActionKind.CHANGE_SOLVE_SELECTION, payload: e.target.value })
-              }
-            />
           </div>
         </CalcCard>
-        <ResultsTable state={state} />
+        <ResultsTable
+          state={state}
+          onChangeSolveSelection={(e: React.ChangeEvent<HTMLInputElement>) =>
+            dispatch({
+              type: ActionKind.CHANGE_SOLVE_SELECTION,
+              payload: e.target.value,
+            })
+          }
+        />
 
         {/* <EquationCard /> */}
         {/* <ExampleCard data={state} /> */}
@@ -613,14 +603,18 @@ const Agitation: NextPage = () => {
 
 export default Agitation
 
-const ResultsTable = ({ state }: { state: State }) => {
+type ResultsTableProps = {
+  state: State
+  onChangeSolveSelection: (e: React.ChangeEvent<HTMLInputElement>) => void
+}
+
+const ResultsTable = ({ state, onChangeSolveSelection }: ResultsTableProps) => {
   const {
     solveSelection,
     baseDiameter,
     baseHeight,
     baseRPM,
     baseImpellerDiameter,
-    baseImpellerType,
     flowNumber,
     powerNumber,
     scaledDiameter,
@@ -664,7 +658,7 @@ const ResultsTable = ({ state }: { state: State }) => {
     let scaledPV = 0
     let scaledVelocity = 0
 
-    if (state.solveSelection === 'tipSpeed') {
+    if (solveSelection === 'tipSpeed') {
       scaledTipSpeed = baseTipSpeed // m/s
       scaledShaftSpeed = (scaledTipSpeed / (scaledImpellerDiameter * Math.PI)) * 60 //rpm
       scaledPumpingRate = flowNumber.calculatedValue.value * (scaledShaftSpeed / 60) * scaledImpellerDiameter ** 3 // m^3/s
@@ -679,7 +673,7 @@ const ResultsTable = ({ state }: { state: State }) => {
         (fluidViscosity.calculatedValue.value / 1000) // unitless
       scaledPV = scaledPower / scaledVolume // unitless
       scaledVelocity = (4 * scaledPumpingRate) / (Math.PI * scaledDiameter.calculatedValue.value ** 2)
-    } else if (state.solveSelection === 'p/V') {
+    } else if (solveSelection === 'p/V') {
       scaledPV = basePV // kW/m^3
       scaledPower = scaledPV * scaledVolume // kW
       scaledShaftSpeed =
@@ -693,7 +687,7 @@ const ResultsTable = ({ state }: { state: State }) => {
         (scaledImpellerDiameter ** 2 * (scaledShaftSpeed / 60) * fluidDensity.calculatedValue.value) /
         (fluidViscosity.calculatedValue.value / 1000) // unitless
       scaledVelocity = (4 * scaledPumpingRate) / (Math.PI * scaledDiameter.calculatedValue.value ** 2)
-    } else if (state.solveSelection === 'Re') {
+    } else if (solveSelection === 'Re') {
       scaledRe = baseRe // unitless
       scaledShaftSpeed =
         ((scaledRe * (fluidViscosity.calculatedValue.value / 1000)) /
@@ -709,7 +703,7 @@ const ResultsTable = ({ state }: { state: State }) => {
         1000 // kW
       scaledPV = scaledPower / scaledVolume // unitless
       scaledVelocity = (4 * scaledPumpingRate) / (Math.PI * scaledDiameter.calculatedValue.value ** 2)
-    } else if (state.solveSelection === 'pumping') {
+    } else if (solveSelection === 'pumping') {
       scaledPumpingRate = basePumpingRate // m^3/s
       scaledShaftSpeed = (scaledPumpingRate / (flowNumber.calculatedValue.value * scaledImpellerDiameter ** 3)) * 60 //rpm
       scaledTipSpeed = (scaledShaftSpeed / 60) * scaledImpellerDiameter * Math.PI // m/s
@@ -759,7 +753,24 @@ const ResultsTable = ({ state }: { state: State }) => {
   return (
     <CalcCard title={'Results'} type={'lg'}>
       <div className="overflow-x-auto">
-        <table className="table w-full">
+        {/* <h2 className="my-4 text-xl">Scale Up Method</h2> */}
+        <InputDropdown
+          name={'method'}
+          label={'Scale Up Method'}
+          selected={false}
+          error={''}
+          value={solveSelection}
+          options={[
+            { label: 'Constant Tip Speed', value: 'tipSpeed' },
+            { label: 'Contant P/V', value: 'p/V' },
+            { label: 'Contant Reynolds Number', value: 'Re' },
+            { label: 'Contant Pumping Rate', value: 'pumping' },
+          ]}
+          focusText={'Enter scale up method'}
+          onChange={onChangeSolveSelection}
+          topRight={<ScaleUpMathodHint />}
+        />
+        <table className="mt-6 table w-full">
           <thead>
             <tr>
               <th>Parameter</th>
@@ -839,3 +850,38 @@ const ResultsTable = ({ state }: { state: State }) => {
     </CalcCard>
   )
 }
+
+const ScaleUpMathodHint = () => (
+  <span className="label-text-alt">
+    <div className="dropdown-end dropdown">
+      <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          ></path>
+        </svg>
+      </label>
+      <div tabIndex={0} className="card dropdown-content compact rounded-box w-64 bg-base-100 shadow">
+        <div className="card-body">
+          <h2 className="card-title">Need help deciding?</h2>
+          <p>
+            Use constant tip speed when <span className="font-bold">shear</span> is the most important factor
+          </p>
+          <p>
+            Use constant P/V when <span className="font-bold">oxygen transfer rate</span> is the most important factor
+          </p>
+          <p>
+            Use constant Reynolds number when <span className="font-bold">heat transfer</span> is the most important
+            factor
+          </p>
+          <p>
+            Use constant pumping rate when <span className="font-bold">mixing time</span> is the most important factor
+          </p>
+        </div>
+      </div>
+    </div>
+  </span>
+)
