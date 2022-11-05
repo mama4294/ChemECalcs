@@ -79,6 +79,11 @@ const Navbar = () => {
                 <a className="hover:bg-neutral-focus">Fluid Flow</a>
               </Link>
             </li>
+            <li>
+              <Link href={'/agitation'}>
+                <a className="hover:bg-neutral-focus">Agitation</a>
+              </Link>
+            </li>
           </ul>
         </div>
         <Link href={'/'}>
@@ -142,6 +147,11 @@ const Navbar = () => {
           <li>
             <Link href={'/fluidflow'}>
               <a className="hover:bg-neutral-focus">Fluid Flow</a>
+            </Link>
+          </li>
+          <li>
+            <Link href={'/agitation'}>
+              <a className="hover:bg-neutral-focus">Agitation</a>
             </Link>
           </li>
         </ul>

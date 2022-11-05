@@ -43,7 +43,7 @@ const calculateAnswer = (state: State): State => {
   let validatedState = resetErrorMessages(state)
 
   switch (state.solveSelection) {
-    case 'flowrate':
+    case 'volumeFlowRate':
       if (inputDiameter <= inputThickness * 2) {
         validatedState = { ...validatedState, thickness: { ...validatedState.thickness, error: 'Thickness too large' } }
       }
