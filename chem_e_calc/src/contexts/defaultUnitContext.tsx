@@ -1,7 +1,7 @@
 import React, { useState, createContext, useEffect } from 'react'
 import { CustomMeasureUnits } from '../utils/units'
 
-type DefaultUnits = {
+export type DefaultUnits = {
   mass: CustomMeasureUnits
   volume: CustomMeasureUnits
   length: CustomMeasureUnits

@@ -6,7 +6,7 @@ import { CalcCard } from '../components/calculators/calcCard'
 import { PageContainer } from '../components/calculators/container'
 import { CalcHeader } from '../components/calculators/header'
 import { InputDropdown, InputFieldConstant, InputFieldWithUnit } from '../components/inputs/inputFieldObj'
-import { DefaultUnitContext, DefaultUnitContextType } from '../contexts/defaultUnitContext'
+import { DefaultUnitContext, DefaultUnitContextType, DefaultUnits } from '../contexts/defaultUnitContext'
 import { convertUnits } from '../utils/units'
 import { ShortInputType } from '../types'
 import { updateCalculatedValue } from '../logic/logic'
@@ -202,8 +202,8 @@ const Agitation: NextPage = () => {
       label: 'Fluid Viscosity',
       placeholder: '0',
       unitType: 'length',
-      displayValue: { value: '3', unit: 'cP' },
-      calculatedValue: { value: 3, unit: 'cP' },
+      displayValue: { value: '1', unit: 'cP' },
+      calculatedValue: { value: 1, unit: 'cP' },
       selectiontext: '',
       focusText: 'Enter the fluid viscosity',
       error: '',
@@ -244,6 +244,63 @@ const Agitation: NextPage = () => {
     }
   }
 
+  const resetErrorMessages = (state: State): State => {
+    return {
+      ...state,
+      baseDiameter: { ...state.baseDiameter, error: '' },
+      baseHeight: { ...state.baseHeight, error: '' },
+      baseRPM: { ...state.baseRPM, error: '' },
+      baseImpellerDiameter: { ...state.baseImpellerDiameter, error: '' },
+      flowNumber: { ...state.flowNumber, error: '' },
+      powerNumber: { ...state.powerNumber, error: '' },
+      scaledDiameter: { ...state.scaledDiameter, error: '' },
+      scaledHeight: { ...state.scaledHeight, error: '' },
+      fluidDensity: { ...state.fluidDensity, error: '' },
+      fluidViscosity: { ...state.fluidViscosity, error: '' },
+    }
+  }
+
+  const validateState = (state: State) => {
+    let validatedState = resetErrorMessages(state)
+
+    const widthVessel = state.baseDiameter.calculatedValue.value
+    const widthImpeller = state.baseImpellerDiameter.calculatedValue.value
+    const rpm = state.baseRPM.calculatedValue.value
+    const fluidDensity = state.fluidDensity.calculatedValue.value
+    const fluidViscosity = state.fluidViscosity.calculatedValue.value
+    const scaledWidth = state.scaledDiameter.calculatedValue.value
+    const scaledHeight = state.scaledHeight.calculatedValue.value
+
+    if (widthVessel <= 0) {
+      validatedState.baseDiameter.error = 'Vessel diameter must be positive'
+    }
+    if (widthImpeller <= 0) {
+      validatedState.baseImpellerDiameter.error = 'Impeller diameter must be positive'
+    }
+
+    if (widthImpeller > widthVessel) {
+      validatedState.baseImpellerDiameter.error = 'Impeller diameter must be less than the vessel diameter'
+    }
+    if (rpm <= 0) {
+      validatedState.baseRPM.error = 'RPM must be positive'
+    }
+    if (fluidDensity <= 0) {
+      validatedState.fluidDensity.error = 'Fluid density must be positive'
+    }
+    if (fluidViscosity <= 0) {
+      validatedState.fluidViscosity.error = 'Fluid viscosity must be positive'
+    }
+
+    if (scaledWidth <= 0) {
+      validatedState.scaledDiameter.error = 'Scaled diameter must be positive'
+    }
+    if (scaledHeight <= 0) {
+      validatedState.scaledHeight.error = 'Scaled height must be positive'
+    }
+
+    return validatedState
+  }
+
   const stateReducer = (state: State, action: Action) => {
     switch (action.type) {
       case ActionKind.REFRESH:
@@ -259,10 +316,8 @@ const Agitation: NextPage = () => {
         let unit = state[name as keyof StateWithoutStrings].displayValue.unit
         let payload = { ...state[name as keyof StateWithoutStrings], displayValue: { value: numericValue, unit } }
         let payloadWithCalculatedValue = updateCalculatedValue(payload)
-        return {
-          ...state,
-          [action.payload.name]: payloadWithCalculatedValue,
-        }
+        return validateState({ ...state, [name]: payloadWithCalculatedValue })
+
       case ActionKind.CHANGE_VALUE_WITHOUT_UNIT:
         name = action.payload.name
         numericValue = action.payload.value.replace(/[^\d.-]/g, '')
@@ -272,10 +327,8 @@ const Agitation: NextPage = () => {
           displayValue: { value: numericValue, unit },
           calculatedValue: { value: Number(numericValue), unit },
         }
-        return {
-          ...state,
-          [action.payload.name]: payload,
-        }
+        return validateState({ ...state, [name]: payload })
+
       case ActionKind.CHANGE_UNIT:
         name = action.payload.name
         const existingValue = state[name as keyof StateWithoutStrings].displayValue.value
@@ -284,10 +337,7 @@ const Agitation: NextPage = () => {
           displayValue: { value: existingValue, unit: action.payload.value },
         }
         payloadWithCalculatedValue = updateCalculatedValue(payload)
-        return {
-          ...state,
-          [action.payload.name]: payloadWithCalculatedValue,
-        }
+        return validateState({ ...state, [name]: payloadWithCalculatedValue })
       case ActionKind.CHANGE_IMPELLER_TYPE:
         const powerNumbers = calcPowerNumbers(action.payload)
         const nP = powerNumbers ? powerNumbers.nP : state.powerNumber.calculatedValue.value
@@ -341,7 +391,7 @@ const Agitation: NextPage = () => {
   return (
     <PageContainer>
       <Breadcrumbs paths={paths} />
-      <CalcHeader title={'Agitation Scaleup'} text={'Scaleup from a small scale vessel to a larger scale'} />
+      <CalcHeader title={'Agitation Scaleup'} text={'Scaleup a vessel from small scale to large scale'} />
       <CalcBody>
         <CalcCard title={'Base Vessel'}>
           <div className="mb-8 flex flex-col">
@@ -587,6 +637,7 @@ const Agitation: NextPage = () => {
         </CalcCard>
         <ResultsTable
           state={state}
+          defaultUnits={defaultUnits}
           onChangeSolveSelection={(e: React.ChangeEvent<HTMLInputElement>) =>
             dispatch({
               type: ActionKind.CHANGE_SOLVE_SELECTION,
@@ -607,10 +658,11 @@ export default Agitation
 
 type ResultsTableProps = {
   state: State
+  defaultUnits: DefaultUnits
   onChangeSolveSelection: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
-const ResultsTable = ({ state, onChangeSolveSelection }: ResultsTableProps) => {
+const ResultsTable = ({ state, onChangeSolveSelection, defaultUnits }: ResultsTableProps) => {
   const {
     solveSelection,
     baseDiameter,
@@ -651,6 +703,8 @@ const ResultsTable = ({ state, onChangeSolveSelection }: ResultsTableProps) => {
       (fluidViscosity.calculatedValue.value / 1000) // unitless
     const basePV = basePower / baseVolume // kW/m^3
     const baseVelocity = (4 * basePumpingRate) / (Math.PI * baseDiameter.calculatedValue.value ** 2)
+    const baseHW = baseHeight.calculatedValue.value / baseDiameter.calculatedValue.value // unitless
+    const scaledHW = scaledHeight.calculatedValue.value / scaledDiameter.calculatedValue.value // unitless
 
     let scaledTipSpeed = 0
     let scaledShaftSpeed = 0
@@ -747,10 +801,108 @@ const ResultsTable = ({ state, onChangeSolveSelection }: ResultsTableProps) => {
       scaledVelocity,
       baseMotorPower,
       scaledMotorPower,
+      baseHW,
+      scaledHW,
     }
   }
 
   const answer = calculateAnswer(state)
+
+  const answerBaseVolume = convertUnits({
+    value: answer.baseVolume,
+    fromUnit: 'm3',
+    toUnit: defaultUnits.volume,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerScaledVolume = convertUnits({
+    value: answer.scaledVolume,
+    fromUnit: 'm3',
+    toUnit: defaultUnits.volume,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerBaseDiameter = convertUnits({
+    value: answer.baseDiameter,
+    fromUnit: 'm',
+    toUnit: defaultUnits.length,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerScaledDiameter = convertUnits({
+    value: answer.scaledDiameter,
+    fromUnit: 'm',
+    toUnit: defaultUnits.length,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerBaseImpellerDiameter = convertUnits({
+    value: state.baseImpellerDiameter.calculatedValue.value,
+    fromUnit: 'm',
+    toUnit: defaultUnits.length,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerScaledImpellerDiameter = convertUnits({
+    value: answer.scaledImpellerDiameter,
+    fromUnit: 'm',
+    toUnit: defaultUnits.length,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerBaseTipSpeed = convertUnits({
+    value: answer.baseTipSpeed,
+    fromUnit: 'm/s',
+    toUnit: defaultUnits.speed,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerScaledTipSpeed = convertUnits({
+    value: answer.scaledTipSpeed,
+    fromUnit: 'm/s',
+    toUnit: defaultUnits.speed,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerBasePumpingRate = convertUnits({
+    value: answer.basePumpingRate,
+    fromUnit: 'm3/s',
+    toUnit: defaultUnits.volumeFlowRate,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerScaledPumpingRate = convertUnits({
+    value: answer.scaledPumpingRate,
+    fromUnit: 'm3/s',
+    toUnit: defaultUnits.volumeFlowRate,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerBasePower = convertUnits({
+    value: answer.basePower,
+    fromUnit: 'kW',
+    toUnit: defaultUnits.power,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerScaledPower = convertUnits({
+    value: answer.scaledPower,
+    fromUnit: 'kW',
+    toUnit: defaultUnits.power,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerBaseMotorPower = convertUnits({
+    value: answer.baseMotorPower,
+    fromUnit: 'kW',
+    toUnit: defaultUnits.power,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerScaledMotorPower = convertUnits({
+    value: answer.scaledMotorPower,
+    fromUnit: 'kW',
+    toUnit: defaultUnits.power,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerBaseVelocity = convertUnits({
+    value: answer.baseVelocity,
+    fromUnit: 'm/s',
+    toUnit: defaultUnits.speed,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const answerScaledVelocity = convertUnits({
+    value: answer.scaledVelocity,
+    fromUnit: 'm/s',
+    toUnit: defaultUnits.speed,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
 
   return (
     <CalcCard title={'Results'} type={'sm'}>
@@ -783,23 +935,35 @@ const ResultsTable = ({ state, onChangeSolveSelection }: ResultsTableProps) => {
           <tbody>
             <tr>
               <td>Vessel Volume</td>
-              <td>{answer.baseVolume.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m³</td>
-              <td>{answer.scaledVolume.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m³</td>
+              <td>
+                {answerBaseVolume} {defaultUnits.volume}
+              </td>
+              <td>
+                {answerScaledVolume} {defaultUnits.volume}
+              </td>
             </tr>
             <tr>
               <td>Vessel Diameter</td>
-              <td>{answer.baseDiameter.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m</td>
-              <td>{answer.scaledDiameter.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m</td>
+              <td>
+                {answerBaseDiameter} {defaultUnits.length}
+              </td>
+              <td>
+                {answerScaledDiameter} {defaultUnits.length}
+              </td>
+            </tr>
+            <tr>
+              <td>Aspect Ratio</td>
+              <td>{answer.baseHW.toLocaleString('en-US', { maximumSignificantDigits: 3 })}</td>
+              <td>{answer.scaledHW.toLocaleString('en-US', { maximumSignificantDigits: 3 })}</td>
             </tr>
             <tr>
               <td>Impeller Diameter</td>
               <td>
-                {state.baseImpellerDiameter.calculatedValue.value.toLocaleString('en-US', {
-                  maximumSignificantDigits: 3,
-                })}{' '}
-                m
+                {answerBaseImpellerDiameter} {defaultUnits.length}
               </td>
-              <td>{answer.scaledImpellerDiameter.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m</td>
+              <td>
+                {answerScaledImpellerDiameter} {defaultUnits.length}
+              </td>
             </tr>
             <tr>
               <td>Flow Number</td>
@@ -813,13 +977,17 @@ const ResultsTable = ({ state, onChangeSolveSelection }: ResultsTableProps) => {
             </tr>
             <tr>
               <td>Shaft Speed</td>
-              <td>{answer.baseShaftSpeed.toLocaleString('en-US', { maximumSignificantDigits: 1 })} rpm</td>
-              <td>{answer.scaledShaftSpeed.toLocaleString('en-US', { maximumSignificantDigits: 1 })} rpm</td>
+              <td>{answer.baseShaftSpeed.toLocaleString('en-US', { maximumSignificantDigits: 3 })} rpm</td>
+              <td>{answer.scaledShaftSpeed.toLocaleString('en-US', { maximumSignificantDigits: 3 })} rpm</td>
             </tr>
             <tr>
               <td>Tip Speed</td>
-              <td>{answer.baseTipSpeed.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m/s</td>
-              <td>{answer.scaledTipSpeed.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m/s</td>
+              <td>
+                {answerBaseTipSpeed} {defaultUnits.speed}
+              </td>
+              <td>
+                {answerScaledTipSpeed} {defaultUnits.speed}
+              </td>
             </tr>
             <tr>
               <td>Reynold's No</td>
@@ -828,28 +996,44 @@ const ResultsTable = ({ state, onChangeSolveSelection }: ResultsTableProps) => {
             </tr>
             <tr>
               <td>Pumping Rate</td>
-              <td>{answer.basePumpingRate.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m³/s</td>
-              <td>{answer.scaledPumpingRate.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m³/s</td>
+              <td>
+                {answerBasePumpingRate} {defaultUnits.volumeFlowRate}
+              </td>
+              <td>
+                {answerScaledPumpingRate} {defaultUnits.volumeFlowRate}
+              </td>
             </tr>
             <tr>
               <td>Power Consumption</td>
-              <td>{answer.basePower.toLocaleString('en-US', { maximumSignificantDigits: 3 })} kW</td>
-              <td>{answer.scaledPower.toLocaleString('en-US', { maximumSignificantDigits: 3 })} kW</td>
+              <td>
+                {answerBasePower} {defaultUnits.power}
+              </td>
+              <td>
+                {answerScaledPower} {defaultUnits.power}
+              </td>
             </tr>
             <tr>
               <td>Motor Size</td>
-              <td>{answer.baseMotorPower.toLocaleString('en-US', { maximumSignificantDigits: 3 })} kW</td>
-              <td>{answer.scaledMotorPower.toLocaleString('en-US', { maximumSignificantDigits: 3 })} kW</td>
+              <td>
+                {answerBaseMotorPower} {defaultUnits.power}
+              </td>
+              <td>
+                {answerScaledMotorPower} {defaultUnits.power}
+              </td>
             </tr>
             <tr>
               <td>P/V</td>
-              <td>{answer.basePV.toLocaleString('en-US', { maximumSignificantDigits: 3 })} kW/m³</td>
-              <td>{answer.scaledPV.toLocaleString('en-US', { maximumSignificantDigits: 3 })} kW/m³</td>
+              <td>{answer.basePV.toPrecision(3)} kW/m³</td>
+              <td>{answer.scaledPV.toPrecision(3)} kW/m³</td>
             </tr>
             <tr>
               <td>Bulk Velocity</td>
-              <td>{answer.baseVelocity.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m/s</td>
-              <td>{answer.scaledVelocity.toLocaleString('en-US', { maximumSignificantDigits: 3 })} m/s</td>
+              <td>
+                {answerBaseVelocity} {defaultUnits.speed}
+              </td>
+              <td>
+                {answerScaledVelocity} {defaultUnits.speed}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -871,7 +1055,7 @@ const ScaleUpMathodHint = () => (
           ></path>
         </svg>
       </label>
-      <div tabIndex={0} className="card dropdown-content compact rounded-box w-64 bg-base-100 shadow">
+      <div tabIndex={0} className="compact card dropdown-content rounded-box w-64 bg-base-100 shadow">
         <div className="card-body">
           <h2 className="card-title">Need help deciding?</h2>
           <p>

@@ -1,6 +1,5 @@
 import { InputType } from '../calculators/calculator'
 import { unitOptions, UnitOptions, UnitOption, addCommas, commasToNumber } from '../../utils/units'
-import { InputType as FluidFLowInputType } from '../../pages/fluidflow'
 
 type InputFieldProps = {
   data: InputType
