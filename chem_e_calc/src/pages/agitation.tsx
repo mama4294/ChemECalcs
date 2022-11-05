@@ -261,7 +261,7 @@ const Agitation: NextPage = () => {
   }
 
   const validateState = (state: State) => {
-    let validatedState = resetErrorMessages(state)
+    const validatedState = resetErrorMessages(state)
 
     const widthVessel = state.baseDiameter.calculatedValue.value
     const widthImpeller = state.baseImpellerDiameter.calculatedValue.value
@@ -990,7 +990,7 @@ const ResultsTable = ({ state, onChangeSolveSelection, defaultUnits }: ResultsTa
               </td>
             </tr>
             <tr>
-              <td>Reynold's No</td>
+              <td>Reynold&apos;s No</td>
               <td>{answer.baseRe.toPrecision(3)}</td>
               <td>{answer.scaledRe.toPrecision(3)}</td>
             </tr>
