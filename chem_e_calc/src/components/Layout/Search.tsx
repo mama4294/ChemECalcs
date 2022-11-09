@@ -3,15 +3,15 @@ import { useRouter } from 'next/router'
 
 const Search = () => {
   const pages = [
-    { title: 'Box', href: '/geometry/box', location: 'geometry' },
-    { title: 'Cone', href: '/geometry/cone', location: 'geometry' },
-    { title: 'Cylinder', href: '/geometry/cylinder', location: 'geometry' },
-    { title: 'Hemisphere', href: '/geometry/hemisphere', location: 'geometry' },
-    { title: 'Pyramid', href: '/geometry/pyramid', location: 'geometry' },
-    { title: 'Sphere', href: '/geometry/sphere', location: 'geometry' },
-    { title: 'Unit Conversion', href: '/conversion', location: 'home' },
-    { title: 'Fluid Flow', href: '/fluidflow', location: 'home' },
-    { title: 'Agitation', href: '/agitation', location: 'home' },
+    { id: 0, title: 'Box', href: '/geometry/box', location: 'geometry' },
+    { id: 1, title: 'Cone', href: '/geometry/cone', location: 'geometry' },
+    { id: 2, title: 'Cylinder', href: '/geometry/cylinder', location: 'geometry' },
+    { id: 3, title: 'Hemisphere', href: '/geometry/hemisphere', location: 'geometry' },
+    { id: 4, title: 'Pyramid', href: '/geometry/pyramid', location: 'geometry' },
+    { id: 5, title: 'Sphere', href: '/geometry/sphere', location: 'geometry' },
+    { id: 6, title: 'Unit Conversion', href: '/conversion', location: 'home' },
+    { id: 7, title: 'Fluid Flow', href: '/fluidflow', location: 'home' },
+    { id: 8, title: 'Agitation', href: '/agitation', location: 'home' },
   ]
 
   const router = useRouter()
@@ -20,10 +20,34 @@ const Search = () => {
   const queryInput = useRef<HTMLInputElement>(null)
 
   const filteredPages = query ? pages.filter(page => page.title.toLowerCase().includes(query.toLowerCase())) : pages
+  const [selectedNum, setSelectedNum] = useState(0)
 
-  const changePage = (href: string) => {
-    router.push(href)
-    closeModalBtnRef.current?.click()
+  const changePage = (href: string | undefined) => {
+    if (href) {
+      router.push(href)
+      closeModalBtnRef.current?.click()
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setSelectedNum(selectedNum === filteredPages.length - 1 ? 0 : selectedNum + 1)
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setSelectedNum(selectedNum === 0 ? filteredPages.length - 1 : selectedNum - 1)
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      changePage(filteredPages[selectedNum]?.href)
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      closeModalBtnRef.current?.click()
+    }
+  }
+
+  const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value)
+    setSelectedNum(0)
   }
 
   return (
@@ -50,18 +74,25 @@ const Search = () => {
               ref={queryInput}
               placeholder="Search..."
               className="input w-full border-0 bg-transparent focus:outline-0 focus:ring-0"
-              onChange={e => setQuery(e.target.value)}
+              onChange={handleQueryChange}
+              onKeyDown={handleKeyDown}
             />
           </div>
           {query && filteredPages.length === 0 && <p className="px-4 pt-2 pb-6 text-sm">No results found</p>}
           {filteredPages.length > 0 && (
             <ul className="max-h-96 overflow-y-auto pb-4 text-sm">
-              {filteredPages.map(page => {
+              {filteredPages.map((page, index) => {
+                const hovered = selectedNum === index
                 return (
-                  <li key={page.href} className="cursor-pointer" onClick={() => changePage(page.href)}>
-                    <div className="group space-x-1 px-4 py-2 hover:bg-primary">
-                      <span className="font-bold group-hover:text-primary-content"> {page.title}</span>
-                      <span className="text-base-content group-hover:text-primary-content">in {page.location}</span>
+                  <li
+                    key={page.href}
+                    className="cursor-pointer"
+                    onClick={() => changePage(page.href)}
+                    onMouseOver={() => setSelectedNum(index)}
+                  >
+                    <div className={`group space-x-1 px-4 py-2 ${hovered ? 'bg-primary text-primary-content' : ''}`}>
+                      <span className="font-bold"> {page.title}</span>
+                      <span className="">in {page.location}</span>
                     </div>
                   </li>
                 )

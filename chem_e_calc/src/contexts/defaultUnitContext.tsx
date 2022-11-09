@@ -38,6 +38,10 @@ const initialValues: DefaultUnits = {
 
 function getLocalStorage() {
   try {
+    if (!window) {
+      console.log('window is not defined')
+      return initialValues
+    }
     const localdata = window.localStorage.getItem('defaultUnits')
     console.log('getting local storage', localdata)
     return localdata ? JSON.parse(localdata) : initialValues
