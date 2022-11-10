@@ -1,16 +1,16 @@
 import { NextPage } from 'next'
 import { useContext, useEffect, useReducer } from 'react'
-import { Breadcrumbs } from '../components/calculators/breadcrumbs'
-import { CalcBody } from '../components/calculators/calcBody'
-import { CalcCard } from '../components/calculators/calcCard'
-import { PageContainer } from '../components/calculators/container'
-import { CalcHeader } from '../components/calculators/header'
-import { InputDropdown, InputFieldConstant, InputFieldWithUnit } from '../components/inputs/inputFieldObj'
-import { DefaultUnitContext, DefaultUnitContextType, DefaultUnits } from '../contexts/defaultUnitContext'
-import { convertUnits } from '../utils/units'
-import { ShortInputType } from '../types'
-import { updateCalculatedValue } from '../logic/logic'
-import { Equation, VariableDefinition } from '../components/Equation'
+import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
+import { CalcBody } from '../../components/calculators/calcBody'
+import { CalcCard } from '../../components/calculators/calcCard'
+import { PageContainer } from '../../components/calculators/container'
+import { CalcHeader } from '../../components/calculators/header'
+import { InputDropdown, InputFieldConstant, InputFieldWithUnit } from '../../components/inputs/inputFieldObj'
+import { DefaultUnitContext, DefaultUnitContextType, DefaultUnits } from '../../contexts/defaultUnitContext'
+import { convertUnits } from '../../utils/units'
+import { ShortInputType } from '../../types'
+import { updateCalculatedValue } from '../../logic/logic'
+import { Equation, VariableDefinition } from '../../components/Equation'
 
 type State = {
   solveSelection: string
@@ -36,7 +36,10 @@ type State = {
 type StateWithoutStrings = Omit<State, 'solveSelection' | 'baseImpellerType'>
 
 const Agitation: NextPage = () => {
-  const paths = [{ title: 'Agitation', href: '/agitation' }]
+  const paths = [
+    { title: 'Agitation', href: '/agitation' },
+    { title: 'Scaleup', href: '/agitation/scaleup' },
+  ]
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
 
   const initialState: State = {

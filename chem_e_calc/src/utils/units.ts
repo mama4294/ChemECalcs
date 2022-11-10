@@ -93,7 +93,7 @@ export const units = {
     "yd3/h'",
   ],
   temperature: ['C', 'F', 'K', 'R'],
-  speed: ['m/s', 'km/h', 'm/h', 'knot', 'ft/s'],
+  speed: ['m/s', 'km/h', 'mph', 'knot', 'ft/s'],
   pressure: ['Pa', 'hPa', 'kPa', 'MPa', 'bar', 'torr', 'psi', 'ksi'],
   voltage: ['V', 'mV', 'kV'],
   current: ['A', 'mA', 'kA'],
@@ -204,8 +204,8 @@ export const unitOptions: UnitOptions = {
 
   speed: [
     { value: 'm/s', label: 'm/s' },
-    { value: 'km/s', label: 'km/s' },
-    { value: 'm/h', label: 'mph' },
+    { value: 'km/h', label: 'km/h' },
+    { value: 'mph', label: 'mph' },
     { value: 'knot', label: 'knot' },
     { value: 'ft/s', label: 'fps' },
   ],

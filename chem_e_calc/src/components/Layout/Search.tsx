@@ -11,7 +11,8 @@ const Search = () => {
     { id: 5, title: 'Sphere', href: '/geometry/sphere', location: 'geometry' },
     { id: 6, title: 'Unit Conversion', href: '/conversion', location: 'home' },
     { id: 7, title: 'Fluid Flow', href: '/fluidflow', location: 'home' },
-    { id: 8, title: 'Agitation', href: '/agitation', location: 'home' },
+    { id: 8, title: 'Scale Up', href: '/agitation/scaleup', location: 'agitation' },
+    { id: 8, title: 'Tip Speed', href: '/agitation/tipspeed', location: 'agitation' },
   ]
 
   const router = useRouter()
@@ -74,7 +75,7 @@ const Search = () => {
               ref={queryInput}
               placeholder="Search..."
               className="input w-full border-0 bg-transparent focus:outline-0 focus:ring-0"
-              onChange={handleQueryChange}
+              onChange={e => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
             />
           </div>
