@@ -1,5 +1,5 @@
 import { NextPage } from 'next'
-import { useContext, useReducer } from 'react'
+import { useContext, useReducer, useState } from 'react'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
 import { CalcCard } from '../../components/calculators/calcCard'
@@ -9,9 +9,11 @@ import { InputDropdown, InputFieldConstant, InputFieldWithUnit } from '../../com
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 import { updateCalculatedValue } from '../../logic/logic'
 import { ShortInputType } from '../../types'
-import { convertUnits } from '../../utils/units'
+import { convertUnits, unitTypes } from '../../utils/units'
 
-type Head = 'ellipsoidal (2:1)' | 'hemispherical' | 'ASME Dish' | 'flat' | 'conical'
+type Head = 'ellipsoidal (2:1)' | 'hemisphere' | 'ASME 80/6 F&D' | 'ASME 80/10 F&D' | 'ASME F&D' | 'flat' | 'cone'
+
+//https://www.chemengonline.com/wp-content/uploads/2017/05/sept11_ep_sas2.pdf
 
 type State = {
   orientation: 'vertical' | 'horizontal'
@@ -24,6 +26,11 @@ type State = {
   bottomConeAngle: ShortInputType
 }
 
+type ResultsState = {
+  totalVolume: string
+  liquidVolume: string
+}
+
 const Vessel: NextPage = () => {
   const paths = [
     { title: 'Geometery', href: '/geometry' },
@@ -32,19 +39,33 @@ const Vessel: NextPage = () => {
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
 
   const headTypes = [
-    { value: 'ellipsoidal (2:1)', label: 'Ellipsoidal (2:1)' },
-    { value: 'hemisphere', label: 'Hemisphere' },
-    { value: 'ASME Dish', label: 'ASME Dish' },
     { value: 'flat', label: 'Flat' },
-    { value: 'conical', label: 'Conical' },
+    { value: 'cone', label: 'Cone' },
+    { value: 'ellipsoidal (2:1)', label: 'Ellipsoidal (2:1)' },
+    { value: 'ASME F&D', label: 'ASME F&D' },
+    { value: 'ASME 80/10 F&D', label: 'ASME 80/10 F&D' },
+    { value: 'ASME 80/6 F&D', label: 'ASME 80/6 F&D' },
+    { value: 'hemisphere', label: 'Hemisphere' },
   ]
+
+  const [resultsState, setResultsState] = useState<ResultsState>({
+    totalVolume: 'm3',
+    liquidVolume: 'm3',
+  })
+
+  const handleChangeResultsState = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setResultsState({
+      ...resultsState,
+      [e.target.name]: e.target.value,
+    })
+  }
 
   type StateData = Omit<State, 'orientation' | 'head' | 'bottom'>
 
   const initialState: State = {
     orientation: 'vertical',
     head: 'flat',
-    bottom: 'ASME Dish',
+    bottom: 'flat',
     diameter: {
       name: 'diameter',
       label: 'Body Diameter',
@@ -62,7 +83,7 @@ const Vessel: NextPage = () => {
         }
       },
       selectiontext: '',
-      focusText: 'Enter vessel diameter',
+      focusText: 'Enter vessel inner diameter',
       error: '',
     },
     height: {
@@ -174,7 +195,7 @@ const Vessel: NextPage = () => {
         unit = state[name as keyof StateData].displayValue.unit
         payload = { ...state[name as keyof StateData], displayValue: { value: numericValue, unit } }
         let payloadWithCalculatedValue = updateCalculatedValue(payload)
-        return calculateAnswer({ ...state, [name]: payloadWithCalculatedValue })
+        return { ...state, [name]: payloadWithCalculatedValue }
       case ActionKind.CHANGE_UNIT:
         name = action.payload.name
         const existingValue = state[name as keyof StateData].displayValue.value
@@ -183,7 +204,7 @@ const Vessel: NextPage = () => {
           displayValue: { value: existingValue, unit: action.payload.value },
         }
         payloadWithCalculatedValue = updateCalculatedValue(payload)
-        return calculateAnswer({ ...state, [name]: payloadWithCalculatedValue })
+        return { ...state, [name]: payloadWithCalculatedValue }
     }
   }
 
@@ -196,22 +217,6 @@ const Vessel: NextPage = () => {
       return 0
     }
     return answer
-  }
-
-  const calculateAnswer = (state: State) => {
-    // const { diameter, shaftSpeed, liquidHeight } = state
-    // const answer = (diameter.calculatedValue.value * shaftSpeed.calculatedValue.value * Math.PI) / 60 // m/s
-    // const convertedAnswer = convertUnits({
-    //   value: answer,
-    //   fromUnit: 'm/s',
-    //   toUnit: liquidHeight.displayValue.unit,
-    // })
-    // const answerObj = {
-    //   ...liquidHeight,
-    //   displayValue: { value: convertedAnswer.toLocaleString(), unit: liquidHeight.displayValue.unit }, //user specified unit
-    //   calculatedValue: { value: answer, unit: 'm/s' }, //m/s
-    // }
-    return state
   }
 
   const [state, dispatch] = useReducer(stateReducer, initialState)
@@ -276,7 +281,7 @@ const Vessel: NextPage = () => {
                 }
                 options={headTypes}
               />
-              {head === 'conical' && (
+              {head === 'cone' && (
                 <InputFieldConstant
                   name={topConeAngle.name}
                   label={topConeAngle.label}
@@ -336,7 +341,7 @@ const Vessel: NextPage = () => {
                 }
                 options={headTypes}
               />
-              {bottom === 'conical' && (
+              {bottom === 'cone' && (
                 <InputFieldConstant
                   name={bottomConeAngle.name}
                   label={bottomConeAngle.label}
@@ -354,23 +359,10 @@ const Vessel: NextPage = () => {
                   }}
                 />
               )}
-              {/* <InputFieldWithUnit
-                key={liquidHeight.name}
-                name={liquidHeight.name}
-                label={liquidHeight.label}
-                placeholder={liquidHeight.placeholder}
-                selected={false}
-                displayValue={liquidHeight.displayValue}
-                error={liquidHeight.error}
-                unitType={liquidHeight.unitType}
-                focusText={liquidHeight.focusText}
-                onChangeValue={handleChangeValue}
-                onChangeUnit={handleChangeUnit}
-              /> */}
             </div>
           </>
         </CalcCard>
-        <ResultsCard state={state} />
+        <ResultsCard state={state} resultsState={resultsState} handleChangeResultsState={handleChangeResultsState} />
       </CalcBody>
     </PageContainer>
   )
@@ -378,29 +370,139 @@ const Vessel: NextPage = () => {
 
 type ResultsCard = {
   state: State
+  resultsState: ResultsState
+  handleChangeResultsState?: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
-const ResultsCard = ({ state }: ResultsCard) => {
-  const { diameter, height } = state
+type TankHeadParameter = {
+  [key: string]: {
+    fd: number
+    fk: number
+    a1: number
+    a2: number
+    b1: number
+    b2: number
+    c: number
+  }
+}
 
+const tankHeadParameters: TankHeadParameter = {
+  'ASME F&D': {
+    fd: 1,
+    fk: 0.06,
+    a1: 0.1163166103,
+    b1: 0.4680851064,
+    a2: 0.1693376137,
+    b2: 0.5,
+    c: 0.080999,
+  },
+  'ASME 80/10 F&D': {
+    fd: 0.8,
+    fk: 0.1,
+    a1: 0.1434785547,
+    b1: 0.4571428571,
+    a2: 0.2255437353,
+    b2: 0.5,
+    c: 0.109884,
+  },
+  'ASME 80/6 F&D': {
+    fd: 0.8,
+    fk: 0.06,
+    a1: 0.1567794689,
+    b1: 0.4756756757,
+    a2: 0.2050210088,
+    b2: 0.5,
+    c: 0.0945365,
+  },
+  'ellipsoidal (2:1)': {
+    fd: 0.875,
+    fk: 0.17,
+    a1: 0.101777034,
+    b1: 0.4095744681,
+    a2: 0.2520032103,
+    b2: 0.5,
+    c: 0.1337164,
+  },
+  hemisphere: {
+    fd: 0.5,
+    fk: 0.5,
+    a1: 0.5,
+    b1: 0.5,
+    a2: 0.5,
+    b2: 0.5,
+    c: 0.2617994,
+  },
+}
+
+const ResultsCard = ({ state, resultsState, handleChangeResultsState }: ResultsCard) => {
+  const { diameter, height, topConeAngle, bottomConeAngle, head, bottom } = state
+
+  type VolumeOfCone = {
+    diameter: number
+    angle: number
+  }
+  const volumeOfCone = ({ diameter, angle }: VolumeOfCone) => {
+    const radius = diameter / 2
+    const height = radius / Math.tan(angle * (Math.PI / 180))
+    const volume = (1 / 3) * Math.PI * Math.pow(radius, 2) * height
+    return volume
+  }
+
+  type VolumeOfDish = {
+    diameter: number
+    type: string
+  }
+
+  const volumeOfDish = ({ diameter, type }: VolumeOfDish) => {
+    const capacityFactor = tankHeadParameters[type]?.c || 0
+    return capacityFactor * Math.pow(diameter, 3) //m3
+  }
+
+  const calculateHeadVolume = (headType: string, diameter: number, angle: number) => {
+    switch (headType) {
+      case 'flat':
+        return 0
+      case 'hemisphere':
+      case 'ASME F&D':
+      case 'ASME 80/10 F&D':
+      case 'ASME 80/6 F&D':
+      case 'ellipsoidal (2:1)':
+        return volumeOfDish({ diameter: diameter, type: headType })
+      case 'cone':
+        return volumeOfCone({ diameter: diameter, angle: angle })
+      default:
+        return 0
+    }
+  }
+
+  const volumeTopHead = calculateHeadVolume(head, diameter.calculatedValue.value, topConeAngle.calculatedValue.value) //m3
   const volumeShell = (Math.PI * Math.pow(diameter.calculatedValue.value, 2) * height.calculatedValue.value) / 4 //m3
+  const volumeBottomHead = calculateHeadVolume(
+    bottom,
+    diameter.calculatedValue.value,
+    bottomConeAngle.calculatedValue.value
+  ) //m3
 
-  const totalVolume = volumeShell
+  const totalVolume = convertUnits({
+    value: volumeShell + volumeTopHead + volumeBottomHead,
+    fromUnit: 'm3',
+    toUnit: resultsState.totalVolume,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
 
   return (
     <CalcCard title={'Results'}>
       <InputFieldWithUnit
         key="volume"
-        name="volume"
+        name="totalVolume"
         label="Tank Volume"
         placeholder="0"
         selected={true}
-        displayValue={{ value: totalVolume.toLocaleString(), unit: 'gal' }}
+        displayValue={{ value: totalVolume, unit: resultsState.totalVolume }}
         error=""
         unitType="volume"
         focusText=""
         onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
-        onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+        onChangeUnit={handleChangeResultsState}
       />
     </CalcCard>
   )
