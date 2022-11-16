@@ -9,13 +9,19 @@ import { InputDropdown, InputFieldConstant, InputFieldWithUnit } from '../../com
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 import { updateCalculatedValue } from '../../logic/logic'
 import { ShortInputType } from '../../types'
-import { convertUnits, unitTypes } from '../../utils/units'
+import { convertUnits } from '../../utils/units'
+
+import dynamic from 'next/dynamic'
+
+const CanvasTank = dynamic(() => import('../../icons/CanvasTank'), {
+  ssr: false,
+})
 
 type Head = 'ellipsoidal (2:1)' | 'hemisphere' | 'ASME 80/6 F&D' | 'ASME 80/10 F&D' | 'ASME F&D' | 'flat' | 'cone'
 
 //https://www.chemengonline.com/wp-content/uploads/2017/05/sept11_ep_sas2.pdf
 
-type State = {
+export type State = {
   orientation: 'vertical' | 'horizontal'
   head: Head
   bottom: Head
@@ -361,6 +367,9 @@ const Vessel: NextPage = () => {
               )}
             </div>
           </>
+        </CalcCard>
+        <CalcCard title={'Tank'}>
+          <CanvasTank state={state} />
         </CalcCard>
         <ResultsCard state={state} resultsState={resultsState} handleChangeResultsState={handleChangeResultsState} />
       </CalcBody>
