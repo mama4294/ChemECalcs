@@ -10,6 +10,7 @@ import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defau
 import { updateCalculatedValue } from '../../logic/logic'
 import { ShortInputType } from '../../types'
 import { convertUnits } from '../../utils/units'
+import Canvas from '../../icons/tankCanvas'
 
 import dynamic from 'next/dynamic'
 
@@ -45,13 +46,13 @@ const Vessel: NextPage = () => {
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
 
   const headTypes = [
-    { value: 'flat', label: 'Flat' },
-    { value: 'cone', label: 'Cone' },
+    { value: 'hemisphere', label: 'Hemisphere' },
     { value: 'ellipsoidal (2:1)', label: 'Ellipsoidal (2:1)' },
-    { value: 'ASME F&D', label: 'ASME F&D' },
     { value: 'ASME 80/10 F&D', label: 'ASME 80/10 F&D' },
     { value: 'ASME 80/6 F&D', label: 'ASME 80/6 F&D' },
-    { value: 'hemisphere', label: 'Hemisphere' },
+    { value: 'ASME F&D', label: 'ASME F&D' },
+    { value: 'cone', label: 'Cone' },
+    { value: 'flat', label: 'Flat' },
   ]
 
   const [resultsState, setResultsState] = useState<ResultsState>({
@@ -369,7 +370,8 @@ const Vessel: NextPage = () => {
           </>
         </CalcCard>
         <CalcCard title={'Tank'}>
-          <CanvasTank state={state} />
+          <Canvas state={state} />
+          {/* <CanvasTank state={state} /> */}
         </CalcCard>
         <ResultsCard state={state} resultsState={resultsState} handleChangeResultsState={handleChangeResultsState} />
       </CalcBody>
