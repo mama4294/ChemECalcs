@@ -5,24 +5,60 @@ const Canvas = ({ state }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  console.log(state)
-
   const canvasWidth = containerRef.current?.clientWidth || 500
   const canvasHight = containerRef.current?.clientHeight || 500
   const limitingDimension = Math.min(canvasWidth, canvasHight)
 
+  const calculateHeadHeight = ({ type, diameter, angle }: { type: string; diameter: number; angle: number }) => {
+    if (type === 'cone') {
+      //calculate height of cone from angle
+      if (angle <= 0) return 0
+      if (angle >= 90) return diameter / 2
+      return diameter / 2 / Math.tan((angle * Math.PI) / 180)
+    } else if (type === 'hemisphere') {
+      return diameter / 2
+    } else if (
+      type == 'ellipsoidal (2:1)' ||
+      type == 'ASME F&D' ||
+      type == 'ASME 80/10 F&D' ||
+      type == 'ASME 80/6 F&D'
+    ) {
+      const CR = ASMEDishEnds[type as keyof typeof ASMEDishEnds].CR
+      const KR = ASMEDishEnds[type as keyof typeof ASMEDishEnds].KR
+      const crownRadius = diameter * CR
+      const knuckleRadius = diameter * KR
+      const crownAngle = Math.asin((diameter / 2 - knuckleRadius) / (crownRadius - knuckleRadius)) //radians
+      return crownRadius - (diameter / 2 - knuckleRadius) / Math.tan(crownAngle)
+    } else return 0
+  }
+
+  //Determine max head dimensions for scaling
+  const topHeadHeight = calculateHeadHeight({
+    type: state.head,
+    diameter: state.diameter.calculatedValue.value,
+    angle: state.topConeAngle.calculatedValue.value,
+  })
+  const bottomeHeadHeight = calculateHeadHeight({
+    type: state.bottom,
+    diameter: state.diameter.calculatedValue.value,
+    angle: state.bottomConeAngle.calculatedValue.value,
+  })
+
   //Calculate scale factor
   const longestWidth = state.diameter.calculatedValue.value
-  const longestHeight = state.height.calculatedValue.value
+  const longestHeight = state.height.calculatedValue.value + topHeadHeight + bottomeHeadHeight
   const maxLength = Math.max(longestWidth, longestHeight)
-  const scaleFactor = limitingDimension / maxLength / 2
+  const scaleFactor = limitingDimension / maxLength / 1.05
 
   //Calculate scaled body dimensions
   const tankDiameter = state.diameter.calculatedValue.value * scaleFactor
   const tankHeight = state.height.calculatedValue.value * scaleFactor
 
+  console.table({ topHeadHeight, tankHeight, bottomeHeadHeight })
+
   //center tank
-  const tankTopLeft = { x: canvasWidth / 2 - tankDiameter / 2, y: canvasHight / 2 - tankHeight / 2 }
+  // const tankTopLeft = { x: canvasWidth / 2 - tankDiameter / 2, y: canvasHight / 2 - tankHeight / 2 }
+  const tankTopLeft = { x: canvasWidth / 2 - tankDiameter / 2, y: topHeadHeight * scaleFactor + 10 }
   const tankTopMiddle = { x: tankTopLeft.x + tankDiameter / 2, y: tankTopLeft.y }
   const tankBottomMiddle = { x: tankTopLeft.x + tankDiameter / 2, y: tankTopLeft.y + tankHeight }
 
@@ -39,9 +75,23 @@ const Canvas = ({ state }: Props) => {
     ctx.lineWidth = 5
     ctx.strokeStyle = tankOutline
     ctx.beginPath()
-    drawHead({ ctx: ctx, top: false, center: tankBottomMiddle, diameter: tankDiameter, type: state.bottom })
+    drawHead({
+      ctx: ctx,
+      top: false,
+      center: tankBottomMiddle,
+      diameter: tankDiameter,
+      type: state.bottom,
+      angle: state.bottomConeAngle.calculatedValue.value,
+    }) //bottom head
     ctx.rect(tankTopLeft.x, tankTopLeft.y, tankDiameter, tankHeight) //draw tank body
-    drawHead({ ctx: ctx, top: true, center: tankTopMiddle, diameter: tankDiameter, type: state.head })
+    drawHead({
+      ctx: ctx,
+      top: true,
+      center: tankTopMiddle,
+      diameter: tankDiameter,
+      type: state.head,
+      angle: state.topConeAngle.calculatedValue.value,
+    }) //top head
     ctx.stroke()
   }
 
@@ -51,18 +101,21 @@ const Canvas = ({ state }: Props) => {
     center: { x: number; y: number }
     diameter: number
     type: string
+    angle: number
   }
 
-  const drawHead = ({ ctx, top, center, diameter, type }: HeadCtx) => {
+  const drawHead = ({ ctx, top, center, diameter, type, angle }: HeadCtx) => {
     if (type == 'hemisphere') {
-      drawHemisphere({ ctx: ctx, top: top, center: center, diameter: diameter, type: type })
+      drawHemisphere({ ctx: ctx, top: top, center: center, diameter: diameter, type: type, angle: angle })
+    } else if (type == 'cone') {
+      drawCone({ ctx: ctx, top: top, center: center, diameter: diameter, type: type, angle: angle })
     } else if (
       type == 'ellipsoidal (2:1)' ||
       type == 'ASME F&D' ||
       type == 'ASME 80/10 F&D' ||
       type == 'ASME 80/6 F&D'
     ) {
-      drawASMEHead({ ctx: ctx, top: top, center: center, diameter: diameter, type: type })
+      drawASMEHead({ ctx: ctx, top: top, center: center, diameter: diameter, type: type, angle: angle })
     }
   }
 
@@ -101,6 +154,21 @@ const Canvas = ({ state }: Props) => {
     }
   }
 
+  const drawCone = ({ ctx, top, center, diameter, angle }: HeadCtx) => {
+    const radius = diameter / 2
+    const height = radius / Math.tan((angle * Math.PI) / 180)
+
+    if (top) {
+      ctx.moveTo(center.x + radius, center.y)
+      ctx.lineTo(center.x, center.y - height)
+      ctx.lineTo(center.x - radius, center.y)
+    } else {
+      ctx.moveTo(center.x - radius, center.y)
+      ctx.lineTo(center.x, center.y + height)
+      ctx.lineTo(center.x + radius, center.y)
+    }
+  }
+
   useEffect(() => {
     const canvas = canvasRef.current
     const context = canvas?.getContext('2d')
@@ -110,7 +178,7 @@ const Canvas = ({ state }: Props) => {
   }, [state])
 
   return (
-    <div className="h-full w-full  fill-accent stroke-base-content" ref={containerRef}>
+    <div className="h-full w-full fill-accent stroke-base-content" ref={containerRef}>
       <canvas ref={canvasRef} width={canvasWidth} height={canvasHight} />
     </div>
   )
@@ -136,7 +204,7 @@ const ASMEDishEnds = {
     KR: 0.1,
   },
   'ASME 80/6 F&D': {
-    CR: 0.9,
+    CR: 0.8,
     KR: 0.06,
   },
 }
