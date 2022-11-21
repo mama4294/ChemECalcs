@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import { State } from '../pages/geometry/tank'
+import { tankHeadParameters } from '../pages/geometry/tank'
 
 const Canvas = ({ state }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -23,8 +24,12 @@ const Canvas = ({ state }: Props) => {
       type == 'ASME 80/10 F&D' ||
       type == 'ASME 80/6 F&D'
     ) {
-      const CR = ASMEDishEnds[type as keyof typeof ASMEDishEnds].CR
-      const KR = ASMEDishEnds[type as keyof typeof ASMEDishEnds].KR
+      const CR = tankHeadParameters[type as keyof typeof tankHeadParameters]?.CR
+      const KR = tankHeadParameters[type as keyof typeof tankHeadParameters]?.KR
+      if (!CR || !KR) {
+        console.error('Error: CR or KR is undefined')
+        return 0
+      }
       const crownRadius = diameter * CR
       const knuckleRadius = diameter * KR
       const crownAngle = Math.asin((diameter / 2 - knuckleRadius) / (crownRadius - knuckleRadius)) //radians
@@ -124,8 +129,13 @@ const Canvas = ({ state }: Props) => {
   }
 
   const drawASMEHead = ({ ctx, top, center, diameter, type }: HeadCtx) => {
-    const CR = ASMEDishEnds[type as keyof typeof ASMEDishEnds].CR
-    const KR = ASMEDishEnds[type as keyof typeof ASMEDishEnds].KR
+    const CR = tankHeadParameters[type as keyof typeof tankHeadParameters]?.CR
+    const KR = tankHeadParameters[type as keyof typeof tankHeadParameters]?.KR
+
+    if (!CR || !KR) {
+      console.error('Error: CR or KR is undefined')
+      return undefined
+    }
 
     const crownRadus = diameter * CR
     const knuckleRadius = diameter * KR
@@ -189,22 +199,3 @@ type Props = {
 }
 
 export default Canvas
-
-const ASMEDishEnds = {
-  'ellipsoidal (2:1)': {
-    CR: 0.9,
-    KR: 0.17,
-  },
-  'ASME F&D': {
-    CR: 1,
-    KR: 0.1,
-  },
-  'ASME 80/10 F&D': {
-    CR: 0.8,
-    KR: 0.1,
-  },
-  'ASME 80/6 F&D': {
-    CR: 0.8,
-    KR: 0.06,
-  },
-}
