@@ -7,8 +7,8 @@ const Canvas = ({ state }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const canvasWidth = containerRef.current?.clientWidth || 500
-  const canvasHight = containerRef.current?.clientHeight || 500
-  const limitingDimension = Math.min(canvasWidth, canvasHight)
+  const canvasHeight = containerRef.current?.clientHeight || 500
+  const limitingDimension = Math.min(canvasWidth, canvasHeight)
 
   const calculateHeadHeight = ({ type, diameter, angle }: { type: string; diameter: number; angle: number }) => {
     if (type === 'cone') {
@@ -43,7 +43,7 @@ const Canvas = ({ state }: Props) => {
     diameter: state.diameter.calculatedValue.value,
     angle: state.topConeAngle.calculatedValue.value,
   })
-  const bottomeHeadHeight = calculateHeadHeight({
+  const bottomHeadHeight = calculateHeadHeight({
     type: state.bottom,
     diameter: state.diameter.calculatedValue.value,
     angle: state.bottomConeAngle.calculatedValue.value,
@@ -51,32 +51,66 @@ const Canvas = ({ state }: Props) => {
 
   //Calculate scale factor
   const longestWidth = state.diameter.calculatedValue.value
-  const longestHeight = state.height.calculatedValue.value + topHeadHeight + bottomeHeadHeight
+  const longestHeight = state.height.calculatedValue.value + topHeadHeight + bottomHeadHeight
   const maxLength = Math.max(longestWidth, longestHeight)
-  const scaleFactor = limitingDimension / maxLength / 1.05
+  const scaleFactor = limitingDimension / maxLength
 
   //Calculate scaled body dimensions
   const tankDiameter = state.diameter.calculatedValue.value * scaleFactor
   const tankHeight = state.height.calculatedValue.value * scaleFactor
 
-  console.table({ topHeadHeight, tankHeight, bottomeHeadHeight })
-
   //center tank
-  // const tankTopLeft = { x: canvasWidth / 2 - tankDiameter / 2, y: canvasHight / 2 - tankHeight / 2 }
-  const tankTopLeft = { x: canvasWidth / 2 - tankDiameter / 2, y: topHeadHeight * scaleFactor + 10 }
+  const tankTopLeft = { x: canvasWidth / 2 - tankDiameter / 2, y: topHeadHeight * scaleFactor }
   const tankTopMiddle = { x: tankTopLeft.x + tankDiameter / 2, y: tankTopLeft.y }
   const tankBottomMiddle = { x: tankTopLeft.x + tankDiameter / 2, y: tankTopLeft.y + tankHeight }
 
+  const totalTankHeight = (topHeadHeight + state.height.calculatedValue.value + bottomHeadHeight) * scaleFactor
+  const percentFill = 0.75
+
+  const fillheight = totalTankHeight - totalTankHeight * percentFill
+
+  console.log({ fillheight, canvasHight: canvasHeight })
+
   //Find colors
   let tankOutline = 'white'
-  let tankFill = 'gray'
+  let tankFill = 'gray' as string
   if (containerRef.current) {
     tankOutline = window.getComputedStyle(containerRef.current).stroke
     tankFill = window.getComputedStyle(containerRef.current).fill
   }
 
   const draw = (ctx: CanvasRenderingContext2D) => {
-    ctx.clearRect(0, 0, canvasWidth, canvasHight)
+    //clear canvas
+    ctx.save()
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+
+    let clipPath = new Path2D()
+
+    drawHead({
+      ctx: clipPath,
+      top: false,
+      center: tankBottomMiddle,
+      diameter: tankDiameter,
+      type: state.bottom,
+      angle: state.bottomConeAngle.calculatedValue.value,
+    }) //bottom head
+    clipPath.rect(tankTopLeft.x, tankTopLeft.y, tankDiameter, tankHeight) //draw tank body
+    drawHead({
+      ctx: clipPath,
+      top: true,
+      center: tankTopMiddle,
+      diameter: tankDiameter,
+      type: state.head,
+      angle: state.topConeAngle.calculatedValue.value,
+    }) //top head
+
+    ctx.clip(clipPath)
+
+    //draw liquid level
+    ctx.fillStyle = `${tankFill}`
+    ctx.fillRect(0, fillheight, canvasWidth, canvasHeight)
+
+    //draw tank
     ctx.lineWidth = 5
     ctx.strokeStyle = tankOutline
     ctx.beginPath()
@@ -98,10 +132,11 @@ const Canvas = ({ state }: Props) => {
       angle: state.topConeAngle.calculatedValue.value,
     }) //top head
     ctx.stroke()
+    ctx.restore()
   }
 
   interface HeadCtx {
-    ctx: CanvasRenderingContext2D
+    ctx: CanvasRenderingContext2D | Path2D
     top: boolean
     center: { x: number; y: number }
     diameter: number
@@ -189,7 +224,7 @@ const Canvas = ({ state }: Props) => {
 
   return (
     <div className="h-full w-full fill-accent stroke-base-content" ref={containerRef}>
-      <canvas ref={canvasRef} width={canvasWidth} height={canvasHight} />
+      <canvas ref={canvasRef} width={canvasWidth} height={canvasHeight} />
     </div>
   )
 }
