@@ -174,7 +174,13 @@ const Vessel: NextPage = () => {
       case ActionKind.CHANGE_DROPDOWN:
         return { ...state, [action.payload.name]: action.payload.value }
       case ActionKind.CHANGE_LIQUID_HEIGHT:
-        return { ...state, liquidHeight: action.payload.value }
+        let liquidHeight = action.payload.value // 0 - 100
+        console.log('Input: ', liquidHeight)
+        if (liquidHeight > 100) liquidHeight = 100
+        else if (liquidHeight <= 0) liquidHeight = 0
+        else if (!Number(liquidHeight)) liquidHeight = state.liquidHeight
+        console.log('Output: ', liquidHeight)
+        return { ...state, liquidHeight }
       case ActionKind.CHANGE_CONE_ANGLE:
         console.log(action.payload)
         let { name, value } = action.payload
@@ -232,6 +238,15 @@ const Vessel: NextPage = () => {
     dispatch({
       type: ActionKind.CHANGE_UNIT,
       payload: { name: e.target.name, value: e.target.value },
+    })
+  }
+
+  const handleChangeLiquidHeight = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value
+    if (value == '') value = '0'
+    dispatch({
+      type: ActionKind.CHANGE_LIQUID_HEIGHT,
+      payload: { value: Number(value) },
     })
   }
 
@@ -364,12 +379,7 @@ const Vessel: NextPage = () => {
                 label="Liquid Height"
                 error=""
                 value={liquidHeight}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  dispatch({
-                    type: ActionKind.CHANGE_LIQUID_HEIGHT,
-                    payload: { value: Number(e.target.value) },
-                  })
-                }
+                onChange={handleChangeLiquidHeight}
                 max={100}
                 min={0}
               />

@@ -230,9 +230,23 @@ export const InputSlider = ({ name, label, error, value, onChange, max, min, top
         {topRight}
       </label>
       <div
-        className={`peer input relative h-full w-full px-0 ${error ? 'input-error text-error' : ' text-base-content'}`}
+        className={`input flex h-full w-full items-center gap-2 px-0 ${
+          error ? 'input-error text-error' : ' text-base-content'
+        }`}
       >
-        <input type="range" min={min} max={max} value={value} className="range" onChange={onChange} name={name} />
+        <input type="range" className="range" min={min} max={max} value={value} onChange={onChange} name={name} />
+        <label className="input-group w-auto">
+          <input
+            type="text"
+            className="input input-bordered w-[6ch] text-center"
+            min={min}
+            max={max}
+            value={value}
+            onChange={onChange}
+            name={name}
+          />
+          <span>%</span>
+        </label>
       </div>
 
       {error && (

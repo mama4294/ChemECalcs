@@ -69,8 +69,6 @@ const Canvas = ({ state }: Props) => {
 
   const fillheight = totalTankHeight - totalTankHeight * percentFill
 
-  console.log({ fillheight, canvasHight: canvasHeight })
-
   //Find colors
   let tankOutline = 'white'
   let tankFill = 'gray' as string
