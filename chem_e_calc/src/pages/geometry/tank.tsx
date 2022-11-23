@@ -5,7 +5,12 @@ import { CalcBody } from '../../components/calculators/calcBody'
 import { CalcCard } from '../../components/calculators/calcCard'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
-import { InputDropdown, InputFieldConstant, InputFieldWithUnit } from '../../components/inputs/inputFieldObj'
+import {
+  InputDropdown,
+  InputFieldConstant,
+  InputFieldWithUnit,
+  InputSlider,
+} from '../../components/inputs/inputFieldObj'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 import { updateCalculatedValue } from '../../logic/logic'
 import { ShortInputType } from '../../types'
@@ -28,7 +33,7 @@ export type State = {
   bottom: Head
   diameter: ShortInputType
   height: ShortInputType
-  liquidHeight: ShortInputType
+  liquidHeight: number
   topConeAngle: ShortInputType
   bottomConeAngle: ShortInputType
 }
@@ -67,12 +72,13 @@ const Vessel: NextPage = () => {
     })
   }
 
-  type StateData = Omit<State, 'orientation' | 'head' | 'bottom'>
+  type StateData = Omit<State, 'orientation' | 'head' | 'bottom' | 'liquidHeight'>
 
   const initialState: State = {
     orientation: 'vertical',
     head: 'ellipsoidal (2:1)',
     bottom: 'ellipsoidal (2:1)',
+    liquidHeight: 50,
     diameter: {
       name: 'diameter',
       label: 'Body Diameter',
@@ -113,26 +119,6 @@ const Vessel: NextPage = () => {
       focusText: 'Enter vessel body height',
       error: '',
     },
-    liquidHeight: {
-      name: 'liquidHeight',
-      label: 'Liquid Height',
-      placeholder: '0',
-      unitType: 'length',
-      displayValue: { value: '1', unit: defaultUnits.length },
-      get calculatedValue() {
-        return {
-          value: convertUnits({
-            value: Number(this.displayValue.value),
-            fromUnit: this.displayValue.unit,
-            toUnit: 'm',
-          }),
-          unit: 'm',
-        }
-      },
-      selectiontext: '',
-      focusText: 'Enter liquid height measured from the tank bottom',
-      error: '',
-    },
     topConeAngle: {
       name: 'topConeAngle',
       label: 'Cone Angle',
@@ -162,6 +148,7 @@ const Vessel: NextPage = () => {
     CHANGE_VALUE = 'CHANGE_VALUE_WITH_UNIT',
     CHANGE_CONE_ANGLE = 'CHANGE_CONE_ANGLE',
     CHANGE_UNIT = 'CHANGE_UNIT',
+    CHANGE_LIQUID_HEIGHT = 'CHANGE_LIQUID_LEVEL',
     REFRESH = 'REFRESH',
   }
 
@@ -175,6 +162,10 @@ const Vessel: NextPage = () => {
         payload: { name: string; value: string }
       }
     | {
+        type: ActionKind.CHANGE_LIQUID_HEIGHT
+        payload: { value: number }
+      }
+    | {
         type: ActionKind.REFRESH
       }
 
@@ -182,6 +173,8 @@ const Vessel: NextPage = () => {
     switch (action.type) {
       case ActionKind.CHANGE_DROPDOWN:
         return { ...state, [action.payload.name]: action.payload.value }
+      case ActionKind.CHANGE_LIQUID_HEIGHT:
+        return { ...state, liquidHeight: action.payload.value }
       case ActionKind.CHANGE_CONE_ANGLE:
         console.log(action.payload)
         let { name, value } = action.payload
@@ -255,7 +248,7 @@ const Vessel: NextPage = () => {
         <CalcCard title={'Calculator'}>
           <>
             <div className="mb-0 flex flex-col">
-              <InputDropdown
+              {/* <InputDropdown
                 name="orientation"
                 label="Orientation"
                 selected={false}
@@ -272,7 +265,7 @@ const Vessel: NextPage = () => {
                   { value: 'vertical', label: 'Vertical' },
                   { value: 'horizontal', label: 'Horizontal' },
                 ]}
-              />
+              /> */}
               <InputDropdown
                 name="head"
                 label={orientation === 'vertical' ? 'Top Head Type' : 'Left Side Type'}
@@ -366,6 +359,20 @@ const Vessel: NextPage = () => {
                   }}
                 />
               )}
+              <InputSlider
+                name="liquidHeight"
+                label="Liquid Height"
+                error=""
+                value={liquidHeight}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({
+                    type: ActionKind.CHANGE_LIQUID_HEIGHT,
+                    payload: { value: Number(e.target.value) },
+                  })
+                }
+                max={100}
+                min={0}
+              />
             </div>
           </>
         </CalcCard>
@@ -514,19 +521,34 @@ const ResultsCard = ({ state, resultsState, handleChangeResultsState }: ResultsC
 
   return (
     <CalcCard title={'Results'}>
-      <InputFieldWithUnit
-        key="volume"
-        name="totalVolume"
-        label="Tank Volume"
-        placeholder="0"
-        selected={true}
-        displayValue={{ value: totalVolume, unit: resultsState.totalVolume }}
-        error=""
-        unitType="volume"
-        focusText=""
-        onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
-        onChangeUnit={handleChangeResultsState}
-      />
+      <>
+        <InputFieldWithUnit
+          key="volume"
+          name="totalVolume"
+          label="Tank Volume"
+          placeholder="0"
+          selected={true}
+          displayValue={{ value: totalVolume, unit: resultsState.totalVolume }}
+          error=""
+          unitType="volume"
+          focusText=""
+          onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+          onChangeUnit={handleChangeResultsState}
+        />
+        <InputFieldWithUnit
+          key="liquidVolume"
+          name="liquidVolume"
+          label="Liquid Volume"
+          placeholder="0"
+          selected={true}
+          displayValue={{ value: totalVolume, unit: resultsState.liquidVolume }}
+          error=""
+          unitType="volume"
+          focusText=""
+          onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+          onChangeUnit={handleChangeResultsState}
+        />
+      </>
     </CalcCard>
   )
 }

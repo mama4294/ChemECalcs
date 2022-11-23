@@ -65,7 +65,7 @@ const Canvas = ({ state }: Props) => {
   const tankBottomMiddle = { x: tankTopLeft.x + tankDiameter / 2, y: tankTopLeft.y + tankHeight }
 
   const totalTankHeight = (topHeadHeight + state.height.calculatedValue.value + bottomHeadHeight) * scaleFactor
-  const percentFill = 0.75
+  const percentFill = state.liquidHeight / 100
 
   const fillheight = totalTankHeight - totalTankHeight * percentFill
 

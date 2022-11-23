@@ -211,6 +211,39 @@ export const InputDropdown = ({
   )
 }
 
+type InputSliderProps = {
+  name: string
+  label: string
+  error: string
+  value: number
+  onChange: any
+  max: number
+  min: number
+  topRight?: React.ReactNode
+}
+
+export const InputSlider = ({ name, label, error, value, onChange, max, min, topRight }: InputSliderProps) => {
+  return (
+    <div className="mb-2">
+      <label htmlFor={label} className="label ">
+        {label}
+        {topRight}
+      </label>
+      <div
+        className={`peer input relative h-full w-full px-0 ${error ? 'input-error text-error' : ' text-base-content'}`}
+      >
+        <input type="range" min={min} max={max} value={value} className="range" onChange={onChange} name={name} />
+      </div>
+
+      {error && (
+        <label className="peer label py-0">
+          <span className="label-text-alt text-error">{error}</span>
+        </label>
+      )}
+    </div>
+  )
+}
+
 const InfoIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
