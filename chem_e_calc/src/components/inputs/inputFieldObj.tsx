@@ -235,17 +235,17 @@ export const InputSlider = ({ name, label, error, value, onChange, max, min, top
         }`}
       >
         <input type="range" className="range" min={min} max={max} value={value} onChange={onChange} name={name} />
-        <label className="input-group w-auto">
+        <label className="relative w-auto">
           <input
             type="text"
-            className="input input-bordered w-[6ch] text-center"
+            className="input input-bordered w-[8ch] pr-8 text-right"
             min={min}
             max={max}
             value={value}
             onChange={onChange}
             name={name}
           />
-          <span>%</span>
+          <span className={'absolute top-0 right-3 translate-y-2/4'}>%</span>
         </label>
       </div>
 
