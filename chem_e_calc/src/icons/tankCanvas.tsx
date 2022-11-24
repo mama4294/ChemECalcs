@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react'
-import { State } from '../pages/geometry/tank'
+import { calculateHeadHeight, State } from '../pages/geometry/tank'
 import { tankHeadParameters } from '../pages/geometry/tank'
 
 const Canvas = ({ state }: Props) => {
@@ -9,33 +9,6 @@ const Canvas = ({ state }: Props) => {
   const canvasWidth = containerRef.current?.clientWidth || 500
   const canvasHeight = containerRef.current?.clientHeight || 500
   const limitingDimension = Math.min(canvasWidth, canvasHeight)
-
-  const calculateHeadHeight = ({ type, diameter, angle }: { type: string; diameter: number; angle: number }) => {
-    if (type === 'cone') {
-      //calculate height of cone from angle
-      if (angle <= 0) return 0
-      if (angle >= 90) return diameter / 2
-      return diameter / 2 / Math.tan((angle * Math.PI) / 180)
-    } else if (type === 'hemisphere') {
-      return diameter / 2
-    } else if (
-      type == 'ellipsoidal (2:1)' ||
-      type == 'ASME F&D' ||
-      type == 'ASME 80/10 F&D' ||
-      type == 'ASME 80/6 F&D'
-    ) {
-      const CR = tankHeadParameters[type as keyof typeof tankHeadParameters]?.CR
-      const KR = tankHeadParameters[type as keyof typeof tankHeadParameters]?.KR
-      if (!CR || !KR) {
-        console.error('Error: CR or KR is undefined')
-        return 0
-      }
-      const crownRadius = diameter * CR
-      const knuckleRadius = diameter * KR
-      const crownAngle = Math.asin((diameter / 2 - knuckleRadius) / (crownRadius - knuckleRadius)) //radians
-      return crownRadius - (diameter / 2 - knuckleRadius) / Math.tan(crownAngle)
-    } else return 0
-  }
 
   //Determine max head dimensions for scaling
   const topHeadHeight = calculateHeadHeight({
@@ -65,7 +38,7 @@ const Canvas = ({ state }: Props) => {
   const tankBottomMiddle = { x: tankTopLeft.x + tankDiameter / 2, y: tankTopLeft.y + tankHeight }
 
   const totalTankHeight = (topHeadHeight + state.height.calculatedValue.value + bottomHeadHeight) * scaleFactor
-  const percentFill = state.liquidHeight / 100
+  const percentFill = state.liquidPercent / 100
 
   const fillheight = totalTankHeight - totalTankHeight * percentFill
 
