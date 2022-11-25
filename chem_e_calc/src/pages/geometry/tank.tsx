@@ -16,7 +16,15 @@ import { updateCalculatedValue } from '../../logic/logic'
 import { ShortInputType } from '../../types'
 import { convertUnits } from '../../utils/units'
 import Canvas from '../../icons/tankCanvas'
-import { heightOfTriangle, volumeOfConeFromAngle, volumeOfConeFromHeight, volumeOfCylinder } from '../../utils/geometry'
+import {
+  calculateASMEVolumebyHeight,
+  capacityOfASMEDish,
+  heightOfTriangle,
+  volumeOfConeFromAngle,
+  volumeOfConeFromHeight,
+  volumeOfCylinder,
+} from '../../utils/geometry'
+import { tankHeadParameters } from '../../constants/ASME'
 
 type Head = 'ellipsoidal (2:1)' | 'hemisphere' | 'ASME 80/6 F&D' | 'ASME 80/10 F&D' | 'ASME F&D' | 'flat' | 'cone'
 
@@ -36,9 +44,11 @@ export type State = {
 type ResultsState = {
   totalVolume: string
   liquidVolume: string
+  totalHeight: string
+  liquidHeight: string
 }
 
-const Vessel: NextPage = () => {
+const Tank: NextPage = () => {
   const paths = [
     { title: 'Geometery', href: '/geometry' },
     { title: 'Vessel', href: '/geometry/tank' },
@@ -58,6 +68,8 @@ const Vessel: NextPage = () => {
   const [resultsState, setResultsState] = useState<ResultsState>({
     totalVolume: 'm3',
     liquidVolume: 'm3',
+    totalHeight: 'm',
+    liquidHeight: 'm',
   })
 
   const handleChangeResultsState = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -243,20 +255,33 @@ const Vessel: NextPage = () => {
     })
   }
 
+  const diameterValue = state.diameter.calculatedValue.value
+  const heightValue = state.height.calculatedValue.value
+  const topConeAngleValue = state.topConeAngle.calculatedValue.value
+  const bottomConeAngleValue = state.bottomConeAngle.calculatedValue.value
+
   //Determine max head dimensions for scaling
-  const topHeadHeight = calculateHeadHeight({
+  const topDishHeight = calculateHeadHeight({
     type: state.head,
-    diameter: state.diameter.calculatedValue.value,
-    angle: state.topConeAngle.calculatedValue.value,
+    diameter: diameterValue,
+    angle: topConeAngleValue,
   })
-  const bottomHeadHeight = calculateHeadHeight({
+  const bottomDishHeight = calculateHeadHeight({
     type: state.bottom,
-    diameter: state.diameter.calculatedValue.value,
-    angle: state.bottomConeAngle.calculatedValue.value,
+    diameter: diameterValue,
+    angle: bottomConeAngleValue,
   })
 
-  const totalHeight = state.height.calculatedValue.value + topHeadHeight + bottomHeadHeight //m
+  const totalHeight = heightValue + topDishHeight + bottomDishHeight //m
   const liquidHeight = totalHeight * (state.liquidPercent / 100) //m
+  const liquidVolumeValue = tankVolumeByLevel({ state, liquidHeight, bottomDishHeight, topDishHeight, totalHeight })
+  const totalVolumeValue = tankVolumeByLevel({
+    state,
+    liquidHeight: totalHeight,
+    bottomDishHeight,
+    topDishHeight,
+    totalHeight,
+  })
 
   const { head, bottom, orientation, diameter, height, liquidPercent, topConeAngle, bottomConeAngle } = state
 
@@ -271,24 +296,6 @@ const Vessel: NextPage = () => {
         <CalcCard title={'Calculator'}>
           <>
             <div className="mb-0 flex flex-col">
-              {/* <InputDropdown
-                name="orientation"
-                label="Orientation"
-                selected={false}
-                error=""
-                focusText="Select orientation"
-                value={state.orientation}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  dispatch({
-                    type: ActionKind.CHANGE_DROPDOWN,
-                    payload: { name: e.target.name, value: e.target.value },
-                  })
-                }
-                options={[
-                  { value: 'vertical', label: 'Vertical' },
-                  { value: 'horizontal', label: 'Horizontal' },
-                ]}
-              /> */}
               <InputDropdown
                 name="head"
                 label={orientation === 'vertical' ? 'Top Head Type' : 'Left Side Type'}
@@ -399,11 +406,12 @@ const Vessel: NextPage = () => {
           {/* <CanvasTank state={state} /> */}
         </CalcCard>
         <ResultsCard
-          state={state}
           resultsState={resultsState}
           handleChangeResultsState={handleChangeResultsState}
-          liquidHeight={liquidHeight}
-          totalHeight={totalHeight}
+          liquidVolumeValue={liquidVolumeValue}
+          totalVolumeValue={totalVolumeValue}
+          totalHeightValue={totalHeight}
+          liquidHeightValue={liquidHeight}
         />
       </CalcBody>
     </PageContainer>
@@ -411,303 +419,44 @@ const Vessel: NextPage = () => {
 }
 
 type ResultsCard = {
-  state: State
   resultsState: ResultsState
   handleChangeResultsState?: (e: React.ChangeEvent<HTMLInputElement>) => void
-  liquidHeight: number
-  totalHeight: number
+  liquidVolumeValue: number
+  totalVolumeValue: number
+  liquidHeightValue: number
+  totalHeightValue: number
 }
 
-export type TankHeadParameter = {
-  [key: string]: {
-    fd: number
-    fk: number
-    a1: number
-    a2: number
-    b1: number
-    b2: number
-    c: number
-    CR: number
-    KR: number
-  }
-}
-
-export const tankHeadParameters: TankHeadParameter = {
-  'ASME F&D': {
-    fd: 1,
-    fk: 0.06,
-    a1: 0.1163166103,
-    b1: 0.4680851064,
-    a2: 0.1693376137,
-    b2: 0.5,
-    c: 0.080999,
-    CR: 1,
-    KR: 0.1,
-  },
-  'ASME 80/10 F&D': {
-    fd: 0.8,
-    fk: 0.1,
-    a1: 0.1434785547,
-    b1: 0.4571428571,
-    a2: 0.2255437353,
-    b2: 0.5,
-    c: 0.109884,
-    CR: 0.8,
-    KR: 0.1,
-  },
-  'ASME 80/6 F&D': {
-    fd: 0.8,
-    fk: 0.06,
-    a1: 0.1567794689,
-    b1: 0.4756756757,
-    a2: 0.2050210088,
-    b2: 0.5,
-    c: 0.0945365,
-    CR: 0.8,
-    KR: 0.06,
-  },
-  'ellipsoidal (2:1)': {
-    fd: 0.875,
-    fk: 0.17,
-    a1: 0.101777034,
-    b1: 0.4095744681,
-    a2: 0.2520032103,
-    b2: 0.5,
-    c: 0.1337164,
-    CR: 0.9,
-    KR: 0.17,
-  },
-  hemisphere: {
-    fd: 0.5,
-    fk: 0.5,
-    a1: 0.5,
-    b1: 0.5,
-    a2: 0.5,
-    b2: 0.5,
-    c: 0.2617994,
-    CR: 1,
-    KR: 0,
-  },
-}
-
-type VolumeOfDish = {
-  diameter: number
-  type: string
-}
-
-const volumeOfDish = ({ diameter, type }: VolumeOfDish) => {
-  const capacityFactor = tankHeadParameters[type]?.c || 0
-  return capacityFactor * Math.pow(diameter, 3) //m3
-}
-
-const ResultsCard = ({ state, resultsState, handleChangeResultsState, liquidHeight, totalHeight }: ResultsCard) => {
-  const { diameter, height, topConeAngle, bottomConeAngle, head, bottom } = state
-
-  const calculateHeadVolume = (headType: string, diameter: number, angle: number) => {
-    switch (headType) {
-      case 'flat':
-        return 0
-      case 'hemisphere':
-      case 'ASME F&D':
-      case 'ASME 80/10 F&D':
-      case 'ASME 80/6 F&D':
-      case 'ellipsoidal (2:1)':
-        return volumeOfDish({ diameter: diameter, type: headType })
-      case 'cone':
-        return volumeOfConeFromAngle({ diameter: diameter, angle: angle })
-      default:
-        return 0
-    }
-  }
-
-  const volumeTopHead = calculateHeadVolume(head, diameter.calculatedValue.value, topConeAngle.calculatedValue.value) //m3
-  const volumeShell = (Math.PI * Math.pow(diameter.calculatedValue.value, 2) * height.calculatedValue.value) / 4 //m3
-  const volumeBottomHead = calculateHeadVolume(
-    bottom,
-    diameter.calculatedValue.value,
-    bottomConeAngle.calculatedValue.value
-  ) //m3
-
+const ResultsCard = ({
+  resultsState,
+  handleChangeResultsState,
+  liquidVolumeValue,
+  totalVolumeValue,
+  totalHeightValue,
+  liquidHeightValue,
+}: ResultsCard) => {
   const totalVolume = convertUnits({
-    value: volumeShell + volumeTopHead + volumeBottomHead,
+    value: totalVolumeValue,
     fromUnit: 'm3',
     toUnit: resultsState.totalVolume,
   }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
 
-  type VolumeByLevelProps = {
-    state: State
-    liquidHeight: number
-  }
-
-  const calcVolumeByLevel = ({ state, liquidHeight }: VolumeByLevelProps) => {
-    const diameter = state.diameter.calculatedValue.value
-    const bottomConeAngle = state.bottomConeAngle.calculatedValue.value
-
-    const calculateBottomVolume = (state: State, liquidHeight: number): number => {
-      if (state.bottom === 'flat') {
-        return 0
-      }
-      if (state.bottom === 'cone') {
-        //TODO fix this. Not correct
-        const coneHeight = heightOfTriangle({ base: diameter, angle: bottomConeAngle })
-        console.table({ coneHeight, liquidHeight })
-        if (liquidHeight < coneHeight) {
-          const radius = liquidHeight * Math.tan(state.bottomConeAngle.calculatedValue.value * (Math.PI / 180))
-          return (1 / 3) * Math.PI * Math.pow(radius, 2) * liquidHeight
-        } else {
-          return volumeOfConeFromHeight({ diameter: diameter, height: coneHeight })
-        }
-      } else {
-        return calculateASMEVolumebyHeight(state, liquidHeight, false)
-      }
-    }
-
-    const calculateTopVolume = (state: State, liquidHeight: number) => {
-      if (state.head === 'flat') {
-        return 0
-      }
-      if (state.head === 'cone') {
-        //TODO fix this. Not correct
-        const coneHeight = heightOfTriangle({ base: diameter, angle: bottomConeAngle })
-        console.table({ coneHeight, liquidHeight })
-        if (liquidHeight < coneHeight) {
-          const radius = liquidHeight * Math.tan(state.bottomConeAngle.calculatedValue.value * (Math.PI / 180))
-          return (1 / 3) * Math.PI * Math.pow(radius, 2) * liquidHeight
-        } else {
-          return volumeOfConeFromHeight({ diameter: diameter, height: coneHeight })
-        }
-      } else {
-        return calculateASMEVolumebyHeight(state, liquidHeight, true)
-      }
-    }
-
-    const calcV1 = ({ diameter, fd, a }: { diameter: number; fd: number; a: number }) => {
-      return Math.PI * diameter ** 3 * (fd * a ** 2 + (1 / 3) * a ** 3)
-    }
-
-    const calcV2 = ({
-      a,
-      a1,
-      a2,
-      fk,
-      diameter,
-    }: {
-      a: number
-      a1: number
-      a2: number
-      fk: number
-      diameter: number
-    }) => {
-      const v2_1 = (Math.pow(0.5 - fk, 2) + Math.pow(fk, 2)) * (a - a1)
-      const v2_2 = (1 / 3) * (Math.pow(a - a2, 3) - Math.pow(a1 - a2, 3))
-      const v2_3 =
-        (0.5 - fk) *
-        ((a - a2) * Math.sqrt(Math.pow(fk, 2) - Math.pow(a - a2, 2)) -
-          (a1 - a2) * Math.sqrt(Math.pow(fk, 2) - Math.pow(a1 - a2, 2)) +
-          Math.pow(fk, 2) * Math.asin((a - a2) / fk) -
-          Math.pow(fk, 2) * Math.asin((a1 - a2) / fk))
-      return Math.PI * Math.pow(diameter, 3) * (v2_1 + v2_2 + v2_3)
-    }
-
-    const calcV4 = ({
-      a,
-      a1,
-      a2,
-      a5,
-      fk,
-      diameter,
-    }: {
-      a: number
-      a1: number
-      a2: number
-      a5: number
-      fk: number
-      diameter: number
-    }) => {
-      const v4_1 = (Math.pow(0.5 - fk, 2) + Math.pow(fk, 2)) * (a5 - a - a1)
-      const v4_2 = (1 / 3) * (Math.pow(a5 - a - a2, 3) - Math.pow(a1 - a2, 3))
-      const v4_3 =
-        (0.5 - fk) *
-        ((a5 - a - a2) * Math.sqrt(Math.pow(fk, 2) - Math.pow(a5 - a - a2, 2)) -
-          (a1 - a2) * Math.sqrt(Math.pow(fk, 2) - Math.pow(a1 - a2, 2)) +
-          Math.pow(fk, 2) * Math.asin((a5 - a - a2) / fk) -
-          Math.pow(fk, 2) * Math.asin((a1 - a2) / fk))
-
-      return Math.PI * Math.pow(diameter, 3) * (v4_1 + v4_2 + v4_3)
-    }
-
-    const calcV5 = ({ diameter, fd, a, a5 }: { diameter: number; fd: number; a: number; a5: number }) => {
-      return Math.PI * diameter ** 3 * (fd * Math.pow(a5 - a, 2) - (1 / 3) * Math.pow(a5 - a, 3))
-    }
-
-    const calculateASMEVolumebyHeight = (state: State, liquidHeight: number, top: boolean): number => {
-      const a = liquidHeight / state.diameter.calculatedValue.value //m
-      const diameter = state.diameter.calculatedValue.value //m
-
-      if (top) {
-        //Top Dish
-        const dish = state.head
-        const fd = tankHeadParameters[dish]?.fd || 0
-        const fk = tankHeadParameters[dish]?.fk || 0
-        const a1 = tankHeadParameters[dish]?.a1 || 0
-        const a2 = tankHeadParameters[dish]?.a2 || 0
-        const a5 = totalHeight / state.diameter.calculatedValue.value
-        const a3 = a5 - a2
-        const a4 = a5 - a1
-
-        console.table({ a, a1, a2, a3, a4, a5, liquidHeight })
-
-        let v4 = 0
-        if (a <= a3) v4 = 0
-        else if (a >= a4) v4 = calcV2({ a: a2, a1, a2, diameter, fk }) - calcV4({ a: a4, a1, a2, a5, diameter, fk })
-        else v4 = calcV2({ a: a2, a1, a2, diameter, fk }) - calcV4({ a: a, a1, a2, a5, diameter, fk })
-
-        let v5 = 0
-        if (a <= a4) v5 = 0
-        else if (a >= a5) v5 = calcV1({ diameter, fd, a: a1 }) - calcV5({ diameter, fd, a: a5, a5 })
-        else v5 = calcV1({ diameter, fd, a: a1 }) - calcV5({ diameter, fd, a, a5 })
-
-        return v4 + v5
-      } else {
-        //Bottom Dish
-        const dish = state.bottom
-        const fd = tankHeadParameters[dish]?.fd || 0
-        const fk = tankHeadParameters[dish]?.fk || 0
-        const a1 = tankHeadParameters[dish]?.a1 || 0
-        const a2 = tankHeadParameters[dish]?.a2 || 0
-
-        let v1 = 0
-        if (a <= 0) v1 = 0 //v1 is empty
-        else if (a >= a1) v1 = calcV1({ diameter, fd, a: a1 }) //v1 completely filled
-        else v1 = calcV1({ diameter, fd, a: a1 }) //v1 partially filled
-
-        let v2 = 0
-        if (a <= a1) v2 = 0 //v2 is empty
-        else if (a >= a2) {
-          //v2 is completely filled
-          v2 = calcV2({ a: a2, a1, a2, diameter, fk })
-        } else {
-          //v2 is partially filled
-          v2 = calcV2({ a, a1, a2, diameter, fk })
-        }
-        return v1 + v2
-      }
-    }
-
-    const bottomVolume = calculateBottomVolume(state, liquidHeight)
-    const middleVolume = volumeOfCylinder({
-      diameter: state.diameter.calculatedValue.value,
-      height: state.height.calculatedValue.value,
-    })
-    const topVolume = calculateTopVolume(state, liquidHeight)
-
-    return bottomVolume + middleVolume + topVolume
-  }
+  const totalHeight = convertUnits({
+    value: totalHeightValue,
+    fromUnit: 'm',
+    toUnit: resultsState.totalHeight,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
 
   const liquidVolume = convertUnits({
-    value: calcVolumeByLevel({ state, liquidHeight }),
+    value: liquidVolumeValue,
     fromUnit: 'm3',
     toUnit: resultsState.liquidVolume,
+  }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
+
+  const liquidHeight = convertUnits({
+    value: liquidHeightValue,
+    fromUnit: 'm',
+    toUnit: resultsState.liquidHeight,
   }).toLocaleString('en-US', { maximumSignificantDigits: 3 })
 
   return (
@@ -727,14 +476,40 @@ const ResultsCard = ({ state, resultsState, handleChangeResultsState, liquidHeig
           onChangeUnit={handleChangeResultsState}
         />
         <InputFieldWithUnit
+          key="totalHeight"
+          name="totalHeight"
+          label="Total Height"
+          placeholder="0"
+          selected={true}
+          displayValue={{ value: totalHeight, unit: resultsState.totalHeight }}
+          error=""
+          unitType="length"
+          focusText=""
+          onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+          onChangeUnit={handleChangeResultsState}
+        />
+        <InputFieldWithUnit
           key="liquidVolume"
           name="liquidVolume"
           label="Liquid Volume"
           placeholder="0"
           selected={true}
-          displayValue={{ value: String(liquidVolume), unit: resultsState.liquidVolume }}
+          displayValue={{ value: liquidVolume, unit: resultsState.liquidVolume }}
           error=""
           unitType="volume"
+          focusText=""
+          onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+          onChangeUnit={handleChangeResultsState}
+        />
+        <InputFieldWithUnit
+          key="liquidHeight"
+          name="liquidHeight"
+          label="Liquid Height"
+          placeholder="0"
+          selected={true}
+          displayValue={{ value: liquidHeight, unit: resultsState.liquidHeight }}
+          error=""
+          unitType="length"
           focusText=""
           onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
           onChangeUnit={handleChangeResultsState}
@@ -744,7 +519,15 @@ const ResultsCard = ({ state, resultsState, handleChangeResultsState, liquidHeig
   )
 }
 
-export const calculateHeadHeight = ({ type, diameter, angle }: { type: string; diameter: number; angle: number }) => {
+export const calculateHeadHeight = ({
+  type,
+  diameter,
+  angle,
+}: {
+  type: keyof typeof tankHeadParameters
+  diameter: number
+  angle: number
+}) => {
   if (type === 'cone') {
     //calculate height of cone from angle
     if (angle <= 0) return 0
@@ -766,4 +549,78 @@ export const calculateHeadHeight = ({ type, diameter, angle }: { type: string; d
   } else return 0
 }
 
-export default Vessel
+const tankVolumeByLevel = ({
+  state,
+  liquidHeight,
+  bottomDishHeight,
+  topDishHeight,
+  totalHeight,
+}: {
+  state: State
+  liquidHeight: number
+  bottomDishHeight: number
+  topDishHeight: number
+  totalHeight: number
+}) => {
+  const diameter = state.diameter.calculatedValue.value
+  const bottomConeAngle = state.bottomConeAngle.calculatedValue.value
+
+  const calculateBottomRegionVolume = (): number => {
+    if (state.bottom === 'flat') {
+      return 0
+    }
+    if (state.bottom === 'cone') {
+      //TODO fix this. Not correct
+      const coneHeight = heightOfTriangle({ base: diameter, angle: bottomConeAngle })
+      console.table({ coneHeight, liquidHeight })
+      if (liquidHeight < coneHeight) {
+        const radius = liquidHeight * Math.tan(state.bottomConeAngle.calculatedValue.value * (Math.PI / 180))
+        return (1 / 3) * Math.PI * Math.pow(radius, 2) * liquidHeight
+      } else {
+        return volumeOfConeFromHeight({ diameter: diameter, height: coneHeight })
+      }
+    } else {
+      return calculateASMEVolumebyHeight(state, liquidHeight, totalHeight, false)
+    }
+  }
+
+  const calculateCylinderRegionVolume = () => {
+    const cylinderHeight = liquidHeight - bottomDishHeight - topDishHeight
+    const yBottom = bottomDishHeight
+    const yTop = totalHeight - topDishHeight
+
+    if (liquidHeight < yBottom) return 0 //liquid is below cylinder
+    else if (liquidHeight > yTop)
+      return volumeOfCylinder({ diameter: diameter, height: cylinderHeight }) //liquid is above cylinder
+    else return volumeOfCylinder({ diameter: diameter, height: liquidHeight - yBottom }) //liquid is in cylinder
+  }
+
+  const calculateTopRegionVolume = () => {
+    if (state.head === 'flat') {
+      return 0
+    }
+    if (state.head === 'cone') {
+      //TODO fix this. Not correct
+      const coneHeight = heightOfTriangle({ base: diameter, angle: bottomConeAngle })
+      console.table({ coneHeight, liquidHeight })
+      if (liquidHeight < coneHeight) {
+        const radius = liquidHeight * Math.tan(state.bottomConeAngle.calculatedValue.value * (Math.PI / 180))
+        return (1 / 3) * Math.PI * Math.pow(radius, 2) * liquidHeight
+      } else {
+        return volumeOfConeFromHeight({ diameter: diameter, height: coneHeight })
+      }
+    } else {
+      return calculateASMEVolumebyHeight(state, liquidHeight, totalHeight, true)
+    }
+  }
+
+  const bottomVolume = calculateBottomRegionVolume()
+  const middleVolume = calculateCylinderRegionVolume()
+  const topVolume = calculateTopRegionVolume()
+
+  console.table({ bottomVolume, middleVolume, topVolume })
+
+  return bottomVolume + middleVolume + topVolume
+}
+
+export default Tank

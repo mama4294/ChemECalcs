@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import { calculateHeadHeight, State } from '../pages/geometry/tank'
-import { tankHeadParameters } from '../pages/geometry/tank'
+import { tankHeadParameters } from '../constants/ASME'
 
 const Canvas = ({ state }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null)
