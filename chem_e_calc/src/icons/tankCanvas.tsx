@@ -172,7 +172,7 @@ const Canvas = ({ state }: Props) => {
 
   const drawCone = ({ ctx, top, center, diameter, angle }: HeadCtx) => {
     const radius = diameter / 2
-    const height = radius / Math.tan((angle * Math.PI) / 180)
+    const height = radius / Math.tan(((90 - angle) * Math.PI) / 180)
 
     if (top) {
       ctx.moveTo(center.x + radius, center.y)

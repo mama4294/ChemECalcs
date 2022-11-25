@@ -1,8 +1,10 @@
 import { tankHeadParameters } from '../constants/ASME'
 import { State } from '../pages/geometry/tank'
 
-export const heightOfTriangle = ({ base, angle }: { base: number; angle: number }) => {
-  return base * Math.tan((angle * Math.PI) / 180)
+export const heightOfTriangle = ({ diameter, angle }: { diameter: number; angle: number }) => {
+  if (angle <= 0) return 0
+  if (angle >= 90) return Infinity
+  return diameter / 2 / Math.tan(((90 - angle) * Math.PI) / 180)
 }
 
 export const volumeOfConeFromHeight = ({ diameter, height }: { diameter: number; height: number }) => {

@@ -18,9 +18,7 @@ import { convertUnits } from '../../utils/units'
 import Canvas from '../../icons/tankCanvas'
 import {
   calculateASMEVolumebyHeight,
-  capacityOfASMEDish,
   heightOfTriangle,
-  volumeOfConeFromAngle,
   volumeOfConeFromHeight,
   volumeOfCylinder,
 } from '../../utils/geometry'
@@ -532,7 +530,7 @@ export const calculateHeadHeight = ({
     //calculate height of cone from angle
     if (angle <= 0) return 0
     if (angle >= 90) return diameter / 2
-    return diameter / 2 / Math.tan((angle * Math.PI) / 180)
+    return diameter / 2 / Math.tan(((90 - angle) * Math.PI) / 180)
   } else if (type === 'hemisphere') {
     return diameter / 2
   } else if (type == 'ellipsoidal (2:1)' || type == 'ASME F&D' || type == 'ASME 80/10 F&D' || type == 'ASME 80/6 F&D') {
@@ -564,31 +562,32 @@ const tankVolumeByLevel = ({
 }) => {
   const diameter = state.diameter.calculatedValue.value
   const bottomConeAngle = state.bottomConeAngle.calculatedValue.value
+  const topConeAngle = state.topConeAngle.calculatedValue.value
+  const cylinderHeight = liquidHeight - bottomDishHeight - topDishHeight
+  const yBottom = bottomDishHeight
+  const yTop = totalHeight - topDishHeight
 
   const calculateBottomRegionVolume = (): number => {
     if (state.bottom === 'flat') {
       return 0
     }
     if (state.bottom === 'cone') {
-      //TODO fix this. Not correct
-      const coneHeight = heightOfTriangle({ base: diameter, angle: bottomConeAngle })
-      console.table({ coneHeight, liquidHeight })
+      const coneHeight = heightOfTriangle({ diameter, angle: bottomConeAngle })
       if (liquidHeight < coneHeight) {
-        const radius = liquidHeight * Math.tan(state.bottomConeAngle.calculatedValue.value * (Math.PI / 180))
-        return (1 / 3) * Math.PI * Math.pow(radius, 2) * liquidHeight
+        //liquid is in the cone
+        const liquidRadius = liquidHeight * Math.tan((90 - bottomConeAngle) * (Math.PI / 180))
+        return volumeOfConeFromHeight({ diameter: 2 * liquidRadius, height: liquidHeight })
       } else {
+        //cone full
         return volumeOfConeFromHeight({ diameter: diameter, height: coneHeight })
       }
     } else {
+      //ASME dish
       return calculateASMEVolumebyHeight(state, liquidHeight, totalHeight, false)
     }
   }
 
   const calculateCylinderRegionVolume = () => {
-    const cylinderHeight = liquidHeight - bottomDishHeight - topDishHeight
-    const yBottom = bottomDishHeight
-    const yTop = totalHeight - topDishHeight
-
     if (liquidHeight < yBottom) return 0 //liquid is below cylinder
     else if (liquidHeight > yTop)
       return volumeOfCylinder({ diameter: diameter, height: cylinderHeight }) //liquid is above cylinder
@@ -600,14 +599,18 @@ const tankVolumeByLevel = ({
       return 0
     }
     if (state.head === 'cone') {
-      //TODO fix this. Not correct
-      const coneHeight = heightOfTriangle({ base: diameter, angle: bottomConeAngle })
-      console.table({ coneHeight, liquidHeight })
-      if (liquidHeight < coneHeight) {
-        const radius = liquidHeight * Math.tan(state.bottomConeAngle.calculatedValue.value * (Math.PI / 180))
-        return (1 / 3) * Math.PI * Math.pow(radius, 2) * liquidHeight
-      } else {
-        return volumeOfConeFromHeight({ diameter: diameter, height: coneHeight })
+      const coneHeight = heightOfTriangle({ diameter, angle: topConeAngle })
+      if (liquidHeight < yTop) return 0 //liquid is below top cone
+      else if (liquidHeight >= topDishHeight)
+        return volumeOfConeFromHeight({ diameter: diameter, height: coneHeight }) //top cone full
+      else {
+        //liquid is in top cone
+        const headspaceHeight = totalHeight - liquidHeight
+        const liquidRadius = headspaceHeight * Math.tan((90 - topConeAngle) * (Math.PI / 180))
+        return (
+          volumeOfConeFromHeight({ diameter: diameter, height: coneHeight }) -
+          volumeOfConeFromHeight({ diameter: liquidRadius * 2, height: headspaceHeight })
+        )
       }
     } else {
       return calculateASMEVolumebyHeight(state, liquidHeight, totalHeight, true)
@@ -617,8 +620,6 @@ const tankVolumeByLevel = ({
   const bottomVolume = calculateBottomRegionVolume()
   const middleVolume = calculateCylinderRegionVolume()
   const topVolume = calculateTopRegionVolume()
-
-  console.table({ bottomVolume, middleVolume, topVolume })
 
   return bottomVolume + middleVolume + topVolume
 }
