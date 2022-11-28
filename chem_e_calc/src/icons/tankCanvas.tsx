@@ -2,13 +2,16 @@ import React, { useRef, useEffect } from 'react'
 import { calculateHeadHeight, State } from '../pages/geometry/tank'
 import { tankHeadParameters } from '../constants/ASME'
 
-const Canvas = ({ state }: Props) => {
+const Canvas = ({ state }: { state: State }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  const canvasWidth = containerRef.current?.clientWidth || 500
-  const canvasHeight = containerRef.current?.clientHeight || 500
-  const limitingDimension = Math.min(canvasWidth, canvasHeight)
+  const [canvasDimention, setCanvasDimention] = React.useState({
+    width: containerRef.current?.clientWidth || 500,
+    height: containerRef.current?.clientHeight || 500,
+  })
+
+  const limitingDimension = Math.min(canvasDimention.width, canvasDimention.height)
 
   //Determine max head dimensions for scaling
   const topHeadHeight = calculateHeadHeight({
@@ -33,7 +36,7 @@ const Canvas = ({ state }: Props) => {
   const tankHeight = state.height.calculatedValue.value * scaleFactor
 
   //center tank
-  const tankTopLeft = { x: canvasWidth / 2 - tankDiameter / 2, y: topHeadHeight * scaleFactor }
+  const tankTopLeft = { x: canvasDimention.width / 2 - tankDiameter / 2, y: topHeadHeight * scaleFactor }
   const tankTopMiddle = { x: tankTopLeft.x + tankDiameter / 2, y: tankTopLeft.y }
   const tankBottomMiddle = { x: tankTopLeft.x + tankDiameter / 2, y: tankTopLeft.y + tankHeight }
 
@@ -43,17 +46,20 @@ const Canvas = ({ state }: Props) => {
   const fillheight = totalTankHeight - totalTankHeight * percentFill
 
   //Find colors
-  let tankOutline = 'white'
-  let tankFill = 'gray' as string
-  if (containerRef.current) {
-    tankOutline = window.getComputedStyle(containerRef.current).stroke
-    tankFill = window.getComputedStyle(containerRef.current).fill
-  }
+  let tankOutline = containerRef.current ? window.getComputedStyle(containerRef.current).stroke : 'black'
+  let tankFill = containerRef.current ? window.getComputedStyle(containerRef.current).fill : 'black'
+
+  useEffect(() => {
+    if (containerRef.current) {
+      tankOutline = window.getComputedStyle(containerRef.current).stroke
+      tankFill = window.getComputedStyle(containerRef.current).fill
+    }
+  }, [])
 
   const draw = (ctx: CanvasRenderingContext2D) => {
     //clear canvas
     ctx.save()
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+    ctx.clearRect(0, 0, canvasDimention.width, canvasDimention.height)
 
     let clipPath = new Path2D()
 
@@ -79,7 +85,7 @@ const Canvas = ({ state }: Props) => {
 
     //draw liquid level
     ctx.fillStyle = `${tankFill}`
-    ctx.fillRect(0, fillheight, canvasWidth, canvasHeight)
+    ctx.fillRect(0, fillheight, canvasDimention.width, canvasDimention.height)
 
     //draw tank
     ctx.lineWidth = 5
@@ -186,22 +192,29 @@ const Canvas = ({ state }: Props) => {
   }
 
   useEffect(() => {
+    const handleResize = () => {
+      setCanvasDimention({
+        width: containerRef.current?.clientWidth || 500,
+        height: containerRef.current?.clientHeight || 500,
+      })
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  })
+
+  useEffect(() => {
     const canvas = canvasRef.current
     const context = canvas?.getContext('2d')
     if (context) {
       draw(context)
     }
-  }, [state])
+  }, [state, limitingDimension])
 
   return (
     <div className="h-full w-full fill-accent stroke-base-content" ref={containerRef}>
-      <canvas ref={canvasRef} width={canvasWidth} height={canvasHeight} />
+      <canvas ref={canvasRef} width={canvasDimention.width} height={canvasDimention.height} />
     </div>
   )
-}
-
-type Props = {
-  state: State
 }
 
 export default Canvas

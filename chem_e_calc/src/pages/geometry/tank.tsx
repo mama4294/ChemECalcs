@@ -401,7 +401,6 @@ const Tank: NextPage = () => {
         </CalcCard>
         <CalcCard title={'Tank'}>
           <Canvas state={state} />
-          {/* <CanvasTank state={state} /> */}
         </CalcCard>
         <ResultsCard
           resultsState={resultsState}

@@ -93,8 +93,6 @@ export const calculateASMEVolumebyHeight = (
     const a3 = a5 - a2
     const a4 = a5 - a1
 
-    console.table({ a, a1, a2, a3, a4, a5, liquidHeight })
-
     let v4 = 0
     if (a <= a3) v4 = 0
     else if (a >= a4) v4 = calcV2({ a: a2, a1, a2, diameter, fk }) - calcV4({ a: a4, a1, a2, a5, diameter, fk })
