@@ -22,7 +22,8 @@ const Home: NextPage = () => {
           <GridCard name="Unit Conversion" description="Convert between units" link="/conversion" />
           <GridCard name="Geometry" description="Calculators for geometric properties" link="/geometry" />
           <GridCard name="Fluid Flow" description="Calculators for fluid dynamics" link="/fluidflow" />
-          <GridCard name="Agitation" description="Agitation scaleup calculation" link="/agitation" />
+          <GridCard name="Tank Volume" description="Tank volume visualization" link="/geometry/tank" />
+          <GridCard name="Agitation" description="Agitation scaleup calculation" link="/agitation" span={2} />
         </div>
       </main>
     </>

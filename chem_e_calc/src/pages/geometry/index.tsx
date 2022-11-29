@@ -6,6 +6,7 @@ import { IconCylinder } from '../../icons/iconCylinder'
 import { IconHemisphere } from '../../icons/iconHemiphere'
 import { IconPyramid } from '../../icons/iconPyramid'
 import { IconSphere } from '../../icons/iconSphere'
+import { IconTank } from '../../icons/IconTank'
 
 const Geometry = () => {
   return (
@@ -33,7 +34,7 @@ const Geometry = () => {
       </div>
 
       {/* Calculator */}
-      <div className="my-3 grid gap-9 py-3 text-center md:grid-cols-3">
+      <div className="my-3 grid gap-9 py-3 text-center  md:grid-cols-3">
         <GridCard name="Cylinder" link="/geometry/cylinder">
           <IconCylinder />
         </GridCard>
@@ -51,6 +52,9 @@ const Geometry = () => {
         </GridCard>
         <GridCard name="Hemisphere" link="/geometry/hemisphere">
           <IconHemisphere />
+        </GridCard>
+        <GridCard name="Tank" link="/geometry/tank" span={2}>
+          <IconTank />
         </GridCard>
       </div>
     </div>
