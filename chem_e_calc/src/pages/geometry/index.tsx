@@ -53,7 +53,7 @@ const Geometry = () => {
         <GridCard name="Hemisphere" link="/geometry/hemisphere">
           <IconHemisphere />
         </GridCard>
-        <GridCard name="Tank" link="/geometry/tank" span={2}>
+        <GridCard name="Tank" link="/geometry/tank" span={1}>
           <IconTank />
         </GridCard>
       </div>
