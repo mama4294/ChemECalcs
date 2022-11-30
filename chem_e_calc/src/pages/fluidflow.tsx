@@ -14,9 +14,11 @@ import { convertUnits } from '../utils/units'
 
 //TODO add equations
 
+type SolveSelectionOptions = 'velocity' | 'outerDiameter' | 'volumeFlowRate'
+
 type State = {
-  solveSelection: string
-  flowrate: ShortInputType
+  solveSelection: SolveSelectionOptions
+  volumeFlowRate: ShortInputType
   outerDiameter: ShortInputType
   thickness: ShortInputType
   velocity: ShortInputType
@@ -27,7 +29,7 @@ type StateWithoutSolveSelection = Omit<State, 'solveSelection'>
 const resetErrorMessages = (state: State): State => {
   return {
     ...state,
-    flowrate: { ...state.flowrate, error: '' },
+    volumeFlowRate: { ...state.volumeFlowRate, error: '' },
     outerDiameter: { ...state.outerDiameter, error: '' },
     thickness: { ...state.thickness, error: '' },
     velocity: { ...state.velocity, error: '' },
@@ -35,11 +37,11 @@ const resetErrorMessages = (state: State): State => {
 }
 
 const calculateAnswer = (state: State): State => {
-  const { velocity, thickness, outerDiameter, flowrate } = state
+  const { velocity, thickness, outerDiameter, volumeFlowRate } = state
   const inputVelocity = velocity.calculatedValue.value //m/s
   const inputThickness = thickness.calculatedValue.value //m
   const inputDiameter = outerDiameter.calculatedValue.value //m
-  const inputFlowrate = flowrate.calculatedValue.value //m3/s
+  const inputFlowrate = volumeFlowRate.calculatedValue.value //m3/s
   let validatedState = resetErrorMessages(state)
 
   switch (state.solveSelection) {
@@ -64,13 +66,13 @@ const calculateAnswer = (state: State): State => {
       let answer = inputVelocity * area //m3/s
 
       let updatedAnswer = updatedisplayValue({
-        ...flowrate,
-        calculatedValue: { value: answer, unit: flowrate.calculatedValue.unit },
+        ...volumeFlowRate,
+        calculatedValue: { value: answer, unit: volumeFlowRate.calculatedValue.unit },
       })
 
       return {
         ...validatedState,
-        flowrate: updatedAnswer,
+        volumeFlowRate: updatedAnswer,
       }
     case 'velocity':
       if (inputDiameter <= inputThickness * 2) {
@@ -102,7 +104,6 @@ const calculateAnswer = (state: State): State => {
         velocity: updatedAnswer,
       }
     case 'outerDiameter':
-      // innerDiameter = inputDiameter - 2 * inputThickness //m
       area = inputFlowrate / inputVelocity //m2
       innerDiameter = 2 * Math.sqrt(area / Math.PI) //m
       answer = innerDiameter + 2 * inputThickness //m
@@ -124,7 +125,8 @@ const calculateAnswer = (state: State): State => {
         outerDiameter: updatedAnswer,
       }
     default:
-      alert('Error: State reducer action not recognized')
+      const neverEver: never = state.solveSelection
+      console.error('Error: State reducer action not recognized, ', neverEver)
       return state
   }
 }
@@ -147,7 +149,7 @@ const UnitConversion: NextPage = () => {
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
 
   const initialState: State = {
-    solveSelection: 'flowrate',
+    solveSelection: 'volumeFlowRate',
     velocity: {
       name: 'velocity',
       label: 'Velocity',
@@ -208,7 +210,7 @@ const UnitConversion: NextPage = () => {
       focusText: 'Enter pipe wall thickness',
       error: '',
     },
-    flowrate: {
+    volumeFlowRate: {
       name: 'volumeFlowRate',
       label: 'Flowrate',
       placeholder: '0',
@@ -231,7 +233,7 @@ const UnitConversion: NextPage = () => {
   }
 
   const solveForOptions: SolveType[] = [
-    { label: initialState.flowrate.label, value: initialState.flowrate.name },
+    { label: initialState.volumeFlowRate.label, value: initialState.volumeFlowRate.name },
     { label: initialState.velocity.label, value: initialState.velocity.name },
     { label: initialState.outerDiameter.label, value: initialState.outerDiameter.name },
   ]
@@ -239,7 +241,7 @@ const UnitConversion: NextPage = () => {
   type Action =
     | {
         type: ActionKind.CHANGE_SOLVE_SELECTION
-        payload: string
+        payload: SolveSelectionOptions
       }
     | {
         type: ActionKind.CHANGE_VALUE
@@ -268,7 +270,8 @@ const UnitConversion: NextPage = () => {
       case ActionKind.REFRESH:
         return calculateAnswer({ ...state })
       default:
-        alert('Error: State reducer action not recognized')
+        const neverEver: never = action
+        console.error('Error: Fluid Flow State reducer action not recognized', neverEver)
         return state
     }
   }
@@ -276,7 +279,7 @@ const UnitConversion: NextPage = () => {
   const [state, dispatch] = useReducer(stateReducer, initialState)
 
   const handleChangeSolveSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: ActionKind.CHANGE_SOLVE_SELECTION, payload: e.target.value })
+    dispatch({ type: ActionKind.CHANGE_SOLVE_SELECTION, payload: e.target.value as SolveSelectionOptions })
   }
 
   const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
