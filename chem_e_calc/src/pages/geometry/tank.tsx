@@ -187,7 +187,7 @@ const Tank: NextPage = () => {
       case ActionKind.CHANGE_CONE_ANGLE:
         console.log(action.payload)
         let { name, value } = action.payload
-        let angle = validateAngle(value)
+        const angle = validateAngle(value)
         let unit = state[name as keyof StateData].displayValue.unit
         let payload = {
           ...state[name as keyof StateData],
@@ -200,7 +200,7 @@ const Tank: NextPage = () => {
         return state
       case ActionKind.CHANGE_VALUE:
         name = action.payload.name
-        let numericValue = action.payload.value.replace(/[^\d.-]/g, '')
+        const numericValue = action.payload.value.replace(/[^\d.-]/g, '')
         unit = state[name as keyof StateData].displayValue.unit
         payload = { ...state[name as keyof StateData], displayValue: { value: numericValue, unit } }
         let payloadWithCalculatedValue = updateCalculatedValue(payload)
@@ -219,7 +219,7 @@ const Tank: NextPage = () => {
 
   const validateAngle = (value: string) => {
     const numericValue = value.replace(/[^\d.-]/g, '')
-    let answer = Number(numericValue)
+    const answer = Number(numericValue)
     if (answer > 90) {
       return 90
     } else if (answer < 0) {
