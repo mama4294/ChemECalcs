@@ -186,8 +186,8 @@ const Tank: NextPage = () => {
         return { ...state, liquidPercent: liquidPercent }
       case ActionKind.CHANGE_CONE_ANGLE:
         console.log(action.payload)
-        let { name, value } = action.payload
-        const angle = validateAngle(value)
+        let { name } = action.payload
+        const angle = validateAngle(action.payload.value)
         let unit = state[name as keyof StateData].displayValue.unit
         let payload = {
           ...state[name as keyof StateData],
@@ -245,8 +245,7 @@ const Tank: NextPage = () => {
   }
 
   const handleChangeLiquidHeight = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value
-    if (value == '') value = '0'
+    const value = e.target.value == '' ? 0 : e.target.value
     dispatch({
       type: ActionKind.CHANGE_LIQUID_HEIGHT,
       payload: { value: Number(value) },
