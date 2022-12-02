@@ -284,9 +284,7 @@ const UnitConversion: NextPage = () => {
 
   const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-
     const numericValue = value.replace(/[^\d.-]/g, '')
-
     const unit = state[name as keyof StateWithoutSolveSelection].displayValue.unit
     const payload = { ...state[name as keyof StateWithoutSolveSelection], displayValue: { value: numericValue, unit } }
     dispatch({ type: ActionKind.CHANGE_VALUE, payload })
