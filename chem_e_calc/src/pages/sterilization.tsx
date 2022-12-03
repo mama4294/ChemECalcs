@@ -17,6 +17,9 @@ import { convertUnits } from '../utils/units'
 type State = {
   temperature: ShortInputType
   holdTime: ShortInputType
+  Zvalue: ShortInputType
+  Dvalue: ShortInputType
+  Tref: ShortInputType
 }
 
 type StateWithoutSolveSelection = Omit<State, 'solveSelection'>
@@ -170,16 +173,57 @@ const Sterilization: NextPage = () => {
       unitType: 'length',
       displayValue: { value: '1', unit: 'min' },
       calculatedValue: { value: 1, unit: 'min' },
-      // get calculatedValue() {
-      //   return {
-      //     value: convertUnits({
-      //       value: Number(this.displayValue.value),
-      //       fromUnit: this.displayValue.unit,
-      //       toUnit: 'm',
-      //     }),
-      //     unit: 'm',
-      //   }
-      // },
+      selectiontext: 'Solve for outer diameter',
+      focusText: 'Enter pipe outer diameter',
+      error: '',
+    },
+    Tref: {
+      name: 'tref',
+      label: 'Reference Temperature',
+      placeholder: '0',
+      unitType: 'temperature',
+      displayValue: { value: '121', unit: defaultUnits.temperature },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'C',
+          }),
+          unit: 'C',
+        }
+      },
+      selectiontext: '',
+      focusText: 'Enter reference temperature',
+      error: '',
+    },
+    Zvalue: {
+      name: 'zValue',
+      label: 'Z Value',
+      placeholder: '0',
+      unitType: 'temperature',
+      displayValue: { value: '10', unit: defaultUnits.temperature },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'C',
+          }),
+          unit: 'C',
+        }
+      },
+      selectiontext: '',
+      focusText: 'Enter Z Value',
+      error: '',
+    },
+    Dvalue: {
+      name: 'dValue',
+      label: 'D value',
+      placeholder: '0',
+      unitType: 'length',
+      displayValue: { value: '1', unit: 'min' },
+      calculatedValue: { value: 1, unit: 'min' },
       selectiontext: 'Solve for outer diameter',
       focusText: 'Enter pipe outer diameter',
       error: '',
