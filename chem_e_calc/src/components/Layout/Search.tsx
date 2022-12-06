@@ -47,11 +47,6 @@ const Search = () => {
     }
   }
 
-  const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value)
-    setSelectedNum(0)
-  }
-
   return (
     <>
       {/* Button to open modal */}

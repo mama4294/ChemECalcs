@@ -85,8 +85,8 @@ const UnitConversion: NextPage = () => {
         const payloadWithCalculatedValue = updateCalculatedValue(action.payload)
         return calculateAnswer({ ...state, [action.payload.name]: payloadWithCalculatedValue })
       case ActionKind.SWAP:
-        let newInput = { ...input, displayValue: output.displayValue, calclatedValue: output.calculatedValue }
-        let newOutput = { ...output, displayValue: input.displayValue, calclatedValue: input.calculatedValue }
+        const newInput = { ...input, displayValue: output.displayValue, calclatedValue: output.calculatedValue }
+        const newOutput = { ...output, displayValue: input.displayValue, calclatedValue: input.calculatedValue }
         return { ...state, input: newInput, output: newOutput }
       case ActionKind.CHANGE_UNIT_TYPE:
         const unitType = action.payload
