@@ -13,7 +13,7 @@ export type OnChangeValueProps = {
 }
 
 export const InputField = ({ data, onChangeValue }: InputFieldProps) => {
-  const { id, label, placeholder, type, selected, displayValue, error, unitType, focusText } = data
+  const { id, label, placeholder, selected, displayValue, error, unitType, focusText } = data
   const { value, unit } = displayValue
   return (
     <div className="mb-2">

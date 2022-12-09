@@ -1,10 +1,10 @@
 import configureMeasurements, { allMeasures, AllMeasuresUnits, AllMeasures, AllMeasuresSystems } from 'convert-units'
-import density, { DensityUnits } from './densityMeasure'
+import density, { DensityUnits } from './measures/densityMeasure'
 
 const customMeasures = { ...allMeasures, density }
 
-export type CustomMeasureUnits = AllMeasuresUnits | DensityUnits
-export type UnitTypes = AllMeasures | 'density'
+export type CustomMeasureUnits = AllMeasuresUnits | DensityUnits | TimeUnits
+export type UnitTypes = AllMeasures | 'density' | 'time'
 
 const convert = configureMeasurements<UnitTypes, AllMeasuresSystems, CustomMeasureUnits>(customMeasures)
 
@@ -48,6 +48,7 @@ export interface Units {
   current: string[]
   power: string[]
   density: string[]
+  time: string[]
 }
 
 export const units = {
@@ -118,6 +119,7 @@ export interface UnitOptions {
   current: UnitOption[]
   power: UnitOption[]
   density: UnitOption[]
+  time: UnitOption[]
 }
 
 export const unitOptions: UnitOptions = {
@@ -245,6 +247,12 @@ export const unitOptions: UnitOptions = {
     { value: 'g/cm3', label: 'g/cm³' },
     { value: 'lb/ft3', label: 'lb/ft³' },
   ],
+  time: [
+    { value: 's', label: 's' },
+    { value: 'min', label: 'min' },
+    { value: 'h', label: 'hr' },
+    { value: 'd', label: 'day' },
+  ],
 }
 
 export const unitTypes = [
@@ -260,4 +268,5 @@ export const unitTypes = [
   { value: 'current', label: 'Current' },
   { value: 'power', label: 'Power' },
   { value: 'density', label: 'Density' },
+  { value: 'time', label: 'Time' },
 ]

@@ -1,124 +1,152 @@
 import type { NextPage } from 'next'
-import { useState } from 'react'
+import { useReducer } from 'react'
 // import Select from 'react-select'
 
-import { InputType } from '../components/calculators/calculator'
 import { Breadcrumbs } from '../components/calculators/breadcrumbs'
 import { CalcBody } from '../components/calculators/calcBody'
 import { CalcCard } from '../components/calculators/calcCard'
 import { PageContainer } from '../components/calculators/container'
 import { CalcHeader } from '../components/calculators/header'
-import { convertUnits, unitTypes, dynamicRound, unitOptions, UnitOptions, UnitOption } from '../utils/units'
-import { InputField, OnChangeValueProps } from '../components/inputs/inputField'
-import { updateArray } from '../logic/logic'
+import { convertUnits, UnitOption, UnitOptions, unitOptions, UnitTypes, unitTypes } from '../utils/units'
+import { updateCalculatedValue } from '../logic/logic'
+import { ShortInputType } from '../types'
+import { InputFieldWithUnit } from '../components/inputs/inputFieldObj'
 
 const UnitConversion: NextPage = () => {
   const paths = [{ title: 'Unit Conversion', href: '/conversion' }]
 
-  const [unitType, setUnitType] = useState('mass')
-
-  const handleChangeUnitType = (newType: string): void => {
-    const newValues: InputType[] = state.map(obj => {
-      const value = obj.displayValue.value as number
-      const newUnit = unitOptions[newType as keyof UnitOptions][0] as UnitOption
-      return {
-        ...obj,
-        unitType: newType,
-        displayValue: { value: value, unit: newUnit.value },
-        calculatedValue: { value: value, unit: newUnit.value },
-      }
-    })
-    setState(newValues)
-    setUnitType(newType)
-  }
-
-  const [state, setState] = useState<InputType[]>([
-    {
-      id: 1,
+  const initialState: State = {
+    unitType: 'mass',
+    input: {
       name: 'input',
       unitType: 'mass',
-      type: 'number',
       placeholder: 'Enter value',
       label: 'From',
-      displayValue: { value: 1, unit: 'mg' },
+      displayValue: { value: '1', unit: 'mg' },
       calculatedValue: { value: 1, unit: 'mg' },
-      solveable: false,
       selectiontext: '',
-      selected: false,
+      focusText: '',
       error: '',
     },
-    {
-      id: 2,
+    output: {
       name: 'output',
       unitType: 'mass',
-      type: 'number',
       placeholder: 'Enter value',
       label: 'To',
-      displayValue: { value: 1, unit: 'mg' },
+      displayValue: { value: '1', unit: 'mg' },
       calculatedValue: { value: 1, unit: 'mg' },
-      solveable: true,
       selectiontext: '',
-      selected: true,
+      focusText: '',
       error: '',
     },
-  ])
-
-  const handleChangeValue = ({ id, unit, number }: OnChangeValueProps): void => {
-    console.log('Update')
-
-    const updatedArr = updateArray({ id, number, unit, array: state })
-    const answerArr = calculateAnswer(updatedArr)
-    if (answerArr) {
-      setState(answerArr)
-    } else {
-      setState(updatedArr)
-    }
   }
 
-  const calculateAnswer = (inputArray: InputType[]) => {
-    const inputObj = inputArray.find(o => o.name === 'input')
-    const outputObj = inputArray.find(o => o.name === 'output')
+  enum ActionKind {
+    CHANGE_VALUE = 'CHANGE_VALUE',
+    CHANGE_UNIT_TYPE = 'CHANGE_UNIT_TYPE',
+    SWAP = 'SWAP',
+  }
 
-    if (!inputObj || !outputObj) {
-      alert('inputs to calculator undefined')
-      return null
-    }
+  type Action =
+    | {
+        type: ActionKind.CHANGE_VALUE
+        payload: ShortInputType
+      }
+    | {
+        type: ActionKind.CHANGE_UNIT_TYPE
+        payload: UnitTypes
+      }
+    | {
+        type: ActionKind.SWAP
+      }
+
+  const calculateAnswer = (state: State): State => {
+    const { input, output } = state
 
     const answerValue = convertUnits({
-      value: inputObj.displayValue.value as number,
-      fromUnit: inputObj.displayValue.unit,
-      toUnit: outputObj.displayValue.unit,
+      value: Number(input.displayValue.value),
+      fromUnit: input.displayValue.unit,
+      toUnit: output.displayValue.unit,
     })
-
-    console.log(
-      `input: ${inputObj.displayValue.value} ${inputObj.displayValue.unit}, output: ${outputObj.displayValue.value} ${outputObj.displayValue.unit}`
-    )
-
-    return inputArray.map(o => {
-      //convert calculed value to display value
-      if (o.name === 'output') {
-        return {
-          ...o,
-          displayValue: {
-            value: dynamicRound(answerValue),
-            unit: o.displayValue.unit,
-          },
-          calculatedValue: { value: answerValue, unit: o.calculatedValue.unit },
-        }
-      } else return o
-    })
-  }
-
-  const handleSwap = () => {
-    if (state[0] && state[1]) {
-      const newInput = { ...state[0], displayValue: state[1].displayValue, calculatedValue: state[1].calculatedValue }
-      const newOutput = { ...state[1], displayValue: state[0].displayValue, calculatedValue: state[0].calculatedValue }
-      setState([newInput, newOutput])
+    return {
+      ...state,
+      output: {
+        ...output,
+        calculatedValue: { value: answerValue, unit: output.displayValue.unit },
+        displayValue: { value: answerValue.toLocaleString(), unit: output.displayValue.unit },
+      },
     }
   }
 
-  const input = state[0]
-  const output = state[1]
+  const stateReducer = (state: State, action: Action): State => {
+    const { input, output } = state
+    switch (action.type) {
+      case ActionKind.CHANGE_VALUE:
+        const payloadWithCalculatedValue = updateCalculatedValue(action.payload)
+        return calculateAnswer({ ...state, [action.payload.name]: payloadWithCalculatedValue })
+      case ActionKind.SWAP:
+        const newInput = { ...input, displayValue: output.displayValue, calclatedValue: output.calculatedValue }
+        const newOutput = { ...output, displayValue: input.displayValue, calclatedValue: input.calculatedValue }
+        return { ...state, input: newInput, output: newOutput }
+      case ActionKind.CHANGE_UNIT_TYPE:
+        const unitType = action.payload
+        const value = state.input.displayValue.value
+        const newUnit = unitOptions[unitType as keyof UnitOptions][0] as UnitOption
+        const updatedInput = {
+          ...input,
+          unitType: unitType,
+          displayValue: { value, unit: newUnit.value },
+          calculatedValue: { value: Number(value), unit: newUnit.value },
+        }
+        const updatedOutput = {
+          ...output,
+          unitType: unitType,
+          displayValue: { value, unit: newUnit.value },
+          calculatedValue: { value: Number(value), unit: newUnit.value },
+        }
+        console.table({ input, output })
+        console.table({ updatedInput, updatedOutput })
+        return { ...state, unitType, input: updatedInput, output: updatedOutput }
+      default:
+        const neverEver: never = action
+        console.error('Error: Fluid Flow State reducer action not recognized', neverEver)
+        return state
+    }
+  }
+
+  const [state, dispatch] = useReducer(stateReducer, initialState)
+
+  const handleChangeUnitType = (newType: string): void => {
+    dispatch({ type: ActionKind.CHANGE_UNIT_TYPE, payload: newType as UnitTypes })
+  }
+
+  type State = {
+    unitType: UnitTypes
+    input: ShortInputType
+    output: ShortInputType
+  }
+
+  type ShortInputStateType = Omit<State, 'unitType'>
+
+  const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    const numericValue = value.replace(/[^\d.-]/g, '')
+    const unit = state[name as keyof ShortInputStateType].displayValue.unit
+    const payload = { ...state[name as keyof ShortInputStateType], displayValue: { value: numericValue, unit } }
+    dispatch({ type: ActionKind.CHANGE_VALUE, payload })
+  }
+
+  const handleChangeUnit = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    const existingValue = state[name as keyof ShortInputStateType].displayValue.value
+    const payload = {
+      ...state[name as keyof ShortInputStateType],
+      displayValue: { value: existingValue, unit: value },
+    }
+    dispatch({ type: ActionKind.CHANGE_VALUE, payload })
+  }
+
+  const { input, output, unitType } = state
 
   return (
     <PageContainer>
@@ -146,13 +174,37 @@ const UnitConversion: NextPage = () => {
               </select>
             </div>
             <div className="mb-0 flex flex-col">
-              {input && <InputField key={input.id} data={input} onChangeValue={handleChangeValue} />}
+              <InputFieldWithUnit
+                key={input.name}
+                name={input.name}
+                label={input.label}
+                placeholder={input.placeholder}
+                selected={false}
+                displayValue={input.displayValue}
+                error={input.error}
+                unitType={input.unitType}
+                focusText={input.focusText}
+                onChangeValue={handleChangeValue}
+                onChangeUnit={handleChangeUnit}
+              />
               <div className="flex justify-center">
-                <button className="btn btn-circle" onClick={handleSwap}>
+                <button className="btn btn-circle" onClick={() => dispatch({ type: ActionKind.SWAP })}>
                   <SwapIcon />
                 </button>
               </div>
-              {output && <InputField key={output.id} data={output} onChangeValue={handleChangeValue} />}
+              <InputFieldWithUnit
+                key={output.name}
+                name={output.name}
+                label={output.label}
+                placeholder={output.placeholder}
+                selected={true}
+                displayValue={output.displayValue}
+                error={output.error}
+                unitType={output.unitType}
+                focusText={output.focusText}
+                onChangeValue={handleChangeValue}
+                onChangeUnit={handleChangeUnit}
+              />
             </div>
           </>
         </CalcCard>

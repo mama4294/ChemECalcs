@@ -61,7 +61,7 @@ const Canvas = ({ state }: { state: State }) => {
     ctx.save()
     ctx.clearRect(0, 0, canvasDimention.width, canvasDimention.height)
 
-    let clipPath = new Path2D()
+    const clipPath = new Path2D()
 
     drawHead({
       ctx: clipPath,

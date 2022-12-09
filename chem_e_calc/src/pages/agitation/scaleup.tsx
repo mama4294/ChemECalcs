@@ -377,7 +377,6 @@ const Agitation: NextPage = () => {
   }, [state])
 
   const {
-    solveSelection,
     baseDiameter,
     baseHeight,
     baseRPM,
@@ -684,7 +683,7 @@ const ResultsTable = ({ state, onChangeSolveSelection, defaultUnits }: ResultsTa
     return Math.PI * (diameter / 2) ** 2 * height
   }
 
-  const calculateAnswer = (state: State) => {
+  const calculateAnswer = () => {
     const baseVolume = calculateVolume(baseDiameter.calculatedValue.value, baseHeight.calculatedValue.value) // m^3
     const scaledVolume = calculateVolume(scaledDiameter.calculatedValue.value, scaledHeight.calculatedValue.value) // m^3
     const baseTipSpeed = (baseRPM.calculatedValue.value / 60) * baseImpellerDiameter.calculatedValue.value * Math.PI // m/s
@@ -809,7 +808,7 @@ const ResultsTable = ({ state, onChangeSolveSelection, defaultUnits }: ResultsTa
     }
   }
 
-  const answer = calculateAnswer(state)
+  const answer = calculateAnswer()
 
   const answerBaseVolume = convertUnits({
     value: answer.baseVolume,
@@ -1058,7 +1057,7 @@ const ScaleUpMathodHint = () => (
           ></path>
         </svg>
       </label>
-      <div tabIndex={0} className="compact card dropdown-content rounded-box w-64 bg-base-100 shadow">
+      <div tabIndex={0} className="card dropdown-content compact rounded-box w-64 bg-base-100 shadow">
         <div className="card-body">
           <h2 className="card-title">Need help deciding?</h2>
           <p>
