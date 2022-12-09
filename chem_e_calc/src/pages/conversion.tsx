@@ -197,7 +197,7 @@ const UnitConversion: NextPage = () => {
                 name={output.name}
                 label={output.label}
                 placeholder={output.placeholder}
-                selected={false}
+                selected={true}
                 displayValue={output.displayValue}
                 error={output.error}
                 unitType={output.unitType}
