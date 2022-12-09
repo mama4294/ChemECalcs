@@ -1,4 +1,3 @@
-import { NextPage } from 'next'
 import React, { useContext, useEffect, useReducer } from 'react'
 import { Breadcrumbs } from '../components/calculators/breadcrumbs'
 import { CalcBody } from '../components/calculators/calcBody'
@@ -17,9 +16,9 @@ import { convertUnits } from '../utils/units'
 type State = {
   temperature: ShortInputType
   holdTime: ShortInputType
-  Zvalue: ShortInputType
-  Dvalue: ShortInputType
-  Tref: ShortInputType
+  zValue: ShortInputType
+  dValue: ShortInputType
+  tRef: ShortInputType
 }
 
 type StateWithoutSolveSelection = Omit<State, 'solveSelection'>
@@ -141,7 +140,7 @@ const updatedisplayValue = (object: ShortInputType): ShortInputType => {
   }
 }
 
-const Sterilization: NextPage = () => {
+const Sterilization = () => {
   const paths = [{ title: 'Sterilization', href: '/sterilization' }]
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
 
@@ -173,11 +172,11 @@ const Sterilization: NextPage = () => {
       unitType: 'length',
       displayValue: { value: '1', unit: 'min' },
       calculatedValue: { value: 1, unit: 'min' },
-      selectiontext: 'Solve for outer diameter',
-      focusText: 'Enter pipe outer diameter',
+      selectiontext: '',
+      focusText: 'Enter the time the media is held at the sterilizaiton temp',
       error: '',
     },
-    Tref: {
+    tRef: {
       name: 'tref',
       label: 'Reference Temperature',
       placeholder: '0',
@@ -197,7 +196,7 @@ const Sterilization: NextPage = () => {
       focusText: 'Enter reference temperature',
       error: '',
     },
-    Zvalue: {
+    zValue: {
       name: 'zValue',
       label: 'Z Value',
       placeholder: '0',
@@ -217,7 +216,7 @@ const Sterilization: NextPage = () => {
       focusText: 'Enter Z Value',
       error: '',
     },
-    Dvalue: {
+    dValue: {
       name: 'dValue',
       label: 'D value',
       placeholder: '0',
@@ -294,7 +293,7 @@ const Sterilization: NextPage = () => {
     refresh()
   }, [])
 
-  const { temperature, holdTime } = state
+  const { temperature, holdTime, tRef, zValue, dValue } = state
 
   return (
     <PageContainer>
@@ -327,6 +326,32 @@ const Sterilization: NextPage = () => {
                 error={holdTime.error}
                 unitType={holdTime.unitType}
                 focusText={holdTime.focusText}
+                onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+                onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+              />
+              <InputFieldWithUnit
+                key={zValue.name}
+                name={zValue.name}
+                label={zValue.label}
+                placeholder={zValue.label}
+                selected={false}
+                displayValue={zValue.displayValue}
+                error={zValue.error}
+                unitType={zValue.unitType}
+                focusText={zValue.focusText}
+                onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+                onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+              />
+              <InputFieldWithUnit
+                key={dValue.name}
+                name={dValue.name}
+                label={dValue.label}
+                placeholder={dValue.label}
+                selected={false}
+                displayValue={dValue.displayValue}
+                error={dValue.error}
+                unitType={dValue.unitType}
+                focusText={dValue.focusText}
                 onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
                 onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
               />
