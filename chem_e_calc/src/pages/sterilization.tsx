@@ -5,7 +5,8 @@ import { CalcCard } from '../components/calculators/calcCard'
 import { PageContainer } from '../components/calculators/container'
 import { CalcHeader } from '../components/calculators/header'
 import { Equation, VariableDefinition } from '../components/Equation'
-import { InputFieldWithUnit } from '../components/inputs/inputFieldObj'
+import { InputDropdown, InputFieldWithUnit } from '../components/inputs/inputFieldObj'
+import { MicrobeNames, microbialData, MicrobialData } from '../constants/sterilizationData'
 import { DefaultUnitContext, DefaultUnitContextType } from '../contexts/defaultUnitContext'
 import { updateCalculatedValue } from '../logic/logic'
 import { ShortInputType } from '../types'
@@ -19,9 +20,10 @@ type State = {
   zValue: ShortInputType
   dValue: ShortInputType
   tRef: ShortInputType
+  microbe: MicrobeNames
 }
 
-type StateWithoutSolveSelection = Omit<State, 'solveSelection'>
+type StateWithoutSolveSelection = Omit<State, 'microbe'>
 
 const resetErrorMessages = (state: State): State => {
   return {
@@ -145,6 +147,7 @@ const Sterilization = () => {
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
 
   const initialState: State = {
+    microbe: 'Escherichia coli',
     temperature: {
       name: 'temperature',
       label: 'Temperature',
@@ -169,7 +172,7 @@ const Sterilization = () => {
       name: 'holdTime',
       label: 'Hold Time',
       placeholder: '0',
-      unitType: 'length',
+      unitType: 'time',
       displayValue: { value: '1', unit: 'min' },
       calculatedValue: { value: 1, unit: 'min' },
       selectiontext: '',
@@ -177,7 +180,7 @@ const Sterilization = () => {
       error: '',
     },
     tRef: {
-      name: 'tref',
+      name: 'tRef',
       label: 'Reference Temperature',
       placeholder: '0',
       unitType: 'temperature',
@@ -193,7 +196,7 @@ const Sterilization = () => {
         }
       },
       selectiontext: '',
-      focusText: 'Enter reference temperature',
+      focusText: 'Enter reference temperature of the Dvalue',
       error: '',
     },
     zValue: {
@@ -220,20 +223,31 @@ const Sterilization = () => {
       name: 'dValue',
       label: 'D value',
       placeholder: '0',
-      unitType: 'length',
+      unitType: 'time',
       displayValue: { value: '1', unit: 'min' },
       calculatedValue: { value: 1, unit: 'min' },
-      selectiontext: 'Solve for outer diameter',
-      focusText: 'Enter pipe outer diameter',
+      selectiontext: '',
+      focusText: 'Enter D-value',
       error: '',
     },
   }
 
+  type MicrobeAndData = {
+    microbe: MicrobeNames
+    tRef: number
+    zValue: number
+    dValue: number
+  }
+
   type Action =
-    // | {
-    //     type: ActionKind.CHANGE_SOLVE_SELECTION
-    //     payload: SolveSelectionOptions
-    //   }
+    | {
+        type: ActionKind.CHANGE_MICROBE_AND_VALUES
+        payload: MicrobeAndData
+      }
+    | {
+        type: ActionKind.CHANGE_MICROBE
+        payload: MicrobeNames
+      }
     | {
         type: ActionKind.CHANGE_VALUE
         payload: ShortInputType
@@ -244,7 +258,8 @@ const Sterilization = () => {
 
   enum ActionKind {
     CHANGE_VALUE = 'CHANGE_VALUE',
-    CHANGE_SOLVE_SELECTION = 'CHANGE_SOLVE_SELECTION',
+    CHANGE_MICROBE = 'CHANGE_MICROBE',
+    CHANGE_MICROBE_AND_VALUES = 'CHANGE_MICROBE_AND_VALUES',
     REFRESH = 'REFRESH',
   }
 
@@ -255,6 +270,14 @@ const Sterilization = () => {
         return calculateAnswer({ ...state, [action.payload.name]: payloadWithCalculatedValue })
       case ActionKind.REFRESH:
         return calculateAnswer({ ...state })
+      case ActionKind.CHANGE_MICROBE:
+        return calculateAnswer({ ...state, microbe: action.payload })
+      case ActionKind.CHANGE_MICROBE_AND_VALUES:
+        const { microbe } = action.payload
+        const tRef = { ...state.tRef, displayValue: { value: action.payload.tRef.toString(), unit: 'C' } }
+        const zValue = { ...state.zValue, displayValue: { value: action.payload.zValue.toString(), unit: 'C' } }
+        const dValue = { ...state.dValue, displayValue: { value: action.payload.dValue.toString(), unit: 's' } }
+        return calculateAnswer({ ...state, microbe, tRef, zValue, dValue })
       default:
         const neverEver: never = action
         console.error('Error: Fluid Flow State reducer action not recognized', neverEver)
@@ -284,6 +307,18 @@ const Sterilization = () => {
     dispatch({ type: ActionKind.CHANGE_VALUE, payload })
   }
 
+  const handleChangeMicrobe = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const payload = e.target.value as MicrobeNames
+    const microbeObject = microbialData.find(microbe => microbe.value === payload)
+    if (microbeObject) {
+      const { tRef, zValue, dValue } = microbeObject
+      console.log(microbeObject)
+      dispatch({ type: ActionKind.CHANGE_MICROBE_AND_VALUES, payload: { microbe: payload, tRef, zValue, dValue } })
+    } else {
+      dispatch({ type: ActionKind.CHANGE_MICROBE, payload })
+    }
+  }
+
   //Solve answer on initial page load
   useEffect(() => {
     const refresh = () => {
@@ -293,7 +328,9 @@ const Sterilization = () => {
     refresh()
   }, [])
 
-  const { temperature, holdTime, tRef, zValue, dValue } = state
+  const { temperature, holdTime, tRef, zValue, dValue, microbe } = state
+
+  const isCustom = microbe === 'Custom'
 
   return (
     <PageContainer>
@@ -326,35 +363,64 @@ const Sterilization = () => {
                 error={holdTime.error}
                 unitType={holdTime.unitType}
                 focusText={holdTime.focusText}
-                onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
-                onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+                onChangeValue={handleChangeValue}
+                onChangeUnit={handleChangeUnit}
               />
-              <InputFieldWithUnit
-                key={zValue.name}
-                name={zValue.name}
-                label={zValue.label}
-                placeholder={zValue.label}
+              <InputDropdown
+                name="microbe"
+                label="Microorganism"
                 selected={false}
-                displayValue={zValue.displayValue}
-                error={zValue.error}
-                unitType={zValue.unitType}
-                focusText={zValue.focusText}
-                onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
-                onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+                error=""
+                value={microbe}
+                options={[...microbialData, { value: 'Custom', label: 'Custom' }]}
+                focusText={'Enter microorganism of interest'}
+                onChange={handleChangeMicrobe}
               />
-              <InputFieldWithUnit
-                key={dValue.name}
-                name={dValue.name}
-                label={dValue.label}
-                placeholder={dValue.label}
-                selected={false}
-                displayValue={dValue.displayValue}
-                error={dValue.error}
-                unitType={dValue.unitType}
-                focusText={dValue.focusText}
-                onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
-                onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
-              />
+              {isCustom && (
+                <InputFieldWithUnit
+                  key={zValue.name}
+                  name={zValue.name}
+                  label={zValue.label}
+                  placeholder={zValue.label}
+                  selected={false}
+                  displayValue={zValue.displayValue}
+                  error={zValue.error}
+                  unitType={zValue.unitType}
+                  focusText={zValue.focusText}
+                  onChangeValue={handleChangeValue}
+                  onChangeUnit={handleChangeUnit}
+                />
+              )}
+              {isCustom && (
+                <InputFieldWithUnit
+                  key={dValue.name}
+                  name={dValue.name}
+                  label={dValue.label}
+                  placeholder={dValue.label}
+                  selected={false}
+                  displayValue={dValue.displayValue}
+                  error={dValue.error}
+                  unitType={dValue.unitType}
+                  focusText={dValue.focusText}
+                  onChangeValue={handleChangeValue}
+                  onChangeUnit={handleChangeUnit}
+                />
+              )}{' '}
+              {isCustom && (
+                <InputFieldWithUnit
+                  key={tRef.name}
+                  name={tRef.name}
+                  label={tRef.label}
+                  placeholder={tRef.label}
+                  selected={false}
+                  displayValue={tRef.displayValue}
+                  error={tRef.error}
+                  unitType={tRef.unitType}
+                  focusText={tRef.focusText}
+                  onChangeValue={handleChangeValue}
+                  onChangeUnit={handleChangeUnit}
+                />
+              )}
             </div>
           </>
         </CalcCard>
