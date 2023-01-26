@@ -12,8 +12,6 @@ import { updateCalculatedValue } from '../logic/logic'
 import { ShortInputType } from '../types'
 import { convertUnits } from '../utils/units'
 
-//TODO add equations
-
 type State = {
   temperature: ShortInputType
   holdTime: ShortInputType
@@ -33,100 +31,19 @@ const resetErrorMessages = (state: State): State => {
   }
 }
 
-const calculateAnswer = (state: State): State => {
-  const { temperature, holdTime } = state
+const calculateAnswer = (state: State) => {
+  console.log(state)
+  const { temperature, holdTime, tRef, zValue, dValue } = state
   const inputTemp = temperature.calculatedValue.value //C
   const inputTime = holdTime.calculatedValue.value //s
+  const inputTRef = tRef.calculatedValue.value //C
+  const inputZValue = zValue.calculatedValue.value //C
+  const inputDValue = dValue.calculatedValue.value //s
 
-  let validatedState = resetErrorMessages(state)
-
-  // switch (state.solveSelection) {
-  //   case 'volumeFlowRate':
-  //     if (inputDiameter <= inputThickness * 2) {
-  //       validatedState = { ...validatedState, thickness: { ...validatedState.thickness, error: 'Thickness too large' } }
-  //     }
-  //     if (inputDiameter < 0) {
-  //       validatedState = {
-  //         ...validatedState,
-  //         outerDiameter: { ...validatedState.outerDiameter, error: 'Diameter must be positive' },
-  //       }
-  //     }
-  //     if (inputThickness < 0) {
-  //       validatedState = {
-  //         ...validatedState,
-  //         thickness: { ...validatedState.thickness, error: 'Thickness must be positive' },
-  //       }
-  //     }
-  //     let innerDiameter = inputDiameter - 2 * inputThickness //m
-  //     let area = Math.PI * (innerDiameter / 2) ** 2 //m2
-  //     let answer = inputVelocity * area //m3/s
-
-  //     let updatedAnswer = updatedisplayValue({
-  //       ...volumeFlowRate,
-  //       calculatedValue: { value: answer, unit: volumeFlowRate.calculatedValue.unit },
-  //     })
-
-  //     return {
-  //       ...validatedState,
-  //       volumeFlowRate: updatedAnswer,
-  //     }
-  //   case 'velocity':
-  //     if (inputDiameter <= inputThickness * 2) {
-  //       validatedState = { ...validatedState, thickness: { ...validatedState.thickness, error: 'Thickness too large' } }
-  //     }
-  //     if (inputDiameter < 0) {
-  //       validatedState = {
-  //         ...validatedState,
-  //         outerDiameter: { ...validatedState.outerDiameter, error: 'Diameter must be positive' },
-  //       }
-  //     }
-  //     if (inputThickness < 0) {
-  //       validatedState = {
-  //         ...validatedState,
-  //         thickness: { ...validatedState.thickness, error: 'Thickness must be positive' },
-  //       }
-  //     }
-  //     innerDiameter = inputDiameter - 2 * inputThickness //m
-  //     area = Math.PI * (innerDiameter / 2) ** 2 //m2
-  //     answer = inputFlowrate / area //m/2
-
-  //     updatedAnswer = updatedisplayValue({
-  //       ...velocity,
-  //       calculatedValue: { value: answer, unit: velocity.calculatedValue.unit },
-  //     })
-
-  //     return {
-  //       ...validatedState,
-  //       velocity: updatedAnswer,
-  //     }
-  //   case 'outerDiameter':
-  //     area = inputFlowrate / inputVelocity //m2
-  //     innerDiameter = 2 * Math.sqrt(area / Math.PI) //m
-  //     answer = innerDiameter + 2 * inputThickness //m
-
-  //     if (inputThickness < 0) {
-  //       validatedState = {
-  //         ...validatedState,
-  //         thickness: { ...validatedState.thickness, error: 'Thickness must be positive' },
-  //       }
-  //     }
-
-  //     updatedAnswer = updatedisplayValue({
-  //       ...outerDiameter,
-  //       calculatedValue: { value: answer, unit: outerDiameter.calculatedValue.unit },
-  //     })
-
-  //     return {
-  //       ...validatedState,
-  //       outerDiameter: updatedAnswer,
-  //     }
-  //   default:
-  //     const neverEver: never = state.solveSelection
-  //     console.error('Error: State reducer action not recognized, ', neverEver)
-  //     return state
-  // }
-
-  return validatedState
+  const lethality = inputTemp <= 121 ? 0 : (inputTemp - inputTRef) / (inputZValue * inputDValue) //1/s
+  const accumulatedLethality = lethality * inputTime
+  const logReduction = accumulatedLethality / inputDValue
+  return { accumulatedLethality, logReduction }
 }
 
 const updatedisplayValue = (object: ShortInputType): ShortInputType => {
@@ -153,7 +70,7 @@ const Sterilization = () => {
       label: 'Temperature',
       placeholder: '0',
       unitType: 'temperature',
-      displayValue: { value: '5', unit: defaultUnits.temperature },
+      displayValue: { value: '121', unit: defaultUnits.temperature },
       get calculatedValue() {
         return {
           value: convertUnits({
@@ -174,7 +91,7 @@ const Sterilization = () => {
       placeholder: '0',
       unitType: 'time',
       displayValue: { value: '1', unit: 'min' },
-      calculatedValue: { value: 1, unit: 'min' },
+      calculatedValue: { value: 1, unit: 's' },
       selectiontext: '',
       focusText: 'Enter the time the media is held at the sterilizaiton temp',
       error: '',
@@ -196,7 +113,7 @@ const Sterilization = () => {
         }
       },
       selectiontext: '',
-      focusText: 'Enter reference temperature of the Dvalue',
+      focusText: 'Reference temperature for the D value',
       error: '',
     },
     zValue: {
@@ -216,7 +133,7 @@ const Sterilization = () => {
         }
       },
       selectiontext: '',
-      focusText: 'Enter Z Value',
+      focusText: 'Temperature increase at which rate of inactivation doubles',
       error: '',
     },
     dValue: {
@@ -225,9 +142,9 @@ const Sterilization = () => {
       placeholder: '0',
       unitType: 'time',
       displayValue: { value: '1', unit: 'min' },
-      calculatedValue: { value: 1, unit: 'min' },
+      calculatedValue: { value: 1, unit: 's' },
       selectiontext: '',
-      focusText: 'Enter D-value',
+      focusText: 'Time for inactivation to reach 90%',
       error: '',
     },
   }
@@ -267,17 +184,17 @@ const Sterilization = () => {
     switch (action.type) {
       case ActionKind.CHANGE_VALUE:
         const payloadWithCalculatedValue = updateCalculatedValue(action.payload)
-        return calculateAnswer({ ...state, [action.payload.name]: payloadWithCalculatedValue })
+        return { ...state, [action.payload.name]: payloadWithCalculatedValue }
       case ActionKind.REFRESH:
-        return calculateAnswer({ ...state })
+        return { ...state }
       case ActionKind.CHANGE_MICROBE:
-        return calculateAnswer({ ...state, microbe: action.payload })
+        return { ...state, microbe: action.payload }
       case ActionKind.CHANGE_MICROBE_AND_VALUES:
         const { microbe } = action.payload
         const tRef = { ...state.tRef, displayValue: { value: action.payload.tRef.toString(), unit: 'C' } }
         const zValue = { ...state.zValue, displayValue: { value: action.payload.zValue.toString(), unit: 'C' } }
         const dValue = { ...state.dValue, displayValue: { value: action.payload.dValue.toString(), unit: 's' } }
-        return calculateAnswer({ ...state, microbe, tRef, zValue, dValue })
+        return { ...state, microbe, tRef, zValue, dValue }
       default:
         const neverEver: never = action
         console.error('Error: Fluid Flow State reducer action not recognized', neverEver)
@@ -331,11 +248,15 @@ const Sterilization = () => {
   const { temperature, holdTime, tRef, zValue, dValue, microbe } = state
 
   const isCustom = microbe === 'Custom'
+  const answer = calculateAnswer(state)
 
   return (
     <PageContainer>
       <Breadcrumbs paths={paths} />
-      <CalcHeader title={'Sterilization'} text={'Calculate the thermal treatment in a system'} />
+      <CalcHeader
+        title={'Sterilization'}
+        text={'Calculate the thermal treatment using moist-heat steriliation kinetics'}
+      />
       <CalcBody>
         <CalcCard title={'Calculator'}>
           <>
@@ -424,7 +345,9 @@ const Sterilization = () => {
             </div>
           </>
         </CalcCard>
+        <AnswerCard state={state} />
         <EquationCard />
+        <EquivalentExposureCard />
       </CalcBody>
     </PageContainer>
   )
@@ -432,27 +355,133 @@ const Sterilization = () => {
 
 export default Sterilization
 
+type AnswerType = {
+  state: State
+}
+
+const AnswerCard = ({ state }: AnswerType) => {
+  const answer = calculateAnswer(state)
+  return (
+    <CalcCard title={'Results'}>
+      <>
+        <InputFieldWithUnit
+          key="accumulatedLethality"
+          name="accumulatedLethality"
+          label="Accumulated Lethality"
+          placeholder="0"
+          selected={true}
+          displayValue={{
+            value: answer.accumulatedLethality.toLocaleString('en-US', { maximumSignificantDigits: 3 }),
+            unit: 'slkdf',
+          }}
+          error=""
+          unitType="volume"
+          focusText=""
+          onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+          onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+        />
+        <InputFieldWithUnit
+          key="logReduction"
+          name="logReduction"
+          label="Log Reduction"
+          placeholder="0"
+          selected={true}
+          displayValue={{
+            value: answer.logReduction.toLocaleString('en-US', { maximumSignificantDigits: 3 }),
+            unit: 'slkdf',
+          }}
+          error=""
+          unitType="volume"
+          focusText=""
+          onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+          onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) => console.log(e)}
+        />
+      </>
+    </CalcCard>
+  )
+}
+
 const EquationCard = () => {
   return (
-    <CalcCard title="Governing Equation">
+    <CalcCard title="Governing Equations">
       <>
         <p>
-          This calculator finds the velocity of fluid in a pipe. This is useful for more advanced calculations like
-          determining the Reynolds number and pressure drop through a system. The governing equation is a function of
-          flow rate and pipe geometery
+          A system contaminated by a microbial organism immersed in saturated steam at constant temperature has been
+          shown to degrade over time according to the following 1st order chemical reaction:
         </p>
-        <Equation equation={`$$v = Q/A_{i}$$`} />
-        <p>The following equations are used to find the pipe geometery:</p>
-        <Equation equation={`$$d_{i} = d_{0} - 2x_{w}$$`} />
-        <Equation equation={`$$r_{i} = d_{i}/2$$`} />
-        <Equation equation={`$$A_{i} = \\pi{r_{i}^{2}}$$`} />
-        <p className="text-lg font-medium">Definitions</p>
-        <VariableDefinition equation={`$$v = $$`} definition="Fluid velocity" />
-        <VariableDefinition equation={`$$Q = $$`} definition="Fluid volumentric flow rate" />
-        <VariableDefinition equation={`$$A_{i} = $$`} definition="Inner pipe area" />
-        <VariableDefinition equation={`$$d_{i} = $$`} definition="Inner pipe diameter" />
-        <VariableDefinition equation={`$$d_{o} = $$`} definition="Inner pipe diameter" />
-        <VariableDefinition equation={`$$r_{i} = $$`} definition="Inner pipe radius" />
+        <Equation equation={`$$\\frac{dN}{dt} = -kN$$`} />
+        <p>This can be converted to the more useful base 10 form:</p>
+        <Equation equation={`$$\\frac{N}{N_0} = 10^{-kt}$$`} />
+        <p>Where</p>
+        <br />
+        <VariableDefinition equation={`$$N_0 = $$`} definition="Initial population of the mircoorganism" />
+        <VariableDefinition equation={`$$t = $$`} definition="Steriliaiton time" />
+        <VariableDefinition equation={`$$N = $$`} definition="Population of the microorganism after sterilization" />
+        <VariableDefinition
+          equation={`$$K = $$`}
+          definition="Rate constant which is typical for the organism and conditions"
+        />
+        <br />
+
+        <p className="text-lg font-medium">D-Value</p>
+        <p>
+          The D-value is defined as the time requires, at a specific reference temperature, to reduce the microbial
+          population by one log reduction, i.e. from 100% to 10%.
+        </p>
+        <p>It is easily calculated as the reciprocal of the rate constant.</p>
+        <Equation equation={`$$D = \\frac{1}{k}$$`} />
+        <br />
+
+        <p className="text-lg font-medium">Z-Value</p>
+        <p>
+          The D-value is only useful for the reference temperature it was calculated at. The Z-value can be used to
+          extrapolate to different temperatures.
+        </p>
+        <p>
+          The Z-value is defined as the temperature coefficient of microbial destruction which causes a 10-fold
+          variation of the D-value
+        </p>
+        <p>
+          For steam at temperatures between 100°C and 130°C, the Z-value is typically between 6 and 13°C. In the absense
+          of experimental data, 10°C is typically chosen{' '}
+        </p>
+        <br />
+      </>
+    </CalcCard>
+  )
+}
+
+const EquivalentExposureCard = () => {
+  return (
+    <CalcCard title="Equivalent Exposure">
+      <>
+        <p>
+          The equivalent exposure time is the amount of time at the reference temperature, typically 121°C, the organism
+          experienced.
+        </p>
+        <p>
+          This can be used to determine the time required at accheive equivalent exposure if temperatures higher or
+          lower than 121°C are used.
+        </p>
+        <Equation equation={`$$F_0 = \\Delta t\\sum 10^{\\frac{T-T_r}{Z}}$$`} />
+        <VariableDefinition equation={`$$F_0 = $$`} definition="Equivalent exposure time" />
+        <VariableDefinition equation={`$$\\Delta t = $$`} definition="Time interval" />
+        <VariableDefinition equation={`$$T_r = $$`} definition="Reference temperature" />
+        <VariableDefinition equation={`$$T = $$`} definition="Actual temperature" />
+        <VariableDefinition equation={`$$Z = $$`} definition="Microorganism's Z-value" />
+
+        <br />
+        <p className="text-lg font-medium">Example</p>
+        <p>
+          If an contaminant with a D-value of 10 minutes at 121°C is exposed to 130°C for 2 minutes, what is the
+          equivalent exposure time at 121°C?
+        </p>
+        <Equation equation={`$$F_0 = \\Delta t\\sum 10^{\\frac{T-T_r}{Z}}$$`} />
+        <Equation equation={`$$F_0 = 2 min \\times 10^{\\frac{130-121}{10}}$$`} />
+        <Equation equation={`$$F_0 = 15.8 min$$`} />
+        <p>
+          Therefore, the sterilziation of this organism at 130°C for 2 minutes is equivalent to 15.8 minutes at 121°C.
+        </p>
       </>
     </CalcCard>
   )
