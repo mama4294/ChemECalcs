@@ -21,10 +21,11 @@ type State = {
   pipeLength: ShortInputType
   elevationRise: ShortInputType
   surfaceRoughness: ShortInputType
+  pressureDrop: ShortInputType
+  frictionFactor: ShortInputType
 }
 
 type AnswerState = {
-  pressureDrop: ShortInputType
   frictionFactor: ShortInputType
   reynoldsNumber: ShortInputType
 }
@@ -228,6 +229,46 @@ const UnitConversion: NextPage = () => {
       focusText: 'Enter fluid flowrate',
       error: '',
     },
+    pressureDrop: {
+      name: 'pressureDrop',
+      label: 'Pressure Drop',
+      placeholder: '0',
+      unitType: 'pressure',
+      displayValue: { value: '1', unit: defaultUnits.pressure },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'psi',
+          }),
+          unit: 'psi',
+        }
+      },
+      selectiontext: 'Solve for flowrate',
+      focusText: 'Enter fluid flowrate',
+      error: '',
+    },
+    frictionFactor: {
+      name: 'frictionFactor',
+      label: 'Friction Factor',
+      placeholder: '0',
+      unitType: 'pressure',
+      displayValue: { value: '1', unit: defaultUnits.pressure },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'psi',
+          }),
+          unit: 'psi',
+        }
+      },
+      selectiontext: 'Solve for flowrate',
+      focusText: 'Enter fluid flowrate',
+      error: '',
+    },
   }
 
   const fluidPropertyOptions: ShortInputType[] = [
@@ -373,24 +414,26 @@ const EquationCard = () => {
   return (
     <CalcCard title="Governing Equation">
       <>
-        <p>The Bernoulli Equation is used to determine pressure drop</p>
-        <Equation
-          equation={`$$P_{1} + {\\rho}gh_{1} + \\frac{1}{2}{\\rho}v_{1}^{2} = P_{2}  + {\\rho}gh_{2}  + \\frac{1}{2}{\\rho}v_{2}^{2} + \\left ( {f_{d}\\frac{L}{d_i}} + \\sum K \\right )\\frac{1}{2}{\\rho}{v}^{2} $$`}
-        />
-        <p>The Bernoulli Equation assumes the following: </p>
+        <p className="mb-2 font-semibold">The Bernoulli Equation is used to determine pressure drop</p>
+        <div className="mb-4">
+          <Equation
+            equation={`$$P_{1} + {\\rho}gh_{1} + \\frac{1}{2}{\\rho}v_{1}^{2} = P_{2}  + {\\rho}gh_{2}  + \\frac{1}{2}{\\rho}v_{2}^{2} + \\left ( {f_{d}\\frac{L}{d_i}} + \\sum K \\right )\\frac{1}{2}{\\rho}{v}^{2} $$`}
+          />
+        </div>
+        <p className="mb-2 font-semibold">With the following assumptions: </p>
 
-        <ul>
-          <li>-The start and end are connected through a fluid streamline</li>
-          <li>-The fluid has constant density</li>
-          <li>-The fluid flow rate is constant</li>
+        <ul className=" mb-2 ml-2 list-inside list-disc">
+          <li>The start and end are connected through a fluid streamline</li>
+          <li>The fluid has constant density</li>
+          <li>The fluid flow rate is constant</li>
         </ul>
 
-        <p>Rearrage to solve for pressure drop:</p>
+        <p className="mb-2 font-semibold">Rearrage to solve for pressure drop:</p>
         <Equation
           equation={`$$P_{1} - P_{2} = {\\rho}g \\left (h_{2}-h_{1}\\right ) + \\frac{1}{2}{\\rho} \\left ( v_{2}^{2} - v_{1}^{2} \\right ) + \\left ( {f_{d}\\frac{L}{d_i}} + \\sum K \\right )\\frac{1}{2}{\\rho}v^{2} $$`}
         />
 
-        <p>Simplify:</p>
+        <p className="mb-2 font-semibold">Simplify:</p>
 
         <Equation equation={`$$P_{1} - P_{2} =  \\Delta P$$`} />
         <Equation equation={`$$h_{2} - h_{1} =  \\Delta h$$`} />
@@ -399,27 +442,31 @@ const EquationCard = () => {
           equation={`$$\\Delta P = {\\rho}g\\Delta h + \\left ( {f_{d}\\frac{L}{d_i}} + \\sum K \\right )\\frac{1}{2}{\\rho}v^{2}$$`}
         />
 
-        <h3>Loss Coefficient</h3>
-        <p>
-          Each bend, valve, and fitting has a small amount of friction associated with it. It can be descriped as the
-          loss coeffient. The sum of all the loss coefficents (ΣK) can be used in the Bernoulli Equation to find the
-          pressure drop due to fittings. It is also known as the resistance coeffient.{' '}
-        </p>
-        <p>
-          Exact calculations for the loss coefficent for each type of valve and fitting can be found in the Crane
-          Technical Paper 410: Flow of Fluids through Valves, Fittings, and Pipe.{' '}
-        </p>
+        <p className="mb-2 font-semibold">Loss Coefficient (K)</p>
+        <div className="ml-2">
+          <p className="mb-2">
+            Each bend, valve, and fitting has a small amount of friction associated with it. It can be descriped as the
+            loss coeffient. The sum of all the loss coefficents (ΣK) can be used in the Bernoulli Equation to find the
+            pressure drop due to fittings. It is also known as the resistance coeffient.
+          </p>
+          <p className="mb-2">
+            Exact calculations for the loss coefficent for each type of valve and fitting can be found in the Crane
+            Technical Paper 410: Flow of Fluids through Valves, Fittings, and Pipe.
+          </p>
+        </div>
         <br />
 
         <p className="text-lg font-medium">Definitions</p>
-        <VariableDefinition equation={`$$P = $$`} definition="Pressure" />
-        <VariableDefinition equation={`$$v = $$`} definition="Fluid velocity" />
-        <VariableDefinition equation={`$$\\rho = $$`} definition="Fluid density" />
-        <VariableDefinition equation={`$$d_i = $$`} definition="Inner pipe diameter" />
-        <VariableDefinition equation={`$$L = $$`} definition="Pipe length" />
-        <VariableDefinition equation={`$$h = $$`} definition="Elevation" />
-        <VariableDefinition equation={`$$f_{d} = $$`} definition="Friction factor" />
-        <VariableDefinition equation={`$$K = $$`} definition="Loss coefficient" />
+        <div className="ml-2">
+          <VariableDefinition equation={`$$P = $$`} definition="Pressure" />
+          <VariableDefinition equation={`$$v = $$`} definition="Fluid velocity" />
+          <VariableDefinition equation={`$$\\rho = $$`} definition="Fluid density" />
+          <VariableDefinition equation={`$$d_i = $$`} definition="Inner pipe diameter" />
+          <VariableDefinition equation={`$$L = $$`} definition="Pipe length" />
+          <VariableDefinition equation={`$$h = $$`} definition="Elevation" />
+          <VariableDefinition equation={`$$f_{d} = $$`} definition="Friction factor" />
+          <VariableDefinition equation={`$$K = $$`} definition="Loss coefficient" />
+        </div>
       </>
     </CalcCard>
   )
@@ -428,53 +475,54 @@ const EquationCard = () => {
 const SurfaceFinishCard = () => (
   <CalcCard title="Surface Finish">
     <>
-      <h3>Surface Roughness</h3>
-
-      <p>
+      <p className="mb-2">
         The surface roughness depends on the pipe material. The table below gives typical roughnesses for specific
         materials
       </p>
-      <table className="table w-full">
-        <thead>
-          <tr>
-            <th>Material</th>
-            <th>Surface Roughness</th>
-          </tr>
-          <tr>
-            <td>Stainless Steel</td>
-            <td>5 μm</td>
-          </tr>
-          <tr>
-            <td>Steel</td>
-            <td>45 μm</td>
-          </tr>
-          <tr>
-            <td>Galvanized Steel</td>
-            <td>150 μm</td>
-          </tr>
-          <tr>
-            <td>Aluminum</td>
-            <td>1 μm</td>
-          </tr>
-          <tr>
-            <td>Copper</td>
-            <td>1 μm</td>
-          </tr>
-          <tr>
-            <td>Brass</td>
-            <td>1 μm</td>
-          </tr>
-          <tr>
-            <td>PVC</td>
-            <td>4 μm</td>
-          </tr>
-          <tr>
-            <td>Cast Iron</td>
-            <td>525 μm</td>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div className="w-full overflow-x-auto">
+        <table className=" table w-full">
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th>Surface Roughness</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Stainless Steel</td>
+              <td>5 μm</td>
+            </tr>
+            <tr>
+              <td>Steel</td>
+              <td>45 μm</td>
+            </tr>
+            <tr>
+              <td>Galvanized Steel</td>
+              <td>150 μm</td>
+            </tr>
+            <tr>
+              <td>Aluminum</td>
+              <td>1 μm</td>
+            </tr>
+            <tr>
+              <td>Copper</td>
+              <td>1 μm</td>
+            </tr>
+            <tr>
+              <td>Brass</td>
+              <td>1 μm</td>
+            </tr>
+            <tr>
+              <td>PVC</td>
+              <td>4 μm</td>
+            </tr>
+            <tr>
+              <td>Cast Iron</td>
+              <td>525 μm</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </>
   </CalcCard>
 )
