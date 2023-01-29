@@ -1,16 +1,19 @@
 import { NextPage } from 'next'
-import React, { useContext, useEffect, useReducer } from 'react'
+import React, { useContext, useEffect, useReducer, useState } from 'react'
 import { Breadcrumbs } from '../components/calculators/breadcrumbs'
 import { CalcBody } from '../components/calculators/calcBody'
 import { CalcCard } from '../components/calculators/calcCard'
 import { PageContainer } from '../components/calculators/container'
 import { CalcHeader } from '../components/calculators/header'
 import { Equation, VariableDefinition } from '../components/Equation'
-import { InputFieldWithUnit } from '../components/inputs/inputFieldObj'
-import { DefaultUnitContext, DefaultUnitContextType } from '../contexts/defaultUnitContext'
+import { InputFieldConstant, InputFieldWithUnit } from '../components/inputs/inputFieldObj'
+import { DefaultUnitContext, DefaultUnitContextType, DefaultUnits } from '../contexts/defaultUnitContext'
 import { updateCalculatedValue } from '../logic/logic'
 import { ShortInputType } from '../types'
 import { convertUnits } from '../utils/units'
+
+//TODO: add viscosity unit type
+//Calculate friction factor
 
 type State = {
   volumeFlowRate: ShortInputType
@@ -21,11 +24,10 @@ type State = {
   pipeLength: ShortInputType
   elevationRise: ShortInputType
   surfaceRoughness: ShortInputType
-  pressureDrop: ShortInputType
-  frictionFactor: ShortInputType
 }
 
 type AnswerState = {
+  pressureDrop: ShortInputType
   frictionFactor: ShortInputType
   reynoldsNumber: ShortInputType
 }
@@ -38,17 +40,6 @@ const resetErrorMessages = (state: State): State => {
     thickness: { ...state.thickness, error: '' },
     pipeLength: { ...state.pipeLength, error: '' },
   }
-}
-
-const calculateAnswer = (state: State): State => {
-  const { pipeLength, thickness, outerDiameter, volumeFlowRate } = state
-  const inputVelocity = pipeLength.calculatedValue.value //m/s
-  const inputThickness = thickness.calculatedValue.value //m
-  const inputDiameter = outerDiameter.calculatedValue.value //m
-  const inputFlowrate = volumeFlowRate.calculatedValue.value //m3/s
-  let validatedState = resetErrorMessages(state)
-
-  return validatedState
 }
 
 const updatedisplayValue = (object: ShortInputType): ShortInputType => {
@@ -200,9 +191,9 @@ const UnitConversion: NextPage = () => {
           value: convertUnits({
             value: Number(this.displayValue.value),
             fromUnit: this.displayValue.unit,
-            toUnit: 'kg/l',
+            toUnit: 'kg/m3',
           }),
-          unit: 'kg/l',
+          unit: 'kg/m3',
         }
       },
       selectiontext: 'Solve for flowrate',
@@ -229,61 +220,7 @@ const UnitConversion: NextPage = () => {
       focusText: 'Enter fluid flowrate',
       error: '',
     },
-    pressureDrop: {
-      name: 'pressureDrop',
-      label: 'Pressure Drop',
-      placeholder: '0',
-      unitType: 'pressure',
-      displayValue: { value: '1', unit: defaultUnits.pressure },
-      get calculatedValue() {
-        return {
-          value: convertUnits({
-            value: Number(this.displayValue.value),
-            fromUnit: this.displayValue.unit,
-            toUnit: 'psi',
-          }),
-          unit: 'psi',
-        }
-      },
-      selectiontext: 'Solve for flowrate',
-      focusText: 'Enter fluid flowrate',
-      error: '',
-    },
-    frictionFactor: {
-      name: 'frictionFactor',
-      label: 'Friction Factor',
-      placeholder: '0',
-      unitType: 'pressure',
-      displayValue: { value: '1', unit: defaultUnits.pressure },
-      get calculatedValue() {
-        return {
-          value: convertUnits({
-            value: Number(this.displayValue.value),
-            fromUnit: this.displayValue.unit,
-            toUnit: 'psi',
-          }),
-          unit: 'psi',
-        }
-      },
-      selectiontext: 'Solve for flowrate',
-      focusText: 'Enter fluid flowrate',
-      error: '',
-    },
   }
-
-  const fluidPropertyOptions: ShortInputType[] = [
-    initialState.volumeFlowRate,
-    initialState.fluidDensity,
-    initialState.fluidViscosity,
-  ]
-
-  const pipingPropertyOptions: ShortInputType[] = [
-    initialState.pipeLength,
-    initialState.outerDiameter,
-    initialState.thickness,
-    initialState.elevationRise,
-    initialState.surfaceRoughness,
-  ]
 
   type Action =
     | {
@@ -304,9 +241,9 @@ const UnitConversion: NextPage = () => {
     switch (action.type) {
       case ActionKind.CHANGE_VALUE:
         const payloadWithCalculatedValue = updateCalculatedValue(action.payload)
-        return calculateAnswer({ ...state, [action.payload.name]: payloadWithCalculatedValue })
+        return { ...state, [action.payload.name]: payloadWithCalculatedValue }
       case ActionKind.REFRESH:
-        return calculateAnswer({ ...state })
+        return { ...state }
       default:
         const neverEver: never = action
         console.error('Error: Fluid Flow State reducer action not recognized', neverEver)
@@ -334,14 +271,15 @@ const UnitConversion: NextPage = () => {
     dispatch({ type: ActionKind.CHANGE_VALUE, payload })
   }
 
-  //Solve answer on initial page load
-  useEffect(() => {
-    const refresh = () => {
-      console.log('Refreshing')
-      dispatch({ type: ActionKind.REFRESH })
-    }
-    refresh()
-  }, [])
+  const fluidPropertyOptions: ShortInputType[] = [state.volumeFlowRate, state.fluidDensity, state.fluidViscosity]
+
+  const pipingPropertyOptions: ShortInputType[] = [
+    state.pipeLength,
+    state.outerDiameter,
+    state.thickness,
+    state.elevationRise,
+    state.surfaceRoughness,
+  ]
 
   return (
     <PageContainer>
@@ -392,7 +330,7 @@ const UnitConversion: NextPage = () => {
             })}
           </div>
         </CalcCard>
-        <AnswerCard />
+        <AnswerCard inputState={state} defaultUnits={defaultUnits} />
         <EquationCard />
         <SurfaceFinishCard />
       </CalcBody>
@@ -402,10 +340,119 @@ const UnitConversion: NextPage = () => {
 
 export default UnitConversion
 
-const AnswerCard = () => {
+const AnswerCard = ({ inputState, defaultUnits }: { inputState: State; defaultUnits: DefaultUnits }) => {
+  const initalAnswerUnits = {
+    pressureDrop: defaultUnits.pressure,
+    frictionFactor: defaultUnits.pressure,
+    reynoldsNumber: defaultUnits.pressure,
+  }
+
+  const [answerUnits, setAnswerUnits] = useState(initalAnswerUnits)
+
+  const handleChangeUnit = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setAnswerUnits({ ...answerUnits, [name]: value })
+  }
+
+  const { dP, ff, re } = calculateAnswer(inputState)
+  const answerState: AnswerState = {
+    pressureDrop: {
+      name: 'pressureDrop',
+      label: 'Pressure Drop',
+      placeholder: '0',
+      unitType: 'pressure',
+      calculatedValue: { value: dP, unit: 'Pa' },
+      get displayValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.calculatedValue.value),
+            fromUnit: this.calculatedValue.unit,
+            toUnit: answerUnits.pressureDrop,
+          }).toLocaleString(),
+          unit: answerUnits.pressureDrop,
+        }
+      },
+      selectiontext: '',
+      focusText: 'Differential pressure calculation',
+      error: '',
+    },
+    frictionFactor: {
+      name: 'frictionFactor',
+      label: 'Friction Factor',
+      placeholder: '0',
+      unitType: 'pressure',
+      calculatedValue: { value: ff, unit: 'unitless' },
+      displayValue: { value: ff.toLocaleString(), unit: 'unitless' },
+      selectiontext: 'Solve for flowrate',
+      focusText: 'Enter fluid flowrate',
+      error: '',
+    },
+    reynoldsNumber: {
+      name: 'reynoldsNumber',
+      label: 'Reynolds Number',
+      placeholder: '0',
+      unitType: 'pressure',
+      calculatedValue: { value: re, unit: 'unitless' },
+      displayValue: { value: re.toLocaleString(), unit: 'unitless' },
+      selectiontext: 'Solve for flowrate',
+      focusText: 'Enter fluid flowrate',
+      error: '',
+    },
+  }
+
+  const logChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.value)
+  }
+
   return (
     <CalcCard title={'Answer'}>
-      <></>
+      <div className="mb-8 flex flex-col">
+        <InputFieldWithUnit
+          name={answerState.pressureDrop.name}
+          label={answerState.pressureDrop.label}
+          placeholder={answerState.pressureDrop.placeholder}
+          selected={true}
+          displayValue={{
+            value: answerState.pressureDrop.displayValue.value,
+            unit: answerState.pressureDrop.displayValue.unit,
+          }}
+          error={answerState.pressureDrop.error}
+          unitType={answerState.pressureDrop.unitType}
+          focusText={answerState.pressureDrop.focusText}
+          onChangeValue={logChange}
+          onChangeUnit={handleChangeUnit}
+        />
+
+        <InputFieldConstant
+          name={answerState.frictionFactor.name}
+          label={answerState.frictionFactor.label}
+          placeholder={answerState.frictionFactor.placeholder}
+          selected={true}
+          displayValue={{
+            value: answerState.frictionFactor.displayValue.value,
+            unit: answerState.frictionFactor.displayValue.unit,
+          }}
+          error={answerState.frictionFactor.error}
+          unitType={answerState.frictionFactor.unitType}
+          focusText={answerState.frictionFactor.focusText}
+          onChangeValue={logChange}
+        />
+
+        <InputFieldConstant
+          name={answerState.reynoldsNumber.name}
+          label={answerState.reynoldsNumber.label}
+          placeholder={answerState.reynoldsNumber.placeholder}
+          selected={true}
+          displayValue={{
+            value: answerState.reynoldsNumber.displayValue.value,
+            unit: answerState.reynoldsNumber.displayValue.unit,
+          }}
+          error={answerState.reynoldsNumber.error}
+          unitType={answerState.reynoldsNumber.unitType}
+          focusText={answerState.reynoldsNumber.focusText}
+          onChangeValue={logChange}
+        />
+      </div>
     </CalcCard>
   )
 }
@@ -526,3 +573,47 @@ const SurfaceFinishCard = () => (
     </>
   </CalcCard>
 )
+
+const calculateAnswer = (state: State) => {
+  //Inputs
+  const { pipeLength, thickness, outerDiameter, volumeFlowRate, fluidDensity, elevationRise, fluidViscosity } = state
+  const inputDensity = fluidDensity.calculatedValue.value //kg/m3
+  const inputElevation = elevationRise.calculatedValue.value //m
+  const inputThickness = thickness.calculatedValue.value //m
+  const inputPipeOD = outerDiameter.calculatedValue.value //m
+  const inputFlowrate = volumeFlowRate.calculatedValue.value //m3/s
+  const inputViscosity = fluidViscosity.calculatedValue.value //Pa*s
+
+  //Intermediate calculations
+  const gravitationalConstant = 9.81 //m/s2
+  const inputPipeID = inputPipeOD - 2 * inputThickness //m
+  const fluidVelocity = inputFlowrate / (Math.PI * (inputPipeID / 2) ** 2) //m/s
+  const frictionFactor = 0.01 //TODO: Add friction factor calculation
+
+  //Pressure drop calculations
+  const dP_elevation = inputDensity * gravitationalConstant * inputElevation // kg/m3 * m/s2 * m = kg/m2/s2 = Pa
+  const dP_fittings = 0 //TODO: Add fittings
+  const dP_friction =
+    ((frictionFactor * (pipeLength.calculatedValue.value / inputPipeID) * 1) / 2) * inputDensity * fluidVelocity ** 2 //
+  const dP_total = dP_elevation + dP_fittings + dP_friction //Pa
+
+  //Reynolds number calculation
+  const reynoldsNumber = (inputDensity * fluidVelocity * inputPipeID) / (inputViscosity / 1000) //kg/m3 * m/s * m / Pa*s = unitless
+
+  console.log(
+    'flowrate',
+    inputFlowrate,
+    'pipeID',
+    inputPipeID,
+    'density',
+    inputDensity,
+    'velocity',
+    fluidVelocity,
+    'diameter',
+    inputPipeID,
+    'viscosity',
+    inputViscosity
+  )
+
+  return { dP: dP_total, ff: frictionFactor, re: reynoldsNumber }
+}
