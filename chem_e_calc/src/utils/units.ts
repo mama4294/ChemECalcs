@@ -1,10 +1,11 @@
 import configureMeasurements, { allMeasures, AllMeasuresUnits, AllMeasures, AllMeasuresSystems } from 'convert-units'
 import density, { DensityUnits } from './measures/densityMeasure'
+import viscosity, { ViscosityUnits } from './measures/dynamicViscosityMeasure'
 
-const customMeasures = { ...allMeasures, density }
+const customMeasures = { ...allMeasures, density, viscosity }
 
-export type CustomMeasureUnits = AllMeasuresUnits | DensityUnits | TimeUnits
-export type UnitTypes = AllMeasures | 'density' | 'time'
+export type CustomMeasureUnits = AllMeasuresUnits | DensityUnits | ViscosityUnits
+export type UnitTypes = AllMeasures | 'density' | 'viscosity' | 'time'
 
 const convert = configureMeasurements<UnitTypes, AllMeasuresSystems, CustomMeasureUnits>(customMeasures)
 
@@ -49,6 +50,7 @@ export interface Units {
   power: string[]
   density: string[]
   time: string[]
+  viscosity: string[]
 }
 
 export const units = {
@@ -120,6 +122,7 @@ export interface UnitOptions {
   power: UnitOption[]
   density: UnitOption[]
   time: UnitOption[]
+  viscosity: UnitOption[]
 }
 
 export const unitOptions: UnitOptions = {
@@ -253,6 +256,12 @@ export const unitOptions: UnitOptions = {
     { value: 'h', label: 'hr' },
     { value: 'd', label: 'day' },
   ],
+  viscosity: [
+    { value: 'pa·s', label: 'pa·s' },
+    { value: 'mpa·s', label: 'mpa·s' },
+    { value: 'cP', label: 'cP' },
+    { value: 'lb·s/ft2', label: 'lb·s/ft2' },
+  ],
 }
 
 export const unitTypes = [
@@ -269,4 +278,5 @@ export const unitTypes = [
   { value: 'power', label: 'Power' },
   { value: 'density', label: 'Density' },
   { value: 'time', label: 'Time' },
+  { value: 'viscosity', label: 'Viscosity' },
 ]
