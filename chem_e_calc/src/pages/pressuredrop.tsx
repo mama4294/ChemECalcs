@@ -30,6 +30,8 @@ type AnswerState = {
   pressureDrop: ShortInputType
   frictionFactor: ShortInputType
   reynoldsNumber: ShortInputType
+  flowRegime: ShortInputType
+  velocity: ShortInputType
 }
 
 const resetErrorMessages = (state: State): State => {
@@ -345,6 +347,7 @@ const AnswerCard = ({ inputState, defaultUnits }: { inputState: State; defaultUn
     pressureDrop: defaultUnits.pressure,
     frictionFactor: defaultUnits.pressure,
     reynoldsNumber: defaultUnits.pressure,
+    velocity: defaultUnits.speed,
   }
 
   const [answerUnits, setAnswerUnits] = useState(initalAnswerUnits)
@@ -354,7 +357,7 @@ const AnswerCard = ({ inputState, defaultUnits }: { inputState: State; defaultUn
     setAnswerUnits({ ...answerUnits, [name]: value })
   }
 
-  const { dP, ff, re } = calculateAnswer(inputState)
+  const { dP, ff, re, regime, velocity } = calculateAnswer(inputState)
   const answerState: AnswerState = {
     pressureDrop: {
       name: 'pressureDrop',
@@ -387,6 +390,26 @@ const AnswerCard = ({ inputState, defaultUnits }: { inputState: State; defaultUn
       focusText: 'Enter fluid flowrate',
       error: '',
     },
+    velocity: {
+      name: 'velocity',
+      label: 'Fluid Velocity',
+      placeholder: '0',
+      unitType: 'speed',
+      calculatedValue: { value: velocity, unit: 'm/s' },
+      get displayValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.calculatedValue.value),
+            fromUnit: this.calculatedValue.unit,
+            toUnit: answerUnits.velocity,
+          }).toLocaleString(),
+          unit: answerUnits.velocity,
+        }
+      },
+      selectiontext: '',
+      focusText: 'Differential pressure calculation',
+      error: '',
+    },
     reynoldsNumber: {
       name: 'reynoldsNumber',
       label: 'Reynolds Number',
@@ -394,6 +417,17 @@ const AnswerCard = ({ inputState, defaultUnits }: { inputState: State; defaultUn
       unitType: 'pressure',
       calculatedValue: { value: re, unit: 'unitless' },
       displayValue: { value: re.toLocaleString(), unit: 'unitless' },
+      selectiontext: 'Solve for flowrate',
+      focusText: 'Enter fluid flowrate',
+      error: '',
+    },
+    flowRegime: {
+      name: 'flowRegime',
+      label: 'Flow Regime',
+      placeholder: '0',
+      unitType: 'pressure',
+      calculatedValue: { value: 0, unit: 'unitless' },
+      displayValue: { value: regime.toLocaleString(), unit: 'unitless' },
       selectiontext: 'Solve for flowrate',
       focusText: 'Enter fluid flowrate',
       error: '',
@@ -419,6 +453,22 @@ const AnswerCard = ({ inputState, defaultUnits }: { inputState: State; defaultUn
           error={answerState.pressureDrop.error}
           unitType={answerState.pressureDrop.unitType}
           focusText={answerState.pressureDrop.focusText}
+          onChangeValue={logChange}
+          onChangeUnit={handleChangeUnit}
+        />
+
+        <InputFieldWithUnit
+          name={answerState.velocity.name}
+          label={answerState.velocity.label}
+          placeholder={answerState.velocity.placeholder}
+          selected={true}
+          displayValue={{
+            value: answerState.velocity.displayValue.value,
+            unit: answerState.velocity.displayValue.unit,
+          }}
+          error={answerState.velocity.error}
+          unitType={answerState.velocity.unitType}
+          focusText={answerState.velocity.focusText}
           onChangeValue={logChange}
           onChangeUnit={handleChangeUnit}
         />
@@ -450,6 +500,20 @@ const AnswerCard = ({ inputState, defaultUnits }: { inputState: State; defaultUn
           error={answerState.reynoldsNumber.error}
           unitType={answerState.reynoldsNumber.unitType}
           focusText={answerState.reynoldsNumber.focusText}
+          onChangeValue={logChange}
+        />
+        <InputFieldConstant
+          name={answerState.flowRegime.name}
+          label={answerState.flowRegime.label}
+          placeholder={answerState.flowRegime.placeholder}
+          selected={true}
+          displayValue={{
+            value: answerState.flowRegime.displayValue.value,
+            unit: answerState.flowRegime.displayValue.unit,
+          }}
+          error={answerState.flowRegime.error}
+          unitType={answerState.flowRegime.unitType}
+          focusText={answerState.flowRegime.focusText}
           onChangeValue={logChange}
         />
       </div>
@@ -600,6 +664,14 @@ const calculateAnswer = (state: State) => {
   //Reynolds number calculation
   const reynoldsNumber = (inputDensity * fluidVelocity * inputPipeID) / (inputViscosity / 1000) //kg/m3 * m/s * m / Pa*s = unitless
 
+  //Flow regime calculation
+  let regime = 'Laminar'
+  if (reynoldsNumber > 4000) {
+    regime = 'Turbulent'
+  } else if (reynoldsNumber > 2000) {
+    regime = 'Transitional'
+  }
+
   console.log(
     'flowrate',
     inputFlowrate,
@@ -615,5 +687,5 @@ const calculateAnswer = (state: State) => {
     inputViscosity
   )
 
-  return { dP: dP_total, ff: frictionFactor, re: reynoldsNumber }
+  return { dP: dP_total, ff: frictionFactor, re: reynoldsNumber, regime: regime, velocity: fluidVelocity }
 }
