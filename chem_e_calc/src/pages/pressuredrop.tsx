@@ -206,16 +206,16 @@ const UnitConversion: NextPage = () => {
       name: 'fluidViscosity',
       label: 'Viscosity',
       placeholder: '0',
-      unitType: 'density',
-      displayValue: { value: '1', unit: defaultUnits.density },
+      unitType: 'viscosity',
+      displayValue: { value: '1', unit: defaultUnits.viscosity },
       get calculatedValue() {
         return {
           value: convertUnits({
             value: Number(this.displayValue.value),
             fromUnit: this.displayValue.unit,
-            toUnit: 'kg/l',
+            toUnit: 'cP',
           }),
-          unit: 'kg/l',
+          unit: 'cP',
         }
       },
       selectiontext: 'Solve for flowrate',

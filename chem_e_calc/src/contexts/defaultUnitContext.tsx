@@ -14,6 +14,7 @@ export type DefaultUnits = {
   current: CustomMeasureUnits
   power: CustomMeasureUnits
   density: CustomMeasureUnits
+  viscosity: CustomMeasureUnits
 }
 
 export type DefaultUnitContextType = {
@@ -34,6 +35,7 @@ const initialValues: DefaultUnits = {
   current: 'mA',
   power: 'kW',
   density: 'kg/l',
+  viscosity: 'cP',
 }
 
 function getLocalStorage() {
