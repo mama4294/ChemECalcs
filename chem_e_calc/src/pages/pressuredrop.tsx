@@ -12,7 +12,6 @@ import { updateCalculatedValue } from '../logic/logic'
 import { ShortInputType } from '../types'
 import { convertUnits } from '../utils/units'
 
-//TODO: add viscosity unit type
 //Calculate friction factor
 
 type State = {
@@ -78,8 +77,8 @@ const UnitConversion: NextPage = () => {
           unit: 'm',
         }
       },
-      selectiontext: 'Solve for fluid velocity',
-      focusText: 'Enter fluid velocity',
+      selectiontext: '',
+      focusText: 'Enter the total length of the pipe',
       error: '',
     },
     elevationRise: {
@@ -99,7 +98,7 @@ const UnitConversion: NextPage = () => {
         }
       },
       selectiontext: 'Solve for fluid velocity',
-      focusText: 'Enter fluid velocity',
+      focusText: 'Enter the difference in elevation between the inlet and outlet (can be negative)',
       error: '',
     },
     surfaceRoughness: {
@@ -118,8 +117,8 @@ const UnitConversion: NextPage = () => {
           unit: 'm',
         }
       },
-      selectiontext: 'Solve for fluid velocity',
-      focusText: 'Enter fluid velocity',
+      selectiontext: '',
+      focusText: 'Enter the surface roughness of the pipe',
       error: '',
     },
     outerDiameter: {
@@ -138,7 +137,7 @@ const UnitConversion: NextPage = () => {
           unit: 'm',
         }
       },
-      selectiontext: 'Solve for outer diameter',
+      selectiontext: '',
       focusText: 'Enter pipe outer diameter',
       error: '',
     },
@@ -158,7 +157,7 @@ const UnitConversion: NextPage = () => {
           unit: 'm',
         }
       },
-      selectiontext: 'Solve for thickness',
+      selectiontext: '',
       focusText: 'Enter pipe wall thickness',
       error: '',
     },
@@ -198,8 +197,8 @@ const UnitConversion: NextPage = () => {
           unit: 'kg/m3',
         }
       },
-      selectiontext: 'Solve for flowrate',
-      focusText: 'Enter fluid flowrate',
+      selectiontext: '',
+      focusText: 'Enter fluid density',
       error: '',
     },
     fluidViscosity: {
@@ -213,13 +212,13 @@ const UnitConversion: NextPage = () => {
           value: convertUnits({
             value: Number(this.displayValue.value),
             fromUnit: this.displayValue.unit,
-            toUnit: 'cP',
+            toUnit: 'pa·s',
           }),
-          unit: 'cP',
+          unit: 'pa·s',
         }
       },
-      selectiontext: 'Solve for flowrate',
-      focusText: 'Enter fluid flowrate',
+      selectiontext: '',
+      focusText: 'Enter fluid dynamic viscosity',
       error: '',
     },
   }
@@ -662,7 +661,7 @@ const calculateAnswer = (state: State) => {
   const dP_total = dP_elevation + dP_fittings + dP_friction //Pa
 
   //Reynolds number calculation
-  const reynoldsNumber = (inputDensity * fluidVelocity * inputPipeID) / (inputViscosity / 1000) //kg/m3 * m/s * m / Pa*s = unitless
+  const reynoldsNumber = (inputDensity * fluidVelocity * inputPipeID) / inputViscosity //kg/m3 * m/s * m / Pa*s = unitless
 
   //Flow regime calculation
   let regime = 'Laminar'
@@ -672,20 +671,20 @@ const calculateAnswer = (state: State) => {
     regime = 'Transitional'
   }
 
-  console.log(
-    'flowrate',
-    inputFlowrate,
-    'pipeID',
-    inputPipeID,
-    'density',
-    inputDensity,
-    'velocity',
-    fluidVelocity,
-    'diameter',
-    inputPipeID,
-    'viscosity',
-    inputViscosity
-  )
+  // console.log(
+  //   'flowrate',
+  //   inputFlowrate,
+  //   'pipeID',
+  //   inputPipeID,
+  //   'density',
+  //   inputDensity,
+  //   'velocity',
+  //   fluidVelocity,
+  //   'diameter',
+  //   inputPipeID,
+  //   'viscosity',
+  //   inputViscosity
+  // )
 
   return { dP: dP_total, ff: frictionFactor, re: reynoldsNumber, regime: regime, velocity: fluidVelocity }
 }
