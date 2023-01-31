@@ -649,12 +649,14 @@ const calculateAnswer = (state: State) => {
   const reynoldsNumber = (inputDensity * fluidVelocity * inputPipeID) / inputViscosity //kg/m3 * m/s * m / Pa*s = unitless
   let frictionFactor = 64 / reynoldsNumber //laminar flow
 
+  console.log('relative roughness: ', inputSurfaceRoughness / inputPipeID)
+
   if (reynoldsNumber > 2000) {
     //transition and turbulent flow
     frictionFactor = solveColebrook({
       initialGuess: 0.5,
       reynoldsNumber: reynoldsNumber,
-      relativeRoughness: inputSurfaceRoughness,
+      roughness: inputSurfaceRoughness,
       diameter: inputPipeID,
     })
   }
