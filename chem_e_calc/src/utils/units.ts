@@ -154,6 +154,7 @@ export const unitOptions: UnitOptions = {
     { value: 'yd3', label: 'yd³' },
   ],
   length: [
+    { value: 'μm', label: 'μm' },
     { value: 'mm', label: 'mm' },
     { value: 'cm', label: 'cm' },
     { value: 'm', label: 'm' },

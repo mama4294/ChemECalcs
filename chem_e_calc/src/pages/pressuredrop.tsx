@@ -71,7 +71,7 @@ const UnitConversion: NextPage = () => {
       label: 'Elevation Rise',
       placeholder: '2',
       unitType: 'length',
-      displayValue: { value: '5', unit: defaultUnits.length },
+      displayValue: { value: '2', unit: defaultUnits.length },
       get calculatedValue() {
         return {
           value: convertUnits({
@@ -91,7 +91,7 @@ const UnitConversion: NextPage = () => {
       label: 'Pipe Surface Roughness',
       placeholder: '0',
       unitType: 'length',
-      displayValue: { value: '0.02', unit: defaultUnits.length },
+      displayValue: { value: '5', unit: 'μm' },
       get calculatedValue() {
         return {
           value: convertUnits({
@@ -111,7 +111,7 @@ const UnitConversion: NextPage = () => {
       label: 'Pipe Outer Diameter',
       placeholder: '0',
       unitType: 'length',
-      displayValue: { value: '1', unit: defaultUnits.length },
+      displayValue: { value: '1.5', unit: defaultUnits.length },
       get calculatedValue() {
         return {
           value: convertUnits({
