@@ -8,11 +8,9 @@ import { CalcHeader } from '../components/calculators/header'
 import { Equation, VariableDefinition } from '../components/Equation'
 import { InputFieldConstant, InputFieldWithUnit } from '../components/inputs/inputFieldObj'
 import { DefaultUnitContext, DefaultUnitContextType, DefaultUnits } from '../contexts/defaultUnitContext'
-import { updateCalculatedValue } from '../logic/logic'
+import { solveColebrook, updateCalculatedValue } from '../logic/logic'
 import { ShortInputType } from '../types'
 import { convertUnits } from '../utils/units'
-
-//Calculate friction factor
 
 type State = {
   volumeFlowRate: ShortInputType
@@ -40,19 +38,6 @@ const resetErrorMessages = (state: State): State => {
     outerDiameter: { ...state.outerDiameter, error: '' },
     thickness: { ...state.thickness, error: '' },
     pipeLength: { ...state.pipeLength, error: '' },
-  }
-}
-
-const updatedisplayValue = (object: ShortInputType): ShortInputType => {
-  const { calculatedValue, displayValue } = object
-  const convertedValue = convertUnits({
-    value: calculatedValue.value,
-    fromUnit: calculatedValue.unit,
-    toUnit: displayValue.unit,
-  })
-  return {
-    ...object,
-    displayValue: { value: convertedValue.toLocaleString(), unit: displayValue.unit },
   }
 }
 
@@ -639,19 +624,40 @@ const SurfaceFinishCard = () => (
 
 const calculateAnswer = (state: State) => {
   //Inputs
-  const { pipeLength, thickness, outerDiameter, volumeFlowRate, fluidDensity, elevationRise, fluidViscosity } = state
+  const {
+    pipeLength,
+    thickness,
+    outerDiameter,
+    volumeFlowRate,
+    fluidDensity,
+    elevationRise,
+    fluidViscosity,
+    surfaceRoughness,
+  } = state
   const inputDensity = fluidDensity.calculatedValue.value //kg/m3
   const inputElevation = elevationRise.calculatedValue.value //m
   const inputThickness = thickness.calculatedValue.value //m
   const inputPipeOD = outerDiameter.calculatedValue.value //m
   const inputFlowrate = volumeFlowRate.calculatedValue.value //m3/s
   const inputViscosity = fluidViscosity.calculatedValue.value //Pa*s
+  const inputSurfaceRoughness = surfaceRoughness.calculatedValue.value //m
 
   //Intermediate calculations
   const gravitationalConstant = 9.81 //m/s2
   const inputPipeID = inputPipeOD - 2 * inputThickness //m
   const fluidVelocity = inputFlowrate / (Math.PI * (inputPipeID / 2) ** 2) //m/s
-  const frictionFactor = 0.01 //TODO: Add friction factor calculation
+  const reynoldsNumber = (inputDensity * fluidVelocity * inputPipeID) / inputViscosity //kg/m3 * m/s * m / Pa*s = unitless
+  let frictionFactor = 64 / reynoldsNumber //laminar flow
+
+  if (reynoldsNumber > 2000) {
+    //transition and turbulent flow
+    frictionFactor = solveColebrook({
+      initialGuess: 0.5,
+      reynoldsNumber: reynoldsNumber,
+      relativeRoughness: inputSurfaceRoughness,
+      diameter: inputPipeID,
+    })
+  }
 
   //Pressure drop calculations
   const dP_elevation = inputDensity * gravitationalConstant * inputElevation // kg/m3 * m/s2 * m = kg/m2/s2 = Pa
@@ -660,9 +666,6 @@ const calculateAnswer = (state: State) => {
     ((frictionFactor * (pipeLength.calculatedValue.value / inputPipeID) * 1) / 2) * inputDensity * fluidVelocity ** 2 //
   const dP_total = dP_elevation + dP_fittings + dP_friction //Pa
 
-  //Reynolds number calculation
-  const reynoldsNumber = (inputDensity * fluidVelocity * inputPipeID) / inputViscosity //kg/m3 * m/s * m / Pa*s = unitless
-
   //Flow regime calculation
   let regime = 'Laminar'
   if (reynoldsNumber > 4000) {
@@ -670,21 +673,6 @@ const calculateAnswer = (state: State) => {
   } else if (reynoldsNumber > 2000) {
     regime = 'Transitional'
   }
-
-  // console.log(
-  //   'flowrate',
-  //   inputFlowrate,
-  //   'pipeID',
-  //   inputPipeID,
-  //   'density',
-  //   inputDensity,
-  //   'velocity',
-  //   fluidVelocity,
-  //   'diameter',
-  //   inputPipeID,
-  //   'viscosity',
-  //   inputViscosity
-  // )
 
   return { dP: dP_total, ff: frictionFactor, re: reynoldsNumber, regime: regime, velocity: fluidVelocity }
 }
