@@ -340,7 +340,9 @@ const AnswerCard = ({
     setAnswerUnits({ ...answerUnits, [name]: value })
   }
 
-  const { dP, ff, re, regime, velocity, dP_friction, dP_elevation, dP_fittings } = calculateAnswer(inputState)
+  const { dP, ff, ffDetails, re, regime, velocity, dP_friction, dP_elevation, dP_fittings } =
+    calculateAnswer(inputState)
+
   const answerState: AnswerState = {
     pressureDrop: {
       name: 'pressureDrop',
@@ -540,6 +542,28 @@ const AnswerCard = ({
             focusText={answerState.frictionFactor.focusText}
             onChangeValue={logChange}
           />
+          <div tabIndex={0} className="collapse-arrow collapse rounded-box">
+            <div className="font-small collapse-title text-sm">Details</div>
+            <div className="collapse-content overflow-x-auto p-0">
+              <table className="table w-full">
+                {/* <!-- head --> */}
+                <thead>
+                  <tr>
+                    <th>Iteration</th>
+                    <th>Friction Factor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ffDetails.map(iteration => (
+                    <tr>
+                      <td>{iteration.i}</td>
+                      <td>{iteration.ff}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
           <InputFieldConstant
             name={answerState.reynoldsNumber.name}
@@ -718,15 +742,18 @@ const calculateAnswer = (state: State) => {
   const fluidVelocity = inputFlowrate / (Math.PI * (inputPipeID / 2) ** 2) //m/s
   const reynoldsNumber = (inputDensity * fluidVelocity * inputPipeID) / inputViscosity //kg/m3 * m/s * m / Pa*s = unitless
   let frictionFactor = 64 / reynoldsNumber //laminar flow
+  let frictionFactorDetails = [{ i: 0, ff: 64 / reynoldsNumber }]
 
   if (reynoldsNumber > 2000) {
     //transition and turbulent flow
-    frictionFactor = solveColebrook({
+    const data = solveColebrook({
       initialGuess: 0.5,
       reynoldsNumber: reynoldsNumber,
       roughness: inputSurfaceRoughness,
       diameter: inputPipeID,
     })
+    frictionFactor = data.ff
+    frictionFactorDetails = data.details
   }
 
   //Pressure drop calculations
@@ -746,6 +773,7 @@ const calculateAnswer = (state: State) => {
   return {
     dP: dP_total,
     ff: frictionFactor,
+    ffDetails: frictionFactorDetails,
     re: reynoldsNumber,
     regime: regime,
     velocity: fluidVelocity,
