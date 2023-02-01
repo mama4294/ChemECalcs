@@ -340,7 +340,7 @@ const AnswerCard = ({
     setAnswerUnits({ ...answerUnits, [name]: value })
   }
 
-  const { dP, ff, re, regime, velocity } = calculateAnswer(inputState)
+  const { dP, ff, re, regime, velocity, dP_friction, dP_elevation, dP_fittings } = calculateAnswer(inputState)
   const answerState: AnswerState = {
     pressureDrop: {
       name: 'pressureDrop',
@@ -448,6 +448,68 @@ const AnswerCard = ({
             onChangeValue={logChange}
             onChangeUnit={handleChangeUnit}
           />
+          <div tabIndex={0} className="collapse-arrow collapse rounded-box">
+            <div className="font-small collapse-title text-sm">Details</div>
+            <div className="collapse-content overflow-x-auto p-0">
+              <table className="table w-full">
+                {/* <!-- head --> */}
+                {/* <thead>
+                  <tr>
+                    <th>Loss Type</th>
+                    <th>Value</th>
+                    <th>Unit</th>
+                  </tr>
+                </thead> */}
+                <tbody>
+                  {/* <!-- row 1 --> */}
+                  <tr>
+                    <td>Elevation Losses</td>
+                    <td>
+                      {' '}
+                      {convertUnits({
+                        value: dP_elevation,
+                        fromUnit: 'Pa',
+                        toUnit: answerUnits.pressureDrop,
+                      }).toLocaleString()}
+                    </td>
+                    <td>{answerUnits.pressureDrop}</td>
+                  </tr>
+                  {/* <!-- row 2 --> */}
+                  <tr>
+                    <td>Friction Losses</td>
+                    <td>
+                      {' '}
+                      {convertUnits({
+                        value: dP_friction,
+                        fromUnit: 'Pa',
+                        toUnit: answerUnits.pressureDrop,
+                      }).toLocaleString()}
+                    </td>
+                    <td>{answerUnits.pressureDrop}</td>
+                  </tr>
+                  {/* <!-- row 3 --> */}
+                  <tr>
+                    <td>Fittings Losses</td>
+                    <td>
+                      {' '}
+                      {convertUnits({
+                        value: dP_fittings,
+                        fromUnit: 'Pa',
+                        toUnit: answerUnits.pressureDrop,
+                      }).toLocaleString()}
+                    </td>
+                    <td>{answerUnits.pressureDrop}</td>
+                  </tr>
+                  {/* <!-- total Row --> */}
+                  <tr>
+                    <td>Total</td>
+                    <td>{answerState.pressureDrop.displayValue.value}</td>
+                    <td>{answerUnits.pressureDrop}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
           <InputFieldWithUnit
             name={answerState.velocity.name}
             label={answerState.velocity.label}
@@ -681,7 +743,16 @@ const calculateAnswer = (state: State) => {
     regime = 'Transitional'
   }
 
-  return { dP: dP_total, ff: frictionFactor, re: reynoldsNumber, regime: regime, velocity: fluidVelocity }
+  return {
+    dP: dP_total,
+    ff: frictionFactor,
+    re: reynoldsNumber,
+    regime: regime,
+    velocity: fluidVelocity,
+    dP_elevation,
+    dP_fittings,
+    dP_friction,
+  }
 }
 
 const resetErrorMessages = (state: State): State => {
