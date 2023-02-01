@@ -31,16 +31,6 @@ type AnswerState = {
   velocity: ShortInputType
 }
 
-const resetErrorMessages = (state: State): State => {
-  return {
-    ...state,
-    volumeFlowRate: { ...state.volumeFlowRate, error: '' },
-    outerDiameter: { ...state.outerDiameter, error: '' },
-    thickness: { ...state.thickness, error: '' },
-    pipeLength: { ...state.pipeLength, error: '' },
-  }
-}
-
 const UnitConversion: NextPage = () => {
   const paths = [{ title: 'Pressure Drop', href: '/pressuredrop' }]
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
@@ -219,7 +209,6 @@ const UnitConversion: NextPage = () => {
 
   enum ActionKind {
     CHANGE_VALUE = 'CHANGE_VALUE',
-    CHANGE_SOLVE_SELECTION = 'CHANGE_SOLVE_SELECTION',
     REFRESH = 'REFRESH',
   }
 
@@ -227,7 +216,7 @@ const UnitConversion: NextPage = () => {
     switch (action.type) {
       case ActionKind.CHANGE_VALUE:
         const payloadWithCalculatedValue = updateCalculatedValue(action.payload)
-        return { ...state, [action.payload.name]: payloadWithCalculatedValue }
+        return validateInputs({ ...state, [action.payload.name]: payloadWithCalculatedValue })
       case ActionKind.REFRESH:
         return { ...state }
       default:
@@ -266,6 +255,8 @@ const UnitConversion: NextPage = () => {
     state.elevationRise,
     state.surfaceRoughness,
   ]
+
+  const isError = hasError(state)
 
   return (
     <PageContainer>
@@ -316,7 +307,7 @@ const UnitConversion: NextPage = () => {
             })}
           </div>
         </CalcCard>
-        <AnswerCard inputState={state} defaultUnits={defaultUnits} />
+        <AnswerCard inputState={state} defaultUnits={defaultUnits} isError={isError} />
         <EquationCard />
         <SurfaceFinishCard />
       </CalcBody>
@@ -326,7 +317,15 @@ const UnitConversion: NextPage = () => {
 
 export default UnitConversion
 
-const AnswerCard = ({ inputState, defaultUnits }: { inputState: State; defaultUnits: DefaultUnits }) => {
+const AnswerCard = ({
+  inputState,
+  defaultUnits,
+  isError,
+}: {
+  inputState: State
+  defaultUnits: DefaultUnits
+  isError: boolean
+}) => {
   const initalAnswerUnits = {
     pressureDrop: defaultUnits.pressure,
     frictionFactor: defaultUnits.pressure,
@@ -422,87 +421,95 @@ const AnswerCard = ({ inputState, defaultUnits }: { inputState: State; defaultUn
     console.log(e.target.value)
   }
 
-  return (
-    <CalcCard title={'Answer'}>
-      <div className="mb-8 flex flex-col">
-        <InputFieldWithUnit
-          name={answerState.pressureDrop.name}
-          label={answerState.pressureDrop.label}
-          placeholder={answerState.pressureDrop.placeholder}
-          selected={true}
-          displayValue={{
-            value: answerState.pressureDrop.displayValue.value,
-            unit: answerState.pressureDrop.displayValue.unit,
-          }}
-          error={answerState.pressureDrop.error}
-          unitType={answerState.pressureDrop.unitType}
-          focusText={answerState.pressureDrop.focusText}
-          onChangeValue={logChange}
-          onChangeUnit={handleChangeUnit}
-        />
+  if (isError) {
+    return (
+      <CalcCard title={'Answer'}>
+        <div className="mb-8 flex flex-col">
+          <div className="text-error">Invalid input</div>
+        </div>
+      </CalcCard>
+    )
+  } else
+    return (
+      <CalcCard title={'Answer'}>
+        <div className="mb-8 flex flex-col">
+          <InputFieldWithUnit
+            name={answerState.pressureDrop.name}
+            label={answerState.pressureDrop.label}
+            placeholder={answerState.pressureDrop.placeholder}
+            selected={true}
+            displayValue={{
+              value: answerState.pressureDrop.displayValue.value,
+              unit: answerState.pressureDrop.displayValue.unit,
+            }}
+            error={answerState.pressureDrop.error}
+            unitType={answerState.pressureDrop.unitType}
+            focusText={answerState.pressureDrop.focusText}
+            onChangeValue={logChange}
+            onChangeUnit={handleChangeUnit}
+          />
+          <InputFieldWithUnit
+            name={answerState.velocity.name}
+            label={answerState.velocity.label}
+            placeholder={answerState.velocity.placeholder}
+            selected={true}
+            displayValue={{
+              value: answerState.velocity.displayValue.value,
+              unit: answerState.velocity.displayValue.unit,
+            }}
+            error={answerState.velocity.error}
+            unitType={answerState.velocity.unitType}
+            focusText={answerState.velocity.focusText}
+            onChangeValue={logChange}
+            onChangeUnit={handleChangeUnit}
+          />
 
-        <InputFieldWithUnit
-          name={answerState.velocity.name}
-          label={answerState.velocity.label}
-          placeholder={answerState.velocity.placeholder}
-          selected={true}
-          displayValue={{
-            value: answerState.velocity.displayValue.value,
-            unit: answerState.velocity.displayValue.unit,
-          }}
-          error={answerState.velocity.error}
-          unitType={answerState.velocity.unitType}
-          focusText={answerState.velocity.focusText}
-          onChangeValue={logChange}
-          onChangeUnit={handleChangeUnit}
-        />
+          <InputFieldConstant
+            name={answerState.frictionFactor.name}
+            label={answerState.frictionFactor.label}
+            placeholder={answerState.frictionFactor.placeholder}
+            selected={true}
+            displayValue={{
+              value: answerState.frictionFactor.displayValue.value,
+              unit: answerState.frictionFactor.displayValue.unit,
+            }}
+            error={answerState.frictionFactor.error}
+            unitType={answerState.frictionFactor.unitType}
+            focusText={answerState.frictionFactor.focusText}
+            onChangeValue={logChange}
+          />
 
-        <InputFieldConstant
-          name={answerState.frictionFactor.name}
-          label={answerState.frictionFactor.label}
-          placeholder={answerState.frictionFactor.placeholder}
-          selected={true}
-          displayValue={{
-            value: answerState.frictionFactor.displayValue.value,
-            unit: answerState.frictionFactor.displayValue.unit,
-          }}
-          error={answerState.frictionFactor.error}
-          unitType={answerState.frictionFactor.unitType}
-          focusText={answerState.frictionFactor.focusText}
-          onChangeValue={logChange}
-        />
-
-        <InputFieldConstant
-          name={answerState.reynoldsNumber.name}
-          label={answerState.reynoldsNumber.label}
-          placeholder={answerState.reynoldsNumber.placeholder}
-          selected={true}
-          displayValue={{
-            value: answerState.reynoldsNumber.displayValue.value,
-            unit: answerState.reynoldsNumber.displayValue.unit,
-          }}
-          error={answerState.reynoldsNumber.error}
-          unitType={answerState.reynoldsNumber.unitType}
-          focusText={answerState.reynoldsNumber.focusText}
-          onChangeValue={logChange}
-        />
-        <InputFieldConstant
-          name={answerState.flowRegime.name}
-          label={answerState.flowRegime.label}
-          placeholder={answerState.flowRegime.placeholder}
-          selected={true}
-          displayValue={{
-            value: answerState.flowRegime.displayValue.value,
-            unit: answerState.flowRegime.displayValue.unit,
-          }}
-          error={answerState.flowRegime.error}
-          unitType={answerState.flowRegime.unitType}
-          focusText={answerState.flowRegime.focusText}
-          onChangeValue={logChange}
-        />
-      </div>
-    </CalcCard>
-  )
+          <InputFieldConstant
+            name={answerState.reynoldsNumber.name}
+            label={answerState.reynoldsNumber.label}
+            placeholder={answerState.reynoldsNumber.placeholder}
+            selected={true}
+            displayValue={{
+              value: answerState.reynoldsNumber.displayValue.value,
+              unit: answerState.reynoldsNumber.displayValue.unit,
+            }}
+            error={answerState.reynoldsNumber.error}
+            unitType={answerState.reynoldsNumber.unitType}
+            focusText={answerState.reynoldsNumber.focusText}
+            onChangeValue={logChange}
+          />
+          <InputFieldConstant
+            name={answerState.flowRegime.name}
+            label={answerState.flowRegime.label}
+            placeholder={answerState.flowRegime.placeholder}
+            selected={true}
+            displayValue={{
+              value: answerState.flowRegime.displayValue.value,
+              unit: answerState.flowRegime.displayValue.unit,
+            }}
+            error={answerState.flowRegime.error}
+            unitType={answerState.flowRegime.unitType}
+            focusText={answerState.flowRegime.focusText}
+            onChangeValue={logChange}
+          />
+        </div>
+      </CalcCard>
+    )
 }
 
 const EquationCard = () => {
@@ -634,6 +641,7 @@ const calculateAnswer = (state: State) => {
     fluidViscosity,
     surfaceRoughness,
   } = state
+  const inputPipeLength = pipeLength.calculatedValue.value //m
   const inputDensity = fluidDensity.calculatedValue.value //kg/m3
   const inputElevation = elevationRise.calculatedValue.value //m
   const inputThickness = thickness.calculatedValue.value //m
@@ -649,8 +657,6 @@ const calculateAnswer = (state: State) => {
   const reynoldsNumber = (inputDensity * fluidVelocity * inputPipeID) / inputViscosity //kg/m3 * m/s * m / Pa*s = unitless
   let frictionFactor = 64 / reynoldsNumber //laminar flow
 
-  console.log('relative roughness: ', inputSurfaceRoughness / inputPipeID)
-
   if (reynoldsNumber > 2000) {
     //transition and turbulent flow
     frictionFactor = solveColebrook({
@@ -664,8 +670,7 @@ const calculateAnswer = (state: State) => {
   //Pressure drop calculations
   const dP_elevation = inputDensity * gravitationalConstant * inputElevation // kg/m3 * m/s2 * m = kg/m2/s2 = Pa
   const dP_fittings = 0 //TODO: Add fittings
-  const dP_friction =
-    ((frictionFactor * (pipeLength.calculatedValue.value / inputPipeID) * 1) / 2) * inputDensity * fluidVelocity ** 2 //
+  const dP_friction = ((frictionFactor * (inputPipeLength / inputPipeID) * 1) / 2) * inputDensity * fluidVelocity ** 2 //
   const dP_total = dP_elevation + dP_fittings + dP_friction //Pa
 
   //Flow regime calculation
@@ -677,4 +682,111 @@ const calculateAnswer = (state: State) => {
   }
 
   return { dP: dP_total, ff: frictionFactor, re: reynoldsNumber, regime: regime, velocity: fluidVelocity }
+}
+
+const resetErrorMessages = (state: State): State => {
+  //Resets error messages to empty string
+  return {
+    ...state,
+    volumeFlowRate: { ...state.volumeFlowRate, error: '' },
+    outerDiameter: { ...state.outerDiameter, error: '' },
+    thickness: { ...state.thickness, error: '' },
+    pipeLength: { ...state.pipeLength, error: '' },
+    fluidDensity: { ...state.fluidDensity, error: '' },
+    fluidViscosity: { ...state.fluidViscosity, error: '' },
+    elevationRise: { ...state.elevationRise, error: '' },
+    surfaceRoughness: { ...state.surfaceRoughness, error: '' },
+  }
+}
+
+const validateInputs = (state: State) => {
+  //Adds error messages to state if inputs are invalid
+  const {
+    pipeLength,
+    thickness,
+    outerDiameter,
+    volumeFlowRate,
+    fluidDensity,
+    elevationRise,
+    fluidViscosity,
+    surfaceRoughness,
+  } = state
+  const inputPipeLength = pipeLength.calculatedValue.value //m
+  const inputDensity = fluidDensity.calculatedValue.value //kg/m3
+  const inputElevation = elevationRise.calculatedValue.value //m
+  const inputThickness = thickness.calculatedValue.value //m
+  const inputPipeOD = outerDiameter.calculatedValue.value //m
+  const inputFlowrate = volumeFlowRate.calculatedValue.value //m3/s
+  const inputViscosity = fluidViscosity.calculatedValue.value //Pa*s
+  const inputSurfaceRoughness = surfaceRoughness.calculatedValue.value //m
+
+  let validatedState = resetErrorMessages(state)
+
+  if (inputPipeLength < 0) {
+    validatedState = {
+      ...validatedState,
+      pipeLength: { ...validatedState.pipeLength, error: 'Length must be positive' },
+    }
+  }
+
+  if (inputPipeOD <= inputThickness * 2) {
+    validatedState = {
+      ...validatedState,
+      thickness: { ...validatedState.thickness, error: 'Thickness too large for pipe' },
+    }
+  }
+
+  if (inputPipeOD < 0) {
+    validatedState = {
+      ...validatedState,
+      outerDiameter: { ...validatedState.outerDiameter, error: 'Diameter must be positive' },
+    }
+  }
+
+  if (inputThickness < 0) {
+    validatedState = {
+      ...validatedState,
+      thickness: { ...validatedState.thickness, error: 'Thickness must be positive' },
+    }
+  }
+
+  if (inputDensity < 0) {
+    validatedState = {
+      ...validatedState,
+      fluidDensity: { ...validatedState.fluidDensity, error: 'Density must be positive' },
+    }
+  }
+
+  if (inputViscosity < 0) {
+    validatedState = {
+      ...validatedState,
+      fluidViscosity: { ...validatedState.fluidViscosity, error: 'Viscosity must be positive' },
+    }
+  }
+
+  if (inputFlowrate <= 0) {
+    validatedState = {
+      ...validatedState,
+      volumeFlowRate: { ...validatedState.volumeFlowRate, error: 'Flow must be positive' },
+    }
+  }
+
+  if (inputSurfaceRoughness < 0) {
+    validatedState = {
+      ...validatedState,
+      surfaceRoughness: { ...validatedState.surfaceRoughness, error: 'Roughness must be positive' },
+    }
+  }
+
+  // return { validatedState, error }
+  return validatedState
+}
+
+//finds if there is an error in the state
+const hasError = (state: State): boolean => {
+  let error = false
+  Object.keys(state).forEach(key => {
+    if (state[key as keyof State].error != '') error = true
+  })
+  return error
 }
