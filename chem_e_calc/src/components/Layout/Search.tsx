@@ -10,10 +10,11 @@ const Search = () => {
     { id: 4, title: 'Pyramid', href: '/geometry/pyramid', location: 'geometry' },
     { id: 5, title: 'Sphere', href: '/geometry/sphere', location: 'geometry' },
     { id: 6, title: 'Unit Conversion', href: '/conversion', location: 'home' },
-    { id: 7, title: 'Fluid Flow', href: '/fluidflow', location: 'home' },
+    { id: 7, title: 'Fluid Flow', href: '/fluids/fluidflow', location: 'fluid dynamics' },
     { id: 8, title: 'Scale Up', href: '/agitation/scaleup', location: 'agitation' },
     { id: 9, title: 'Tip Speed', href: '/agitation/tipspeed', location: 'agitation' },
     { id: 10, title: 'Tanks', href: '/geometry/tank', location: 'geometry' },
+    { id: 11, title: 'Pressure Drop', href: '/fluids/pressuredrop', location: 'fluid dynamics' },
   ]
 
   const router = useRouter()

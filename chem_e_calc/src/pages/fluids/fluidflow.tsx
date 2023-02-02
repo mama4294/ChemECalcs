@@ -145,7 +145,10 @@ const updatedisplayValue = (object: ShortInputType): ShortInputType => {
 }
 
 const UnitConversion: NextPage = () => {
-  const paths = [{ title: 'Fluid Flow', href: '/fluidflow' }]
+  const paths = [
+    { title: 'Fluid Dynamics', href: '/fluids/' },
+    { title: 'Fluid Flow', href: '/fluids/fluidflow' },
+  ]
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
 
   const initialState: State = {

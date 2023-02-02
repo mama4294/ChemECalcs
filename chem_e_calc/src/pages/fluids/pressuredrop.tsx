@@ -33,7 +33,10 @@ type AnswerState = {
 }
 
 const UnitConversion: NextPage = () => {
-  const paths = [{ title: 'Pressure Drop', href: '/pressuredrop' }]
+  const paths = [
+    { title: 'Fluid Dynamics', href: '/fluids/' },
+    { title: 'Pressure Drop', href: '/fluids/pressuredrop' },
+  ]
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
 
   const initialState: State = {

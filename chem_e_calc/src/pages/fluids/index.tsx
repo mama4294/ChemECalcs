@@ -5,12 +5,12 @@ import { CalcHeader } from '../../components/calculators/header'
 import { GridCard } from '../../components/GridCard'
 
 const Fluids = () => {
-  const paths = [{ title: 'Fluid Flow', href: '/fluids/' }]
+  const paths = [{ title: 'Fluid Dynamics', href: '/fluids/' }]
 
   return (
     <PageContainer>
       <Breadcrumbs paths={paths} />
-      <CalcHeader title={'Fluid Flow'} text={'Calculators for fluid dynamics'} />
+      <CalcHeader title={'Fluid Dynamics'} text={'Calculators for fluid dynamics'} />
       <CalcBody>
         <GridCard
           name="Fluid Flow"
