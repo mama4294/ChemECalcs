@@ -21,6 +21,7 @@ type State = {
   pipeLength: ShortInputType
   elevationRise: ShortInputType
   surfaceRoughness: ShortInputType
+  lossCoefficient: ShortInputType
 }
 
 type AnswerState = {
@@ -196,6 +197,17 @@ const UnitConversion: NextPage = () => {
       focusText: 'Enter fluid dynamic viscosity',
       error: '',
     },
+    lossCoefficient: {
+      name: 'lossCoefficient',
+      label: 'Loss Coefficient',
+      placeholder: '0',
+      unitType: 'mass',
+      calculatedValue: { value: 0, unit: 'unitless' },
+      displayValue: { value: '0', unit: 'unitless' },
+      selectiontext: '',
+      focusText: 'Enter loss coefficient',
+      error: '',
+    },
   }
 
   type Action =
@@ -204,12 +216,13 @@ const UnitConversion: NextPage = () => {
         payload: ShortInputType
       }
     | {
-        type: ActionKind.REFRESH
+        type: ActionKind.CHANGE_VALUE_UNITLESS
+        payload: ShortInputType
       }
 
   enum ActionKind {
     CHANGE_VALUE = 'CHANGE_VALUE',
-    REFRESH = 'REFRESH',
+    CHANGE_VALUE_UNITLESS = 'CHANGE_VALUE_UNITLESS',
   }
 
   const stateReducer = (state: State, action: Action) => {
@@ -217,8 +230,8 @@ const UnitConversion: NextPage = () => {
       case ActionKind.CHANGE_VALUE:
         const payloadWithCalculatedValue = updateCalculatedValue(action.payload)
         return validateInputs({ ...state, [action.payload.name]: payloadWithCalculatedValue })
-      case ActionKind.REFRESH:
-        return { ...state }
+      case ActionKind.CHANGE_VALUE_UNITLESS:
+        return validateInputs({ ...state, [action.payload.name]: action.payload })
       default:
         const neverEver: never = action
         console.error('Error: Fluid Flow State reducer action not recognized', neverEver)
@@ -236,6 +249,14 @@ const UnitConversion: NextPage = () => {
     dispatch({ type: ActionKind.CHANGE_VALUE, payload })
   }
 
+  const handleChangeValueUnitless = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    const numericValue = value.replace(/[^\d.-]/g, '')
+    const unit = state[name as keyof State].displayValue.unit
+    const payload = { ...state[name as keyof State], displayValue: { value: numericValue, unit } }
+    dispatch({ type: ActionKind.CHANGE_VALUE_UNITLESS, payload })
+  }
+
   const handleChangeUnit = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     const existingValue = state[name as keyof State].displayValue.value
@@ -250,10 +271,9 @@ const UnitConversion: NextPage = () => {
 
   const pipingPropertyOptions: ShortInputType[] = [
     state.pipeLength,
+    state.elevationRise,
     state.outerDiameter,
     state.thickness,
-    state.elevationRise,
-    state.surfaceRoughness,
   ]
 
   const isError = hasError(state)
@@ -305,11 +325,41 @@ const UnitConversion: NextPage = () => {
                 />
               )
             })}
+            <InputFieldWithUnit
+              name={state.surfaceRoughness.name}
+              label={state.surfaceRoughness.label}
+              placeholder={state.surfaceRoughness.placeholder}
+              selected={false}
+              displayValue={{
+                value: state.surfaceRoughness.displayValue.value,
+                unit: state.surfaceRoughness.displayValue.unit,
+              }}
+              error={state.surfaceRoughness.error}
+              unitType={state.surfaceRoughness.unitType}
+              focusText={state.surfaceRoughness.focusText}
+              onChangeValue={handleChangeValue}
+              onChangeUnit={handleChangeUnit}
+              topRight={<SurfaceRoughnessHint />}
+            />
+            <InputFieldConstant
+              name={state.lossCoefficient.name}
+              label={state.lossCoefficient.label}
+              placeholder={state.lossCoefficient.placeholder}
+              selected={false}
+              displayValue={{
+                value: state.lossCoefficient.displayValue.value,
+                unit: state.lossCoefficient.displayValue.unit,
+              }}
+              error={state.lossCoefficient.error}
+              unitType={state.lossCoefficient.unitType}
+              focusText={state.lossCoefficient.focusText}
+              onChangeValue={handleChangeValueUnitless}
+              topRight={<LossCoefficientHint />}
+            />
           </div>
         </CalcCard>
         <AnswerCard inputState={state} defaultUnits={defaultUnits} isError={isError} />
         <EquationCard />
-        <SurfaceFinishCard />
       </CalcBody>
     </PageContainer>
   )
@@ -554,21 +604,9 @@ const EquationCard = () => {
         <Equation equation={`$$h_{2} - h_{1} =  \\Delta h$$`} />
         <Equation equation={`$$v_{2}^{2} - v_{1}^{2}  = 0$$`} />
         <Equation
-          equation={`$$\\Delta P = {\\rho}g\\Delta h + \\left ( {f_{d}\\frac{L}{d_i}} + \\sum K \\right )\\frac{1}{2}{\\rho}v^{2}$$`}
+          equation={`$$\\Delta P = {\\rho}g\\Delta h + \\left ( {f\\frac{L}{d_i}} + \\sum K \\right )\\frac{1}{2}{\\rho}v^{2}$$`}
         />
 
-        <p className="mb-2 font-semibold">Loss Coefficient (K)</p>
-        <div className="ml-2">
-          <p className="mb-2">
-            Each bend, valve, and fitting has a small amount of friction associated with it. It can be descriped as the
-            loss coeffient. The sum of all the loss coefficents (ΣK) can be used in the Bernoulli Equation to find the
-            pressure drop due to fittings. It is also known as the resistance coeffient.
-          </p>
-          <p className="mb-2">
-            Exact calculations for the loss coefficent for each type of valve and fitting can be found in the Crane
-            Technical Paper 410: Flow of Fluids through Valves, Fittings, and Pipe.
-          </p>
-        </div>
         <br />
 
         <p className="text-lg font-medium">Definitions</p>
@@ -579,68 +617,14 @@ const EquationCard = () => {
           <VariableDefinition equation={`$$d_i = $$`} definition="Inner pipe diameter" />
           <VariableDefinition equation={`$$L = $$`} definition="Pipe length" />
           <VariableDefinition equation={`$$h = $$`} definition="Elevation" />
-          <VariableDefinition equation={`$$f_{d} = $$`} definition="Friction factor" />
+          <VariableDefinition equation={`$$\\epsilon = $$`} definition="Surface roughness" />
+          <VariableDefinition equation={`$$f = $$`} definition="Friction factor" />
           <VariableDefinition equation={`$$K = $$`} definition="Loss coefficient" />
         </div>
       </>
     </CalcCard>
   )
 }
-
-const SurfaceFinishCard = () => (
-  <CalcCard title="Surface Finish">
-    <>
-      <p className="mb-2">
-        The surface roughness depends on the pipe material. The table below gives typical roughnesses for specific
-        materials
-      </p>
-      <div className="w-full overflow-x-auto">
-        <table className=" table w-full">
-          <thead>
-            <tr>
-              <th>Material</th>
-              <th>Surface Roughness</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Stainless Steel</td>
-              <td>5 μm</td>
-            </tr>
-            <tr>
-              <td>Steel</td>
-              <td>45 μm</td>
-            </tr>
-            <tr>
-              <td>Galvanized Steel</td>
-              <td>150 μm</td>
-            </tr>
-            <tr>
-              <td>Aluminum</td>
-              <td>1 μm</td>
-            </tr>
-            <tr>
-              <td>Copper</td>
-              <td>1 μm</td>
-            </tr>
-            <tr>
-              <td>Brass</td>
-              <td>1 μm</td>
-            </tr>
-            <tr>
-              <td>PVC</td>
-              <td>4 μm</td>
-            </tr>
-            <tr>
-              <td>Cast Iron</td>
-              <td>525 μm</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </>
-  </CalcCard>
-)
 
 const calculateAnswer = (state: State) => {
   //Inputs
@@ -653,6 +637,7 @@ const calculateAnswer = (state: State) => {
     elevationRise,
     fluidViscosity,
     surfaceRoughness,
+    lossCoefficient,
   } = state
   const inputPipeLength = pipeLength.calculatedValue.value //m
   const inputDensity = fluidDensity.calculatedValue.value //kg/m3
@@ -662,6 +647,7 @@ const calculateAnswer = (state: State) => {
   const inputFlowrate = volumeFlowRate.calculatedValue.value //m3/s
   const inputViscosity = fluidViscosity.calculatedValue.value //Pa*s
   const inputSurfaceRoughness = surfaceRoughness.calculatedValue.value //m
+  const inputLossCoefficient = +lossCoefficient.displayValue.value //unitless
 
   //Intermediate calculations
   const gravitationalConstant = 9.81 //m/s2
@@ -685,8 +671,8 @@ const calculateAnswer = (state: State) => {
 
   //Pressure drop calculations
   const dP_elevation = inputDensity * gravitationalConstant * inputElevation // kg/m3 * m/s2 * m = kg/m2/s2 = Pa
-  const dP_fittings = 0 //TODO: Add fittings
-  const dP_friction = ((frictionFactor * (inputPipeLength / inputPipeID) * 1) / 2) * inputDensity * fluidVelocity ** 2 //
+  const dP_fittings = inputLossCoefficient * (1 / 2) * inputDensity * fluidVelocity ** 2 //Pa
+  const dP_friction = frictionFactor * (inputPipeLength / inputPipeID) * (1 / 2) * inputDensity * fluidVelocity ** 2 //Pa
   const dP_total = dP_elevation + dP_fittings + dP_friction //Pa
 
   //Flow regime calculation
@@ -837,7 +823,7 @@ const FrictionFactorModal = ({ ffDetails, reynoldsNumber }: FrictionFactorModalP
           </svg>
         </label>
         <div tabIndex={0} className="card dropdown-content compact rounded-box min-w-[16rem] bg-base-100 shadow">
-          <div className="card-body overflow-x-auto">
+          <div className="card-body overflow-x-auto overflow-y-auto">
             <h2 className="card-title">Details</h2>
             {reynoldsNumber < 2000 && (
               <>
@@ -848,7 +834,12 @@ const FrictionFactorModal = ({ ffDetails, reynoldsNumber }: FrictionFactorModalP
 
             {reynoldsNumber >= 2000 && (
               <>
-                <p>Friction factor solved iteratively useing Colebrook White equation until ±0.000001 convergence</p>
+                <p>Friction factor solved iteratively using the Colebrook White equation until ±0.000001 convergence</p>
+                {/* Equation for friction factor using Colebrook white equation */}
+                <Equation
+                  equation={`$$f = \\frac{1}{ -2log_{10} \\left( \\frac{\\epsilon}{3.7 d_{i}} + \\frac{2.51}{Re\\sqrt{f}}\\right )}^{2}$$`}
+                />
+
                 <table className="table w-full ">
                   <thead>
                     <tr>
@@ -990,6 +981,109 @@ const FlowRegimeHint = () => (
             <li>{'Transition: 2,000 > Re < 4,000'}</li>
             <li>{'Turbulent: Re >= 4,000'}</li>
           </ul>
+        </div>
+      </div>
+    </div>
+  </span>
+)
+
+const LossCoefficientHint = () => (
+  <span className="label-text-alt">
+    <div className="dropdown-end dropdown">
+      <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          ></path>
+        </svg>
+      </label>
+      <div tabIndex={0} className="card dropdown-content compact rounded-box min-w-[16rem] bg-base-100 shadow">
+        <div className="card-body overflow-x-auto">
+          <h2 className="card-title">Loss Coefficient (ΣK)</h2>
+          <div className="ml-2">
+            <p className="mb-2">
+              Each bend, valve, and fitting has a small amount of friction associated with it. It can be described as
+              the loss coeffient. The sum of all the loss coefficents (ΣK) can be used in the Bernoulli Equation to find
+              the pressure drop due to fittings. It is also known as the resistance coeffient.
+            </p>
+            <p className="mb-2">
+              Exact calculations for the loss coefficent for each type of valve and fitting can be found in the Crane
+              Technical Paper 410: Flow of Fluids through Valves, Fittings, and Pipe.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </span>
+)
+
+const SurfaceRoughnessHint = () => (
+  <span className="label-text-alt">
+    <div className="dropdown-end dropdown">
+      <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          ></path>
+        </svg>
+      </label>
+      <div tabIndex={0} className="card dropdown-content compact rounded-box min-w-[16rem] bg-base-100 shadow">
+        <div className="card-body overflow-x-auto">
+          <h2 className="card-title">Surface Finish</h2>
+          <p className="mb-2">
+            The surface roughness depends on the pipe material. The table below gives typical roughnesses for specific
+            materials
+          </p>
+          <div className="w-full overflow-x-auto">
+            <table className=" table w-full">
+              <thead>
+                <tr>
+                  <th>Material</th>
+                  <th>Surface Roughness</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Stainless Steel</td>
+                  <td>5 μm</td>
+                </tr>
+                <tr>
+                  <td>Steel</td>
+                  <td>45 μm</td>
+                </tr>
+                <tr>
+                  <td>Galvanized Steel</td>
+                  <td>150 μm</td>
+                </tr>
+                <tr>
+                  <td>Aluminum</td>
+                  <td>1 μm</td>
+                </tr>
+                <tr>
+                  <td>Copper</td>
+                  <td>1 μm</td>
+                </tr>
+                <tr>
+                  <td>Brass</td>
+                  <td>1 μm</td>
+                </tr>
+                <tr>
+                  <td>PVC</td>
+                  <td>4 μm</td>
+                </tr>
+                <tr>
+                  <td>Cast Iron</td>
+                  <td>525 μm</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
