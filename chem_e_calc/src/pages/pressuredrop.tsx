@@ -488,7 +488,7 @@ const AnswerCard = ({
             unitType={answerState.frictionFactor.unitType}
             focusText={answerState.frictionFactor.focusText}
             onChangeValue={logChange}
-            topRight={<FrictionFactorModal ffDetails={ffDetails} />}
+            topRight={<FrictionFactorModal ffDetails={ffDetails} reynoldsNumber={re} />}
           />
 
           <InputFieldConstant
@@ -818,9 +818,10 @@ const hasError = (state: State): boolean => {
 
 type FrictionFactorModalProps = {
   ffDetails: { i: number; ff: number }[]
+  reynoldsNumber: number
 }
 
-const FrictionFactorModal = ({ ffDetails }: FrictionFactorModalProps) => {
+const FrictionFactorModal = ({ ffDetails, reynoldsNumber }: FrictionFactorModalProps) => {
   return (
     <span className="label-text-alt">
       <div className="dropdown-end dropdown">
@@ -834,25 +835,37 @@ const FrictionFactorModal = ({ ffDetails }: FrictionFactorModalProps) => {
             ></path>
           </svg>
         </label>
-        <div tabIndex={0} className="card dropdown-content compact rounded-box bg-base-100 shadow">
+        <div tabIndex={0} className="card dropdown-content compact rounded-box min-w-[16rem] bg-base-100 shadow">
           <div className="card-body overflow-x-auto">
             <h2 className="card-title">Details</h2>
-            <table className="table w-full ">
-              <thead>
-                <tr>
-                  <th>Iteration</th>
-                  <th>Friction Factor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ffDetails.map(iteration => (
-                  <tr>
-                    <td>{iteration.i}</td>
-                    <td>{iteration.ff}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {reynoldsNumber < 2000 && (
+              <>
+                <p>Laminar flow. Friction factor found using this equation:</p>
+                <Equation equation={`$$f =  \\frac{64}{Re}$$`} />
+              </>
+            )}
+
+            {reynoldsNumber >= 2000 && (
+              <>
+                <p>Friction factor solved iteratively useing Colebrook White equation until ±0.000001 convergence</p>
+                <table className="table w-full ">
+                  <thead>
+                    <tr>
+                      <th>Iteration</th>
+                      <th>Friction Factor</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ffDetails.map(iteration => (
+                      <tr>
+                        <td>{iteration.i}</td>
+                        <td>{iteration.ff}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            )}
           </div>
         </div>
       </div>
