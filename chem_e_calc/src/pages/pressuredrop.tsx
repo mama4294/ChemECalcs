@@ -518,6 +518,7 @@ const AnswerCard = ({
             unitType={answerState.flowRegime.unitType}
             focusText={answerState.flowRegime.focusText}
             onChangeValue={logChange}
+            topRight={<FlowRegimeHint />}
           />
         </div>
       </CalcCard>
@@ -966,3 +967,31 @@ const PressureDropModal = ({ dP_friction, dP_elevation, dP_fittings, dP_total, u
     </span>
   )
 }
+
+const FlowRegimeHint = () => (
+  <span className="label-text-alt">
+    <div className="dropdown-end dropdown">
+      <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          ></path>
+        </svg>
+      </label>
+      <div tabIndex={0} className="card dropdown-content compact rounded-box min-w-[16rem] bg-base-100 shadow">
+        <div className="card-body overflow-x-auto">
+          <h2 className="card-title">Details</h2>
+          <p>Flow regime is determined by the Reynolds number</p>
+          <ul className="list-inside list-disc space-y-1">
+            <li>{'Laminar: Re <= 2,000'}</li>
+            <li>{'Transition: 2,000 > Re < 4,000'}</li>
+            <li>{'Turbulent: Re >= 4,000'}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </span>
+)
