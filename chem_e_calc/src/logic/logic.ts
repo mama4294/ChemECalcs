@@ -105,3 +105,25 @@ export const updateCalculatedValue = (object: ShortInputType): ShortInputType =>
   })
   return { ...object, calculatedValue: { value: convertedValue, unit: calculatedValue.unit } }
 }
+
+type ColbrookParameters = {
+  initialGuess: number
+  roughness: number
+  diameter: number
+  reynoldsNumber: number
+}
+
+export const solveColebrook = ({ initialGuess, roughness, diameter, reynoldsNumber }: ColbrookParameters) => {
+  let ff = initialGuess
+  let fOld = 0
+  let i = 0
+  let details = [{ i, ff }]
+  while (Math.abs(ff - fOld) > 0.000001 && i < 100) {
+    //100 iterations max
+    fOld = ff
+    ff = 1 / Math.pow(-2 * Math.log10(roughness / (3.72 * diameter) + 2.51 / (reynoldsNumber * Math.sqrt(ff))), 2)
+    i++
+    details.push({ i, ff })
+  }
+  return { ff, details }
+}
