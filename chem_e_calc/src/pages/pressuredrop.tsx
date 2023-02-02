@@ -449,69 +449,16 @@ const AnswerCard = ({
             focusText={answerState.pressureDrop.focusText}
             onChangeValue={logChange}
             onChangeUnit={handleChangeUnit}
+            topRight={
+              <PressureDropModal
+                dP_total={dP}
+                dP_friction={dP_friction}
+                dP_elevation={dP_elevation}
+                dP_fittings={dP_fittings}
+                unit={answerUnits.pressureDrop}
+              />
+            }
           />
-          <div tabIndex={0} className="collapse-arrow collapse rounded-box">
-            <div className="font-small collapse-title text-sm">Details</div>
-            <div className="collapse-content overflow-x-auto p-0">
-              <table className="table w-full">
-                {/* <!-- head --> */}
-                {/* <thead>
-                  <tr>
-                    <th>Loss Type</th>
-                    <th>Value</th>
-                    <th>Unit</th>
-                  </tr>
-                </thead> */}
-                <tbody>
-                  {/* <!-- row 1 --> */}
-                  <tr>
-                    <td>Elevation Losses</td>
-                    <td>
-                      {' '}
-                      {convertUnits({
-                        value: dP_elevation,
-                        fromUnit: 'Pa',
-                        toUnit: answerUnits.pressureDrop,
-                      }).toLocaleString()}
-                    </td>
-                    <td>{answerUnits.pressureDrop}</td>
-                  </tr>
-                  {/* <!-- row 2 --> */}
-                  <tr>
-                    <td>Friction Losses</td>
-                    <td>
-                      {' '}
-                      {convertUnits({
-                        value: dP_friction,
-                        fromUnit: 'Pa',
-                        toUnit: answerUnits.pressureDrop,
-                      }).toLocaleString()}
-                    </td>
-                    <td>{answerUnits.pressureDrop}</td>
-                  </tr>
-                  {/* <!-- row 3 --> */}
-                  <tr>
-                    <td>Fittings Losses</td>
-                    <td>
-                      {' '}
-                      {convertUnits({
-                        value: dP_fittings,
-                        fromUnit: 'Pa',
-                        toUnit: answerUnits.pressureDrop,
-                      }).toLocaleString()}
-                    </td>
-                    <td>{answerUnits.pressureDrop}</td>
-                  </tr>
-                  {/* <!-- total Row --> */}
-                  <tr>
-                    <td>Total</td>
-                    <td>{answerState.pressureDrop.displayValue.value}</td>
-                    <td>{answerUnits.pressureDrop}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
           <InputFieldWithUnit
             name={answerState.velocity.name}
             label={answerState.velocity.label}
@@ -541,29 +488,8 @@ const AnswerCard = ({
             unitType={answerState.frictionFactor.unitType}
             focusText={answerState.frictionFactor.focusText}
             onChangeValue={logChange}
+            topRight={<FrictionFactorModal ffDetails={ffDetails} />}
           />
-          <div tabIndex={0} className="collapse-arrow collapse rounded-box">
-            <div className="font-small collapse-title text-sm">Details</div>
-            <div className="collapse-content overflow-x-auto p-0">
-              <table className="table w-full">
-                {/* <!-- head --> */}
-                <thead>
-                  <tr>
-                    <th>Iteration</th>
-                    <th>Friction Factor</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ffDetails.map(iteration => (
-                    <tr>
-                      <td>{iteration.i}</td>
-                      <td>{iteration.ff}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
 
           <InputFieldConstant
             name={answerState.reynoldsNumber.name}
@@ -888,4 +814,142 @@ const hasError = (state: State): boolean => {
     if (state[key as keyof State].error != '') error = true
   })
   return error
+}
+
+type FrictionFactorModalProps = {
+  ffDetails: { i: number; ff: number }[]
+}
+
+const FrictionFactorModal = ({ ffDetails }: FrictionFactorModalProps) => {
+  return (
+    <span className="label-text-alt">
+      <div className="dropdown-end dropdown">
+        <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+        </label>
+        <div tabIndex={0} className="card dropdown-content compact rounded-box bg-base-100 shadow">
+          <div className="card-body overflow-x-auto">
+            <h2 className="card-title">Details</h2>
+            <table className="table w-full ">
+              <thead>
+                <tr>
+                  <th>Iteration</th>
+                  <th>Friction Factor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ffDetails.map(iteration => (
+                  <tr>
+                    <td>{iteration.i}</td>
+                    <td>{iteration.ff}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </span>
+  )
+}
+
+type PressureDropModalProps = {
+  dP_friction: number
+  dP_elevation: number
+  dP_fittings: number
+  dP_total: number
+  unit: string
+}
+
+const PressureDropModal = ({ dP_friction, dP_elevation, dP_fittings, dP_total, unit }: PressureDropModalProps) => {
+  return (
+    <span className="label-text-alt">
+      <div className="dropdown-end dropdown">
+        <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+        </label>
+        <div tabIndex={0} className="card dropdown-content compact rounded-box bg-base-100 shadow">
+          <div className="card-body overflow-x-auto">
+            <h2 className="card-title">Details</h2>
+            <table className="table w-full">
+              {/* <!-- head --> */}
+              <thead>
+                <tr>
+                  <th>Loss Type</th>
+                  <th>Value</th>
+                  <th>Unit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* <!-- row 1 --> */}
+                <tr>
+                  <td>Elevation Losses</td>
+                  <td>
+                    {' '}
+                    {convertUnits({
+                      value: dP_elevation,
+                      fromUnit: 'Pa',
+                      toUnit: unit,
+                    }).toLocaleString()}
+                  </td>
+                  <td>{unit}</td>
+                </tr>
+                {/* <!-- row 2 --> */}
+                <tr>
+                  <td>Friction Losses</td>
+                  <td>
+                    {' '}
+                    {convertUnits({
+                      value: dP_friction,
+                      fromUnit: 'Pa',
+                      toUnit: unit,
+                    }).toLocaleString()}
+                  </td>
+                  <td>{unit}</td>
+                </tr>
+                {/* <!-- row 3 --> */}
+                <tr>
+                  <td>Fittings Losses</td>
+                  <td>
+                    {convertUnits({
+                      value: dP_fittings,
+                      fromUnit: 'Pa',
+                      toUnit: unit,
+                    }).toLocaleString()}
+                  </td>
+                  <td>{unit}</td>
+                </tr>
+                {/* <!-- total Row --> */}
+                <tr>
+                  <td>Total</td>
+                  <td>
+                    {convertUnits({
+                      value: dP_total,
+                      fromUnit: 'Pa',
+                      toUnit: unit,
+                    }).toLocaleString()}
+                  </td>
+                  <td>{unit}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </span>
+  )
 }

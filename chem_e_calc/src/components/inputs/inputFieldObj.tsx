@@ -14,6 +14,7 @@ type InputFieldProps = {
   focusText: string
   onChangeValue: any
   onChangeUnit: any
+  topRight?: React.ReactNode
 }
 
 export const InputFieldWithUnit = ({
@@ -27,12 +28,14 @@ export const InputFieldWithUnit = ({
   focusText,
   onChangeValue,
   onChangeUnit,
+  topRight,
 }: InputFieldProps) => {
   const { value, unit } = displayValue
   return (
     <div className="mb-2">
       <label htmlFor={label} className="label ">
         {label}
+        {topRight}
       </label>
       <div
         className={`peer input relative h-full w-full px-0 ${error ? 'input-error text-error' : ' text-base-content'}`}
@@ -96,6 +99,7 @@ type InputFieldUnitlessProps = {
   unitType: string
   focusText: string
   onChangeValue: any
+  topRight?: React.ReactNode
 }
 
 export const InputFieldConstant = ({
@@ -107,12 +111,14 @@ export const InputFieldConstant = ({
   error,
   focusText,
   onChangeValue,
+  topRight,
 }: InputFieldUnitlessProps) => {
   const { value, unit } = displayValue
   return (
     <div className="mb-2">
       <label htmlFor={label} className="label ">
         {label}
+        {topRight}
       </label>
       <div
         className={`peer input relative h-full w-full px-0 ${error ? 'input-error text-error' : ' text-base-content'}`}
