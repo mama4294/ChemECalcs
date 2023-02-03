@@ -612,7 +612,7 @@ const EquationCard = () => {
 
         <br />
 
-        <p className="text-lg font-medium">Definitions</p>
+        <p className="mb-2 text-lg font-medium">Definitions</p>
         <div className="ml-2">
           <VariableDefinition equation={`$$P = $$`} definition="Pressure" />
           <VariableDefinition equation={`$$v = $$`} definition="Fluid velocity" />

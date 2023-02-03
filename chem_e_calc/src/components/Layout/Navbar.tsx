@@ -107,6 +107,11 @@ const DesktopMenu = () => {
               </Link>
             </li>
             <li>
+              <Link href={'/fluids/reynoldsnumber'}>
+                <a className="hover:bg-neutral-focus">Reynolds Number</a>
+              </Link>
+            </li>
+            <li>
               <Link href={'/fluids/pressuredrop'}>
                 <a className="hover:bg-neutral-focus">Pressure Drop</a>
               </Link>
@@ -237,6 +242,11 @@ const MobileMenu = () => {
               <li>
                 <Link href={'/fluids/fluidflow'}>
                   <a className="hover:bg-neutral-focus">Fluid Flow</a>
+                </Link>
+              </li>
+              <li>
+                <Link href={'/fluids/reynoldsnumber'}>
+                  <a className="hover:bg-neutral-focus">Reynolds Number</a>
                 </Link>
               </li>
               <li>

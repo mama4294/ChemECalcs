@@ -18,6 +18,11 @@ const Fluids = () => {
           link="/fluids/fluidflow"
         />
         <GridCard
+          name="Fluid Flow"
+          description="Calculate the flow regime of fluid in a pipe"
+          link="/fluids/reynoldsnumber"
+        />
+        <GridCard
           name="Pressure Drop"
           description="Calculate pressure drop through a system"
           link="/fluids/pressuredrop"
