@@ -1,5 +1,5 @@
 import { NextPage } from 'next'
-import React, { useContext, useEffect, useReducer, useState } from 'react'
+import React, { useContext, useReducer, useState } from 'react'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
 import { CalcCard } from '../../components/calculators/calcCard'
@@ -716,19 +716,9 @@ const resetErrorMessages = (state: State): State => {
 
 const validateInputs = (state: State) => {
   //Adds error messages to state if inputs are invalid
-  const {
-    pipeLength,
-    thickness,
-    outerDiameter,
-    volumeFlowRate,
-    fluidDensity,
-    elevationRise,
-    fluidViscosity,
-    surfaceRoughness,
-  } = state
+  const { pipeLength, thickness, outerDiameter, volumeFlowRate, fluidDensity, fluidViscosity, surfaceRoughness } = state
   const inputPipeLength = pipeLength.calculatedValue.value //m
   const inputDensity = fluidDensity.calculatedValue.value //kg/m3
-  const inputElevation = elevationRise.calculatedValue.value //m
   const inputThickness = thickness.calculatedValue.value //m
   const inputPipeOD = outerDiameter.calculatedValue.value //m
   const inputFlowrate = volumeFlowRate.calculatedValue.value //m3/s
@@ -825,7 +815,7 @@ const FrictionFactorModal = ({ ffDetails, reynoldsNumber }: FrictionFactorModalP
             ></path>
           </svg>
         </label>
-        <div tabIndex={0} className="card dropdown-content compact rounded-box min-w-[16rem] bg-base-100 shadow">
+        <div tabIndex={0} className="compact card dropdown-content rounded-box min-w-[16rem] bg-base-100 shadow">
           <div className="card-body overflow-x-auto overflow-y-auto">
             <h2 className="card-title">Details</h2>
             {reynoldsNumber < 2000 && (
@@ -852,7 +842,7 @@ const FrictionFactorModal = ({ ffDetails, reynoldsNumber }: FrictionFactorModalP
                   </thead>
                   <tbody>
                     {ffDetails.map(iteration => (
-                      <tr>
+                      <tr key={iteration.i}>
                         <td>{iteration.i}</td>
                         <td>{iteration.ff}</td>
                       </tr>
@@ -890,7 +880,7 @@ const PressureDropModal = ({ dP_friction, dP_elevation, dP_fittings, dP_total, u
             ></path>
           </svg>
         </label>
-        <div tabIndex={0} className="card dropdown-content compact rounded-box bg-base-100 shadow">
+        <div tabIndex={0} className="compact card dropdown-content rounded-box bg-base-100 shadow">
           <div className="card-body overflow-x-auto">
             <h2 className="card-title">Details</h2>
             <table className="table w-full">
@@ -975,7 +965,7 @@ const FlowRegimeHint = () => (
           ></path>
         </svg>
       </label>
-      <div tabIndex={0} className="card dropdown-content compact rounded-box min-w-[16rem] bg-base-100 shadow">
+      <div tabIndex={0} className="compact card dropdown-content rounded-box min-w-[16rem] bg-base-100 shadow">
         <div className="card-body overflow-x-auto">
           <h2 className="card-title">Details</h2>
           <p>Flow regime is determined by the Reynolds number</p>
@@ -1003,7 +993,7 @@ const LossCoefficientHint = () => (
           ></path>
         </svg>
       </label>
-      <div tabIndex={0} className="card dropdown-content compact rounded-box min-w-[16rem] bg-base-100 shadow">
+      <div tabIndex={0} className="compact card dropdown-content rounded-box min-w-[16rem] bg-base-100 shadow">
         <div className="card-body overflow-x-auto">
           <h2 className="card-title">Loss Coefficient (ΣK)</h2>
           <div className="ml-2">
@@ -1036,7 +1026,7 @@ const SurfaceRoughnessHint = () => (
           ></path>
         </svg>
       </label>
-      <div tabIndex={0} className="card dropdown-content compact rounded-box min-w-[16rem] bg-base-100 shadow">
+      <div tabIndex={0} className="compact card dropdown-content rounded-box min-w-[16rem] bg-base-100 shadow">
         <div className="card-body overflow-x-auto">
           <h2 className="card-title">Surface Finish</h2>
           <p className="mb-2">

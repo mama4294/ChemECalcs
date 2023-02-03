@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { useContext, useState } from 'react'
 import { convertUnits } from '../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
@@ -7,9 +6,7 @@ import { CalcCard } from '../../components/calculators/calcCard'
 import { Calculator, InputType } from '../../components/calculators/calculator'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
-import { Illustraion } from '../../components/calculators/illustration'
 import { OnChangeValueProps } from '../../components/inputs/inputField'
-import { IconBox } from '../../icons/IconBox'
 import { IconContainer } from '../../icons/IconContainer'
 import { IconCylinderUnits } from '../../icons/iconCylinderUnits'
 import { handleChangeSolveSelection, updateAnswer, updateArray, validateNotBlank } from '../../logic/logic'
@@ -162,8 +159,6 @@ const Geometry = () => {
 
     return updateAnswer(inputArray, answerValue, 'diameter')
   }
-
-  const equation = values.find(item => item.selected === true)?.equation || ''
 
   const paths = [
     { title: 'Geometry', href: '/geometry' },

@@ -117,7 +117,7 @@ export const solveColebrook = ({ initialGuess, roughness, diameter, reynoldsNumb
   let ff = initialGuess
   let fOld = 0
   let i = 0
-  let details = [{ i, ff }]
+  const details = [{ i, ff }]
   while (Math.abs(ff - fOld) > 0.000001 && i < 100) {
     //100 iterations max
     fOld = ff
