@@ -28,7 +28,7 @@ type VariableDefinition = {
 
 export const VariableDefinition = ({ equation, definition }: VariableDefinition) => {
   return (
-    <div>
+    <div className="badge badge-outline badge-lg mr-2 mb-2">
       <InlineEquation equation={equation} />
       <span className="ml-2">{definition}</span>
     </div>
