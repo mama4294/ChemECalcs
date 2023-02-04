@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { GridCard } from '../../components/GridCard'
-import Metadata from '../../components/Layout/MetaData'
+import { Metadata } from '../../components/Layout/Metadata'
 import { IconBox } from '../../icons/IconBox'
 import { IconCone } from '../../icons/iconCone'
 import { IconCylinder } from '../../icons/iconCylinder'

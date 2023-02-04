@@ -11,7 +11,7 @@ import { IconContainer } from '../../icons/IconContainer'
 import { IconCylinderUnits } from '../../icons/iconCylinderUnits'
 import { handleChangeSolveSelection, updateAnswer, updateArray, validateNotBlank } from '../../logic/logic'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
-import Metadata from '../../components/Layout/MetaData'
+import { Metadata } from '../../components/Layout/Metadata'
 
 const Geometry = () => {
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType

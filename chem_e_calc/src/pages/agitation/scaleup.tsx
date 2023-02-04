@@ -11,7 +11,7 @@ import { convertUnits } from '../../utils/units'
 import { ShortInputType } from '../../types'
 import { updateCalculatedValue } from '../../logic/logic'
 import { Equation, VariableDefinition } from '../../components/Equation'
-import Metadata from '../../components/Layout/MetaData'
+import { Metadata } from '../../components/Layout/Metadata'
 
 type State = {
   solveSelection: string

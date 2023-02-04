@@ -11,7 +11,7 @@ import { ShortInputType } from '../../types'
 import { InputFieldConstant, InputFieldWithUnit } from '../../components/inputs/inputFieldObj'
 import { updateCalculatedValue } from '../../logic/logic'
 import { Equation, VariableDefinition } from '../../components/Equation'
-import Metadata from '../../components/Layout/MetaData'
+import { Metadata } from '../../components/Layout/Metadata'
 
 const TipSpeedPage: NextPage = () => {
   const paths = [

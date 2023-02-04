@@ -11,7 +11,7 @@ import { convertUnits, UnitOption, UnitOptions, unitOptions, UnitTypes, unitType
 import { updateCalculatedValue } from '../logic/logic'
 import { ShortInputType } from '../types'
 import { InputFieldWithUnit } from '../components/inputs/inputFieldObj'
-import Metadata from '../components/Layout/MetaData'
+import { Metadata } from '../components/Layout/Metadata'
 
 const UnitConversion: NextPage = () => {
   const paths = [{ title: 'Unit Conversion', href: '/conversion' }]

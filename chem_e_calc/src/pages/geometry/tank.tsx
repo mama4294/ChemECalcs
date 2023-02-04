@@ -23,7 +23,7 @@ import {
   volumeOfCylinder,
 } from '../../utils/geometry'
 import { tankHeadParameters } from '../../constants/ASME'
-import Metadata from '../../components/Layout/MetaData'
+import { Metadata } from '../../components/Layout/Metadata'
 
 type Head = 'ellipsoidal (2:1)' | 'hemisphere' | 'ASME 80/6 F&D' | 'ASME 80/10 F&D' | 'ASME F&D' | 'flat' | 'cone'
 

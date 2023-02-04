@@ -3,7 +3,7 @@ import { CalcBody } from '../../components/calculators/calcBody'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
 import { GridCard } from '../../components/GridCard'
-import Metadata from '../../components/Layout/MetaData'
+import { Metadata } from '../../components/Layout/Metadata'
 
 const Agitation = () => {
   const paths = [{ title: 'Agitation', href: '/agitation/' }]
