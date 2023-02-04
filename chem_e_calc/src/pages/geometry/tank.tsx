@@ -23,6 +23,7 @@ import {
   volumeOfCylinder,
 } from '../../utils/geometry'
 import { tankHeadParameters } from '../../constants/ASME'
+import Metadata from '../../components/Layout/MetaData'
 
 type Head = 'ellipsoidal (2:1)' | 'hemisphere' | 'ASME 80/6 F&D' | 'ASME 80/10 F&D' | 'ASME F&D' | 'flat' | 'cone'
 
@@ -283,134 +284,141 @@ const Tank: NextPage = () => {
   const { head, bottom, orientation, diameter, height, liquidPercent, topConeAngle, bottomConeAngle } = state
 
   return (
-    <PageContainer>
-      <Breadcrumbs paths={paths} />
-      <CalcHeader
-        title={'Tank'}
-        text={'Calculate the volume of a tank with flat, conical, ellipsoidal, hemispherical, or torisoidal heads'}
+    <>
+      <Metadata
+        title="Tank Volume Calculator"
+        description="Chemical engineering calculations for process and plant engineers"
+        keywords="box, volume, lenght, width, height, calculator, chemical engineering, process engineering, chemical engineering calculations, process engineering calculations"
       />
-      <CalcBody>
-        <CalcCard title={'Calculator'}>
-          <>
-            <div className="mb-0 flex flex-col">
-              <InputDropdown
-                name="head"
-                label={orientation === 'vertical' ? 'Top Head Type' : 'Left Side Type'}
-                selected={false}
-                error=""
-                focusText="Select orientation"
-                value={state.head}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  dispatch({
-                    type: ActionKind.CHANGE_DROPDOWN,
-                    payload: { name: e.target.name, value: e.target.value },
-                  })
-                }
-                options={headTypes}
-              />
-              {head === 'cone' && (
-                <InputFieldConstant
-                  name={topConeAngle.name}
-                  label={topConeAngle.label}
-                  placeholder={topConeAngle.placeholder}
-                  selected={false}
-                  unitType={topConeAngle.unitType}
-                  displayValue={topConeAngle.displayValue}
-                  error={topConeAngle.error}
-                  focusText={topConeAngle.focusText}
-                  onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    dispatch({
-                      type: ActionKind.CHANGE_CONE_ANGLE,
-                      payload: { name: e.target.name, value: e.target.value },
-                    })
-                  }}
-                />
-              )}
-
-              <InputFieldWithUnit
-                key={diameter.name}
-                name={diameter.name}
-                label={diameter.label}
-                placeholder={diameter.placeholder}
-                selected={false}
-                displayValue={diameter.displayValue}
-                error={diameter.error}
-                unitType={diameter.unitType}
-                focusText={diameter.focusText}
-                onChangeValue={handleChangeValue}
-                onChangeUnit={handleChangeUnit}
-              />
-              <InputFieldWithUnit
-                key={height.name}
-                name={height.name}
-                label={orientation === 'vertical' ? height.label : 'Body Length'}
-                placeholder={height.placeholder}
-                selected={false}
-                displayValue={height.displayValue}
-                error={height.error}
-                unitType={height.unitType}
-                focusText={height.focusText}
-                onChangeValue={handleChangeValue}
-                onChangeUnit={handleChangeUnit}
-              />
-              <InputDropdown
-                name="bottom"
-                label={orientation === 'vertical' ? 'Bottom Head Type' : 'Right Side Type'}
-                selected={false}
-                error=""
-                focusText="Select orientation"
-                value={state.bottom}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  dispatch({
-                    type: ActionKind.CHANGE_DROPDOWN,
-                    payload: { name: e.target.name, value: e.target.value },
-                  })
-                }
-                options={headTypes}
-              />
-              {bottom === 'cone' && (
-                <InputFieldConstant
-                  name={bottomConeAngle.name}
-                  label={bottomConeAngle.label}
-                  placeholder={bottomConeAngle.placeholder}
-                  selected={false}
-                  unitType={bottomConeAngle.unitType}
-                  displayValue={bottomConeAngle.displayValue}
-                  error={bottomConeAngle.error}
-                  focusText={bottomConeAngle.focusText}
-                  onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    dispatch({
-                      type: ActionKind.CHANGE_CONE_ANGLE,
-                      payload: { name: e.target.name, value: e.target.value },
-                    })
-                  }}
-                />
-              )}
-              <InputSlider
-                name="liquidHeight"
-                label="Liquid Height"
-                error=""
-                value={liquidPercent}
-                onChange={handleChangeLiquidHeight}
-                max={100}
-                min={0}
-              />
-            </div>
-          </>
-        </CalcCard>
-        <CalcCard title={'Tank'}>
-          <Canvas state={state} />
-        </CalcCard>
-        <ResultsCard
-          resultsState={resultsState}
-          handleChangeResultsState={handleChangeResultsState}
-          liquidVolumeValue={liquidVolumeValue}
-          totalVolumeValue={totalVolumeValue}
-          totalHeightValue={totalHeight}
-          liquidHeightValue={liquidHeight}
+      <PageContainer>
+        <Breadcrumbs paths={paths} />
+        <CalcHeader
+          title={'Tank'}
+          text={'Calculate the volume of a tank with flat, conical, ellipsoidal, hemispherical, or torisoidal heads'}
         />
-      </CalcBody>
-    </PageContainer>
+        <CalcBody>
+          <CalcCard title={'Calculator'}>
+            <>
+              <div className="mb-0 flex flex-col">
+                <InputDropdown
+                  name="head"
+                  label={orientation === 'vertical' ? 'Top Head Type' : 'Left Side Type'}
+                  selected={false}
+                  error=""
+                  focusText="Select orientation"
+                  value={state.head}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    dispatch({
+                      type: ActionKind.CHANGE_DROPDOWN,
+                      payload: { name: e.target.name, value: e.target.value },
+                    })
+                  }
+                  options={headTypes}
+                />
+                {head === 'cone' && (
+                  <InputFieldConstant
+                    name={topConeAngle.name}
+                    label={topConeAngle.label}
+                    placeholder={topConeAngle.placeholder}
+                    selected={false}
+                    unitType={topConeAngle.unitType}
+                    displayValue={topConeAngle.displayValue}
+                    error={topConeAngle.error}
+                    focusText={topConeAngle.focusText}
+                    onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      dispatch({
+                        type: ActionKind.CHANGE_CONE_ANGLE,
+                        payload: { name: e.target.name, value: e.target.value },
+                      })
+                    }}
+                  />
+                )}
+
+                <InputFieldWithUnit
+                  key={diameter.name}
+                  name={diameter.name}
+                  label={diameter.label}
+                  placeholder={diameter.placeholder}
+                  selected={false}
+                  displayValue={diameter.displayValue}
+                  error={diameter.error}
+                  unitType={diameter.unitType}
+                  focusText={diameter.focusText}
+                  onChangeValue={handleChangeValue}
+                  onChangeUnit={handleChangeUnit}
+                />
+                <InputFieldWithUnit
+                  key={height.name}
+                  name={height.name}
+                  label={orientation === 'vertical' ? height.label : 'Body Length'}
+                  placeholder={height.placeholder}
+                  selected={false}
+                  displayValue={height.displayValue}
+                  error={height.error}
+                  unitType={height.unitType}
+                  focusText={height.focusText}
+                  onChangeValue={handleChangeValue}
+                  onChangeUnit={handleChangeUnit}
+                />
+                <InputDropdown
+                  name="bottom"
+                  label={orientation === 'vertical' ? 'Bottom Head Type' : 'Right Side Type'}
+                  selected={false}
+                  error=""
+                  focusText="Select orientation"
+                  value={state.bottom}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    dispatch({
+                      type: ActionKind.CHANGE_DROPDOWN,
+                      payload: { name: e.target.name, value: e.target.value },
+                    })
+                  }
+                  options={headTypes}
+                />
+                {bottom === 'cone' && (
+                  <InputFieldConstant
+                    name={bottomConeAngle.name}
+                    label={bottomConeAngle.label}
+                    placeholder={bottomConeAngle.placeholder}
+                    selected={false}
+                    unitType={bottomConeAngle.unitType}
+                    displayValue={bottomConeAngle.displayValue}
+                    error={bottomConeAngle.error}
+                    focusText={bottomConeAngle.focusText}
+                    onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      dispatch({
+                        type: ActionKind.CHANGE_CONE_ANGLE,
+                        payload: { name: e.target.name, value: e.target.value },
+                      })
+                    }}
+                  />
+                )}
+                <InputSlider
+                  name="liquidHeight"
+                  label="Liquid Height"
+                  error=""
+                  value={liquidPercent}
+                  onChange={handleChangeLiquidHeight}
+                  max={100}
+                  min={0}
+                />
+              </div>
+            </>
+          </CalcCard>
+          <CalcCard title={'Tank'}>
+            <Canvas state={state} />
+          </CalcCard>
+          <ResultsCard
+            resultsState={resultsState}
+            handleChangeResultsState={handleChangeResultsState}
+            liquidVolumeValue={liquidVolumeValue}
+            totalVolumeValue={totalVolumeValue}
+            totalHeightValue={totalHeight}
+            liquidHeightValue={liquidHeight}
+          />
+        </CalcBody>
+      </PageContainer>
+    </>
   )
 }
 

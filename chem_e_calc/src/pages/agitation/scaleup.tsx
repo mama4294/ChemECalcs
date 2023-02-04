@@ -11,6 +11,7 @@ import { convertUnits } from '../../utils/units'
 import { ShortInputType } from '../../types'
 import { updateCalculatedValue } from '../../logic/logic'
 import { Equation, VariableDefinition } from '../../components/Equation'
+import Metadata from '../../components/Layout/MetaData'
 
 type State = {
   solveSelection: string
@@ -391,126 +392,71 @@ const Agitation: NextPage = () => {
   } = state
 
   return (
-    <PageContainer>
-      <Breadcrumbs paths={paths} />
-      <CalcHeader title={'Agitation Scaleup'} text={'Scaleup a vessel from small scale to large scale'} />
-      <CalcBody>
-        <CalcCard title={'Base Vessel'}>
-          <div className="mb-8 flex flex-col">
-            <InputFieldWithUnit
-              key={baseDiameter.name}
-              name={baseDiameter.name}
-              label={baseDiameter.label}
-              placeholder={baseDiameter.placeholder}
-              selected={false}
-              displayValue={{ value: baseDiameter.displayValue.value, unit: baseDiameter.displayValue.unit }}
-              error={baseDiameter.error}
-              unitType={baseDiameter.unitType}
-              focusText={baseDiameter.focusText}
-              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({
-                  type: ActionKind.CHANGE_VALUE_WITH_UNIT,
-                  payload: { name: e.target.name, value: e.target.value },
-                })
-              }
-              onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
-              }
-            />
-            <InputFieldWithUnit
-              key={baseHeight.name}
-              name={baseHeight.name}
-              label={baseHeight.label}
-              placeholder={baseHeight.placeholder}
-              selected={false}
-              displayValue={{ value: baseHeight.displayValue.value, unit: baseHeight.displayValue.unit }}
-              error={baseHeight.error}
-              unitType={baseHeight.unitType}
-              focusText={baseHeight.focusText}
-              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({
-                  type: ActionKind.CHANGE_VALUE_WITH_UNIT,
-                  payload: { name: e.target.name, value: e.target.value },
-                })
-              }
-              onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
-              }
-            />
-            <InputFieldConstant
-              key={baseRPM.name}
-              name={baseRPM.name}
-              label={baseRPM.label}
-              placeholder={baseRPM.placeholder}
-              selected={false}
-              displayValue={{
-                value: baseRPM.displayValue.value,
-                unit: baseRPM.displayValue.unit,
-              }}
-              error={baseRPM.error}
-              unitType={baseRPM.unitType}
-              focusText={baseRPM.focusText}
-              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({
-                  type: ActionKind.CHANGE_VALUE_WITHOUT_UNIT,
-                  payload: { name: e.target.name, value: e.target.value },
-                })
-              }
-            />
-            <InputFieldWithUnit
-              key={baseImpellerDiameter.name}
-              name={baseImpellerDiameter.name}
-              label={baseImpellerDiameter.label}
-              placeholder={baseImpellerDiameter.placeholder}
-              selected={false}
-              displayValue={{
-                value: baseImpellerDiameter.displayValue.value,
-                unit: baseImpellerDiameter.displayValue.unit,
-              }}
-              error={baseImpellerDiameter.error}
-              unitType={baseImpellerDiameter.unitType}
-              focusText={baseImpellerDiameter.focusText}
-              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({
-                  type: ActionKind.CHANGE_VALUE_WITH_UNIT,
-                  payload: { name: e.target.name, value: e.target.value },
-                })
-              }
-              onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
-              }
-            />
-            <InputDropdown
-              name={'impellerType'}
-              label={'Impeller type'}
-              selected={false}
-              error={''}
-              value={baseImpellerType}
-              options={[
-                { label: 'Rushton', value: 'rushton' },
-                { label: 'Pitched Blade', value: 'pitchedBlade' },
-                { label: 'Hydrofoil', value: 'hydrofoil' },
-                { label: 'Custom', value: 'custom' },
-              ]}
-              focusText={'Enter style of vessel impeller'}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({ type: ActionKind.CHANGE_IMPELLER_TYPE, payload: e.target.value })
-              }
-            />
-            {baseImpellerType === 'custom' && (
+    <>
+      <Metadata
+        title="Agitation Scaleup"
+        description="Chemical engineering calculations for process and plant engineers"
+        keywords="Agitation, chemical, engineering, home, calculator, unit, conversion, geometry, fluid, dynamics, tank, volume, agitation, scaleup, efficiency, accuracy, process, engineers"
+      />
+      <PageContainer>
+        <Breadcrumbs paths={paths} />
+        <CalcHeader title={'Agitation Scaleup'} text={'Scaleup a vessel from small scale to large scale'} />
+        <CalcBody>
+          <CalcCard title={'Base Vessel'}>
+            <div className="mb-8 flex flex-col">
+              <InputFieldWithUnit
+                key={baseDiameter.name}
+                name={baseDiameter.name}
+                label={baseDiameter.label}
+                placeholder={baseDiameter.placeholder}
+                selected={false}
+                displayValue={{ value: baseDiameter.displayValue.value, unit: baseDiameter.displayValue.unit }}
+                error={baseDiameter.error}
+                unitType={baseDiameter.unitType}
+                focusText={baseDiameter.focusText}
+                onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({
+                    type: ActionKind.CHANGE_VALUE_WITH_UNIT,
+                    payload: { name: e.target.name, value: e.target.value },
+                  })
+                }
+                onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
+                }
+              />
+              <InputFieldWithUnit
+                key={baseHeight.name}
+                name={baseHeight.name}
+                label={baseHeight.label}
+                placeholder={baseHeight.placeholder}
+                selected={false}
+                displayValue={{ value: baseHeight.displayValue.value, unit: baseHeight.displayValue.unit }}
+                error={baseHeight.error}
+                unitType={baseHeight.unitType}
+                focusText={baseHeight.focusText}
+                onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({
+                    type: ActionKind.CHANGE_VALUE_WITH_UNIT,
+                    payload: { name: e.target.name, value: e.target.value },
+                  })
+                }
+                onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
+                }
+              />
               <InputFieldConstant
-                key={flowNumber.name}
-                name={flowNumber.name}
-                label={flowNumber.label}
-                placeholder={flowNumber.placeholder}
+                key={baseRPM.name}
+                name={baseRPM.name}
+                label={baseRPM.label}
+                placeholder={baseRPM.placeholder}
                 selected={false}
                 displayValue={{
-                  value: flowNumber.displayValue.value,
-                  unit: flowNumber.displayValue.unit,
+                  value: baseRPM.displayValue.value,
+                  unit: baseRPM.displayValue.unit,
                 }}
-                error={flowNumber.error}
-                unitType={flowNumber.unitType}
-                focusText={flowNumber.focusText}
+                error={baseRPM.error}
+                unitType={baseRPM.unitType}
+                focusText={baseRPM.focusText}
                 onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
                   dispatch({
                     type: ActionKind.CHANGE_VALUE_WITHOUT_UNIT,
@@ -518,21 +464,177 @@ const Agitation: NextPage = () => {
                   })
                 }
               />
-            )}
-            {baseImpellerType === 'custom' && (
-              <InputFieldConstant
-                key={powerNumber.name}
-                name={powerNumber.name}
-                label={powerNumber.label}
-                placeholder={powerNumber.placeholder}
+              <InputFieldWithUnit
+                key={baseImpellerDiameter.name}
+                name={baseImpellerDiameter.name}
+                label={baseImpellerDiameter.label}
+                placeholder={baseImpellerDiameter.placeholder}
                 selected={false}
                 displayValue={{
-                  value: powerNumber.displayValue.value,
-                  unit: powerNumber.displayValue.unit,
+                  value: baseImpellerDiameter.displayValue.value,
+                  unit: baseImpellerDiameter.displayValue.unit,
                 }}
-                error={powerNumber.error}
-                unitType={powerNumber.unitType}
-                focusText={powerNumber.focusText}
+                error={baseImpellerDiameter.error}
+                unitType={baseImpellerDiameter.unitType}
+                focusText={baseImpellerDiameter.focusText}
+                onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({
+                    type: ActionKind.CHANGE_VALUE_WITH_UNIT,
+                    payload: { name: e.target.name, value: e.target.value },
+                  })
+                }
+                onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
+                }
+              />
+              <InputDropdown
+                name={'impellerType'}
+                label={'Impeller type'}
+                selected={false}
+                error={''}
+                value={baseImpellerType}
+                options={[
+                  { label: 'Rushton', value: 'rushton' },
+                  { label: 'Pitched Blade', value: 'pitchedBlade' },
+                  { label: 'Hydrofoil', value: 'hydrofoil' },
+                  { label: 'Custom', value: 'custom' },
+                ]}
+                focusText={'Enter style of vessel impeller'}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({ type: ActionKind.CHANGE_IMPELLER_TYPE, payload: e.target.value })
+                }
+              />
+              {baseImpellerType === 'custom' && (
+                <InputFieldConstant
+                  key={flowNumber.name}
+                  name={flowNumber.name}
+                  label={flowNumber.label}
+                  placeholder={flowNumber.placeholder}
+                  selected={false}
+                  displayValue={{
+                    value: flowNumber.displayValue.value,
+                    unit: flowNumber.displayValue.unit,
+                  }}
+                  error={flowNumber.error}
+                  unitType={flowNumber.unitType}
+                  focusText={flowNumber.focusText}
+                  onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    dispatch({
+                      type: ActionKind.CHANGE_VALUE_WITHOUT_UNIT,
+                      payload: { name: e.target.name, value: e.target.value },
+                    })
+                  }
+                />
+              )}
+              {baseImpellerType === 'custom' && (
+                <InputFieldConstant
+                  key={powerNumber.name}
+                  name={powerNumber.name}
+                  label={powerNumber.label}
+                  placeholder={powerNumber.placeholder}
+                  selected={false}
+                  displayValue={{
+                    value: powerNumber.displayValue.value,
+                    unit: powerNumber.displayValue.unit,
+                  }}
+                  error={powerNumber.error}
+                  unitType={powerNumber.unitType}
+                  focusText={powerNumber.focusText}
+                  onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    dispatch({
+                      type: ActionKind.CHANGE_VALUE_WITHOUT_UNIT,
+                      payload: { name: e.target.name, value: e.target.value },
+                    })
+                  }
+                />
+              )}
+            </div>
+          </CalcCard>
+          <CalcCard title={'Scaled Up Vessel'}>
+            <div className="mb-8 flex flex-col">
+              <InputFieldWithUnit
+                key={scaledDiameter.name}
+                name={scaledDiameter.name}
+                label={scaledDiameter.label}
+                placeholder={scaledDiameter.placeholder}
+                selected={false}
+                displayValue={{
+                  value: scaledDiameter.displayValue.value,
+                  unit: scaledDiameter.displayValue.unit,
+                }}
+                error={scaledDiameter.error}
+                unitType={scaledDiameter.unitType}
+                focusText={scaledDiameter.focusText}
+                onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({
+                    type: ActionKind.CHANGE_VALUE_WITH_UNIT,
+                    payload: { name: e.target.name, value: e.target.value },
+                  })
+                }
+                onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
+                }
+              />
+              <InputFieldWithUnit
+                key={scaledHeight.name}
+                name={scaledHeight.name}
+                label={scaledHeight.label}
+                placeholder={scaledHeight.placeholder}
+                selected={false}
+                displayValue={{
+                  value: scaledHeight.displayValue.value,
+                  unit: scaledHeight.displayValue.unit,
+                }}
+                error={scaledHeight.error}
+                unitType={scaledHeight.unitType}
+                focusText={scaledHeight.focusText}
+                onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({
+                    type: ActionKind.CHANGE_VALUE_WITH_UNIT,
+                    payload: { name: e.target.name, value: e.target.value },
+                  })
+                }
+                onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
+                }
+              />
+              <h2 className="my-4 text-xl">Fluid Properties</h2>
+              <InputFieldWithUnit
+                key={fluidDensity.name}
+                name={fluidDensity.name}
+                label={fluidDensity.label}
+                placeholder={fluidDensity.placeholder}
+                selected={false}
+                displayValue={{
+                  value: fluidDensity.displayValue.value,
+                  unit: fluidDensity.displayValue.unit,
+                }}
+                error={fluidDensity.error}
+                unitType={fluidDensity.unitType}
+                focusText={fluidDensity.focusText}
+                onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({
+                    type: ActionKind.CHANGE_VALUE_WITH_UNIT,
+                    payload: { name: e.target.name, value: e.target.value },
+                  })
+                }
+                onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
+                }
+              />
+              <InputFieldConstant
+                key={fluidViscosity.name}
+                name={fluidViscosity.name}
+                label={fluidViscosity.label}
+                placeholder={fluidViscosity.placeholder}
+                selected={false}
+                displayValue={{
+                  value: fluidViscosity.displayValue.value,
+                  unit: fluidViscosity.displayValue.unit,
+                }}
+                error={fluidViscosity.error}
+                unitType={fluidViscosity.unitType}
+                focusText={fluidViscosity.focusText}
                 onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
                   dispatch({
                     type: ActionKind.CHANGE_VALUE_WITHOUT_UNIT,
@@ -540,119 +642,25 @@ const Agitation: NextPage = () => {
                   })
                 }
               />
-            )}
-          </div>
-        </CalcCard>
-        <CalcCard title={'Scaled Up Vessel'}>
-          <div className="mb-8 flex flex-col">
-            <InputFieldWithUnit
-              key={scaledDiameter.name}
-              name={scaledDiameter.name}
-              label={scaledDiameter.label}
-              placeholder={scaledDiameter.placeholder}
-              selected={false}
-              displayValue={{
-                value: scaledDiameter.displayValue.value,
-                unit: scaledDiameter.displayValue.unit,
-              }}
-              error={scaledDiameter.error}
-              unitType={scaledDiameter.unitType}
-              focusText={scaledDiameter.focusText}
-              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({
-                  type: ActionKind.CHANGE_VALUE_WITH_UNIT,
-                  payload: { name: e.target.name, value: e.target.value },
-                })
-              }
-              onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
-              }
-            />
-            <InputFieldWithUnit
-              key={scaledHeight.name}
-              name={scaledHeight.name}
-              label={scaledHeight.label}
-              placeholder={scaledHeight.placeholder}
-              selected={false}
-              displayValue={{
-                value: scaledHeight.displayValue.value,
-                unit: scaledHeight.displayValue.unit,
-              }}
-              error={scaledHeight.error}
-              unitType={scaledHeight.unitType}
-              focusText={scaledHeight.focusText}
-              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({
-                  type: ActionKind.CHANGE_VALUE_WITH_UNIT,
-                  payload: { name: e.target.name, value: e.target.value },
-                })
-              }
-              onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
-              }
-            />
-            <h2 className="my-4 text-xl">Fluid Properties</h2>
-            <InputFieldWithUnit
-              key={fluidDensity.name}
-              name={fluidDensity.name}
-              label={fluidDensity.label}
-              placeholder={fluidDensity.placeholder}
-              selected={false}
-              displayValue={{
-                value: fluidDensity.displayValue.value,
-                unit: fluidDensity.displayValue.unit,
-              }}
-              error={fluidDensity.error}
-              unitType={fluidDensity.unitType}
-              focusText={fluidDensity.focusText}
-              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({
-                  type: ActionKind.CHANGE_VALUE_WITH_UNIT,
-                  payload: { name: e.target.name, value: e.target.value },
-                })
-              }
-              onChangeUnit={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({ type: ActionKind.CHANGE_UNIT, payload: { name: e.target.name, value: e.target.value } })
-              }
-            />
-            <InputFieldConstant
-              key={fluidViscosity.name}
-              name={fluidViscosity.name}
-              label={fluidViscosity.label}
-              placeholder={fluidViscosity.placeholder}
-              selected={false}
-              displayValue={{
-                value: fluidViscosity.displayValue.value,
-                unit: fluidViscosity.displayValue.unit,
-              }}
-              error={fluidViscosity.error}
-              unitType={fluidViscosity.unitType}
-              focusText={fluidViscosity.focusText}
-              onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({
-                  type: ActionKind.CHANGE_VALUE_WITHOUT_UNIT,
-                  payload: { name: e.target.name, value: e.target.value },
-                })
-              }
-            />
-          </div>
-        </CalcCard>
-        <ResultsTable
-          state={state}
-          defaultUnits={defaultUnits}
-          onChangeSolveSelection={(e: React.ChangeEvent<HTMLInputElement>) =>
-            dispatch({
-              type: ActionKind.CHANGE_SOLVE_SELECTION,
-              payload: e.target.value,
-            })
-          }
-        />
+            </div>
+          </CalcCard>
+          <ResultsTable
+            state={state}
+            defaultUnits={defaultUnits}
+            onChangeSolveSelection={(e: React.ChangeEvent<HTMLInputElement>) =>
+              dispatch({
+                type: ActionKind.CHANGE_SOLVE_SELECTION,
+                payload: e.target.value,
+              })
+            }
+          />
 
-        {/* <EquationCard /> */}
-        {/* <ExampleCard data={state} /> */}
-        <EquationCard />
-      </CalcBody>
-    </PageContainer>
+          {/* <EquationCard /> */}
+          {/* <ExampleCard data={state} /> */}
+          <EquationCard />
+        </CalcBody>
+      </PageContainer>
+    </>
   )
 }
 
@@ -1057,7 +1065,7 @@ const ScaleUpMathodHint = () => (
           ></path>
         </svg>
       </label>
-      <div tabIndex={0} className="card dropdown-content compact rounded-box w-64 bg-base-100 shadow">
+      <div tabIndex={0} className="compact card dropdown-content rounded-box w-64 bg-base-100 shadow">
         <div className="card-body">
           <h2 className="card-title">Need help deciding?</h2>
           <p>

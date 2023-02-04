@@ -7,6 +7,7 @@ import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
 import { Equation, VariableDefinition } from '../../components/Equation'
 import { InputFieldConstant, InputFieldWithUnit } from '../../components/inputs/inputFieldObj'
+import Metadata from '../../components/Layout/MetaData'
 import { DefaultUnitContext, DefaultUnitContextType, DefaultUnits } from '../../contexts/defaultUnitContext'
 import { solveColebrook, updateCalculatedValue } from '../../logic/logic'
 import { ShortInputType } from '../../types'
@@ -282,89 +283,96 @@ const UnitConversion: NextPage = () => {
   const isError = hasError(state)
 
   return (
-    <PageContainer>
-      <Breadcrumbs paths={paths} />
-      <CalcHeader title={'Fluid Flow'} text={'Calculate the pressure drop in a length of pipe'} />
-      <CalcBody>
-        <CalcCard title={'Fluid Properties'}>
-          <div className="mb-8 flex flex-col">
-            {fluidPropertyOptions.map(key => {
-              const { name, label, placeholder, displayValue, error, unitType, focusText } = key
-              return (
-                <InputFieldWithUnit
-                  key={name}
-                  name={name}
-                  label={label}
-                  placeholder={placeholder}
-                  selected={false}
-                  displayValue={{ value: displayValue.value, unit: displayValue.unit }}
-                  error={error}
-                  unitType={unitType}
-                  focusText={focusText}
-                  onChangeValue={handleChangeValue}
-                  onChangeUnit={handleChangeUnit}
-                />
-              )
-            })}
-          </div>
-        </CalcCard>
-        <CalcCard title={'Piping Properties'}>
-          <div className="mb-8 flex flex-col">
-            {pipingPropertyOptions.map(key => {
-              const { name, label, placeholder, displayValue, error, unitType, focusText } = key
-              return (
-                <InputFieldWithUnit
-                  key={name}
-                  name={name}
-                  label={label}
-                  placeholder={placeholder}
-                  selected={false}
-                  displayValue={{ value: displayValue.value, unit: displayValue.unit }}
-                  error={error}
-                  unitType={unitType}
-                  focusText={focusText}
-                  onChangeValue={handleChangeValue}
-                  onChangeUnit={handleChangeUnit}
-                />
-              )
-            })}
-            <InputFieldWithUnit
-              name={state.surfaceRoughness.name}
-              label={state.surfaceRoughness.label}
-              placeholder={state.surfaceRoughness.placeholder}
-              selected={false}
-              displayValue={{
-                value: state.surfaceRoughness.displayValue.value,
-                unit: state.surfaceRoughness.displayValue.unit,
-              }}
-              error={state.surfaceRoughness.error}
-              unitType={state.surfaceRoughness.unitType}
-              focusText={state.surfaceRoughness.focusText}
-              onChangeValue={handleChangeValue}
-              onChangeUnit={handleChangeUnit}
-              topRight={<SurfaceRoughnessHint />}
-            />
-            <InputFieldConstant
-              name={state.lossCoefficient.name}
-              label={state.lossCoefficient.label}
-              placeholder={state.lossCoefficient.placeholder}
-              selected={false}
-              displayValue={{
-                value: state.lossCoefficient.displayValue.value,
-                unit: state.lossCoefficient.displayValue.unit,
-              }}
-              error={state.lossCoefficient.error}
-              unitType={state.lossCoefficient.unitType}
-              focusText={state.lossCoefficient.focusText}
-              onChangeValue={handleChangeValueUnitless}
-              topRight={<LossCoefficientHint />}
-            />
-          </div>
-        </CalcCard>
-        <AnswerCard inputState={state} defaultUnits={defaultUnits} isError={isError} />
-        <EquationCard />
-      </CalcBody>
-    </PageContainer>
+    <>
+      <Metadata
+        title="Pressure Drop"
+        description="Chemical engineering calculations for process and plant engineers"
+        keywords="Fluid Dynamics, chemical, engineering, home, calculator, unit, conversion, geometry, fluid, dynamics, tank, volume, agitation, scaleup, efficiency, accuracy, process, engineers"
+      />
+      <PageContainer>
+        <Breadcrumbs paths={paths} />
+        <CalcHeader title={'Fluid Flow'} text={'Calculate the pressure drop in a length of pipe'} />
+        <CalcBody>
+          <CalcCard title={'Fluid Properties'}>
+            <div className="mb-8 flex flex-col">
+              {fluidPropertyOptions.map(key => {
+                const { name, label, placeholder, displayValue, error, unitType, focusText } = key
+                return (
+                  <InputFieldWithUnit
+                    key={name}
+                    name={name}
+                    label={label}
+                    placeholder={placeholder}
+                    selected={false}
+                    displayValue={{ value: displayValue.value, unit: displayValue.unit }}
+                    error={error}
+                    unitType={unitType}
+                    focusText={focusText}
+                    onChangeValue={handleChangeValue}
+                    onChangeUnit={handleChangeUnit}
+                  />
+                )
+              })}
+            </div>
+          </CalcCard>
+          <CalcCard title={'Piping Properties'}>
+            <div className="mb-8 flex flex-col">
+              {pipingPropertyOptions.map(key => {
+                const { name, label, placeholder, displayValue, error, unitType, focusText } = key
+                return (
+                  <InputFieldWithUnit
+                    key={name}
+                    name={name}
+                    label={label}
+                    placeholder={placeholder}
+                    selected={false}
+                    displayValue={{ value: displayValue.value, unit: displayValue.unit }}
+                    error={error}
+                    unitType={unitType}
+                    focusText={focusText}
+                    onChangeValue={handleChangeValue}
+                    onChangeUnit={handleChangeUnit}
+                  />
+                )
+              })}
+              <InputFieldWithUnit
+                name={state.surfaceRoughness.name}
+                label={state.surfaceRoughness.label}
+                placeholder={state.surfaceRoughness.placeholder}
+                selected={false}
+                displayValue={{
+                  value: state.surfaceRoughness.displayValue.value,
+                  unit: state.surfaceRoughness.displayValue.unit,
+                }}
+                error={state.surfaceRoughness.error}
+                unitType={state.surfaceRoughness.unitType}
+                focusText={state.surfaceRoughness.focusText}
+                onChangeValue={handleChangeValue}
+                onChangeUnit={handleChangeUnit}
+                topRight={<SurfaceRoughnessHint />}
+              />
+              <InputFieldConstant
+                name={state.lossCoefficient.name}
+                label={state.lossCoefficient.label}
+                placeholder={state.lossCoefficient.placeholder}
+                selected={false}
+                displayValue={{
+                  value: state.lossCoefficient.displayValue.value,
+                  unit: state.lossCoefficient.displayValue.unit,
+                }}
+                error={state.lossCoefficient.error}
+                unitType={state.lossCoefficient.unitType}
+                focusText={state.lossCoefficient.focusText}
+                onChangeValue={handleChangeValueUnitless}
+                topRight={<LossCoefficientHint />}
+              />
+            </div>
+          </CalcCard>
+          <AnswerCard inputState={state} defaultUnits={defaultUnits} isError={isError} />
+          <EquationCard />
+        </CalcBody>
+      </PageContainer>
+    </>
   )
 }
 

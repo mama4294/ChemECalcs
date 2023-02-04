@@ -11,6 +11,7 @@ import { IconContainer } from '../../icons/IconContainer'
 import { IconSphereUnits } from '../../icons/iconSphereUnits'
 import { handleChangeSolveSelection, updateAnswer, updateArray, validateNotBlank } from '../../logic/logic'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
+import Metadata from '../../components/Layout/MetaData'
 
 const Sphere = () => {
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
@@ -123,23 +124,30 @@ const Sphere = () => {
   }
 
   return (
-    <PageContainer>
-      <Breadcrumbs paths={paths} />
-      <CalcHeader title={'Sphere'} text={'This calculates the volume of a sphere'} />
-      <CalcBody>
-        <Calculator
-          title="Calculator"
-          values={values}
-          onChangeSolveSelection={onChangeSolveSelection}
-          onChangeValue={onChangeValue}
-        />
-        <CalcCard title="Sphere">
-          <IconContainer>
-            <IconSphereUnits />
-          </IconContainer>
-        </CalcCard>
-      </CalcBody>
-    </PageContainer>
+    <>
+      <Metadata
+        title="Sphere"
+        description="Chemical engineering calculations for process and plant engineers"
+        keywords="box, volume, lenght, width, height, calculator, chemical engineering, process engineering, chemical engineering calculations, process engineering calculations"
+      />
+      <PageContainer>
+        <Breadcrumbs paths={paths} />
+        <CalcHeader title={'Sphere'} text={'This calculates the volume of a sphere'} />
+        <CalcBody>
+          <Calculator
+            title="Calculator"
+            values={values}
+            onChangeSolveSelection={onChangeSolveSelection}
+            onChangeValue={onChangeValue}
+          />
+          <CalcCard title="Sphere">
+            <IconContainer>
+              <IconSphereUnits />
+            </IconContainer>
+          </CalcCard>
+        </CalcBody>
+      </PageContainer>
+    </>
   )
 }
 

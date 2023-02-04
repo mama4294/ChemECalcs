@@ -11,6 +11,7 @@ import { IconContainer } from '../../icons/IconContainer'
 import { IconCylinderUnits } from '../../icons/iconCylinderUnits'
 import { handleChangeSolveSelection, updateAnswer, updateArray, validateNotBlank } from '../../logic/logic'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
+import Metadata from '../../components/Layout/MetaData'
 
 const Geometry = () => {
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
@@ -166,27 +167,34 @@ const Geometry = () => {
   ]
 
   return (
-    <PageContainer>
-      <>
-        <Breadcrumbs paths={paths} />
-        <CalcHeader title={'Cylinder'} text={'This calculates the volume of a cylinder'} />
+    <>
+      <Metadata
+        title="Cylinder"
+        description="Chemical engineering calculations for process and plant engineers"
+        keywords="box, volume, lenght, width, height, calculator, chemical engineering, process engineering, chemical engineering calculations, process engineering calculations"
+      />
+      <PageContainer>
+        <>
+          <Breadcrumbs paths={paths} />
+          <CalcHeader title={'Cylinder'} text={'This calculates the volume of a cylinder'} />
 
-        {/* Calculator */}
-        <CalcBody>
-          <Calculator
-            title="Calculator"
-            values={values}
-            onChangeSolveSelection={onChangeSolveSelection}
-            onChangeValue={onChangeValue}
-          />
-          <CalcCard title="Cylinder">
-            <IconContainer>
-              <IconCylinderUnits />
-            </IconContainer>
-          </CalcCard>
-        </CalcBody>
-      </>
-    </PageContainer>
+          {/* Calculator */}
+          <CalcBody>
+            <Calculator
+              title="Calculator"
+              values={values}
+              onChangeSolveSelection={onChangeSolveSelection}
+              onChangeValue={onChangeValue}
+            />
+            <CalcCard title="Cylinder">
+              <IconContainer>
+                <IconCylinderUnits />
+              </IconContainer>
+            </CalcCard>
+          </CalcBody>
+        </>
+      </PageContainer>
+    </>
   )
 }
 

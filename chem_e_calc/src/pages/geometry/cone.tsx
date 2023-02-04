@@ -11,6 +11,7 @@ import { IconConeUnits } from '../../icons/iconConeUnits'
 import { IconContainer } from '../../icons/IconContainer'
 import { handleChangeSolveSelection, updateAnswer, updateArray, validateNotBlank } from '../../logic/logic'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
+import Metadata from '../../components/Layout/MetaData'
 
 const Cone = () => {
   const paths = [
@@ -167,23 +168,30 @@ const Cone = () => {
   }
 
   return (
-    <PageContainer>
-      <Breadcrumbs paths={paths} />
-      <CalcHeader title={'Cone'} text={'This calculates the volume of a cone'} />
-      <CalcBody>
-        <Calculator
-          title="Calculator"
-          values={values}
-          onChangeSolveSelection={onChangeSolveSelection}
-          onChangeValue={onChangeValue}
-        />
-        <CalcCard title="Cone">
-          <IconContainer>
-            <IconConeUnits />
-          </IconContainer>
-        </CalcCard>
-      </CalcBody>
-    </PageContainer>
+    <>
+      <Metadata
+        title="Cone"
+        description="Chemical engineering calculations for process and plant engineers"
+        keywords="box, volume, lenght, width, height, calculator, chemical engineering, process engineering, chemical engineering calculations, process engineering calculations"
+      />
+      <PageContainer>
+        <Breadcrumbs paths={paths} />
+        <CalcHeader title={'Cone'} text={'This calculates the volume of a cone'} />
+        <CalcBody>
+          <Calculator
+            title="Calculator"
+            values={values}
+            onChangeSolveSelection={onChangeSolveSelection}
+            onChangeValue={onChangeValue}
+          />
+          <CalcCard title="Cone">
+            <IconContainer>
+              <IconConeUnits />
+            </IconContainer>
+          </CalcCard>
+        </CalcBody>
+      </PageContainer>
+    </>
   )
 }
 

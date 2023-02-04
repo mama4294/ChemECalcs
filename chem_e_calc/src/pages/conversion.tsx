@@ -11,6 +11,7 @@ import { convertUnits, UnitOption, UnitOptions, unitOptions, UnitTypes, unitType
 import { updateCalculatedValue } from '../logic/logic'
 import { ShortInputType } from '../types'
 import { InputFieldWithUnit } from '../components/inputs/inputFieldObj'
+import Metadata from '../components/Layout/MetaData'
 
 const UnitConversion: NextPage = () => {
   const paths = [{ title: 'Unit Conversion', href: '/conversion' }]
@@ -149,67 +150,74 @@ const UnitConversion: NextPage = () => {
   const { input, output, unitType } = state
 
   return (
-    <PageContainer>
-      <Breadcrumbs paths={paths} />
-      <CalcHeader title={'Unit Conversion'} text={'Convert between units'} />
-      <CalcBody>
-        <CalcCard title={'Calculator'}>
-          <>
-            <div className="form-control mb-2 w-full">
-              <label className="label">
-                <span className="label-text">Category</span>
-              </label>
-              <select
-                className="select input-bordered w-full"
-                value={unitType}
-                onChange={e => handleChangeUnitType(e.target.value)}
-              >
-                {unitTypes.map(type => {
-                  return (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  )
-                })}
-              </select>
-            </div>
-            <div className="mb-0 flex flex-col">
-              <InputFieldWithUnit
-                key={input.name}
-                name={input.name}
-                label={input.label}
-                placeholder={input.placeholder}
-                selected={false}
-                displayValue={input.displayValue}
-                error={input.error}
-                unitType={input.unitType}
-                focusText={input.focusText}
-                onChangeValue={handleChangeValue}
-                onChangeUnit={handleChangeUnit}
-              />
-              <div className="flex justify-center">
-                <button className="btn btn-circle" onClick={() => dispatch({ type: ActionKind.SWAP })}>
-                  <SwapIcon />
-                </button>
+    <>
+      <Metadata
+        title="Unit Conversion"
+        description="Chemical engineering calculations for process and plant engineers"
+        keywords="conversion, mass, length, flowrate, density, pressure, viscosity"
+      />
+      <PageContainer>
+        <Breadcrumbs paths={paths} />
+        <CalcHeader title={'Unit Conversion'} text={'Convert between units'} />
+        <CalcBody>
+          <CalcCard title={'Calculator'}>
+            <>
+              <div className="form-control mb-2 w-full">
+                <label className="label">
+                  <span className="label-text">Category</span>
+                </label>
+                <select
+                  className="select input-bordered w-full"
+                  value={unitType}
+                  onChange={e => handleChangeUnitType(e.target.value)}
+                >
+                  {unitTypes.map(type => {
+                    return (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    )
+                  })}
+                </select>
               </div>
-              <InputFieldWithUnit
-                key={output.name}
-                name={output.name}
-                label={output.label}
-                placeholder={output.placeholder}
-                selected={true}
-                displayValue={output.displayValue}
-                error={output.error}
-                unitType={output.unitType}
-                focusText={output.focusText}
-                onChangeValue={handleChangeValue}
-                onChangeUnit={handleChangeUnit}
-              />
-            </div>
-          </>
-        </CalcCard>
-      </CalcBody>
-    </PageContainer>
+              <div className="mb-0 flex flex-col">
+                <InputFieldWithUnit
+                  key={input.name}
+                  name={input.name}
+                  label={input.label}
+                  placeholder={input.placeholder}
+                  selected={false}
+                  displayValue={input.displayValue}
+                  error={input.error}
+                  unitType={input.unitType}
+                  focusText={input.focusText}
+                  onChangeValue={handleChangeValue}
+                  onChangeUnit={handleChangeUnit}
+                />
+                <div className="flex justify-center">
+                  <button className="btn btn-circle" onClick={() => dispatch({ type: ActionKind.SWAP })}>
+                    <SwapIcon />
+                  </button>
+                </div>
+                <InputFieldWithUnit
+                  key={output.name}
+                  name={output.name}
+                  label={output.label}
+                  placeholder={output.placeholder}
+                  selected={true}
+                  displayValue={output.displayValue}
+                  error={output.error}
+                  unitType={output.unitType}
+                  focusText={output.focusText}
+                  onChangeValue={handleChangeValue}
+                  onChangeUnit={handleChangeUnit}
+                />
+              </div>
+            </>
+          </CalcCard>
+        </CalcBody>
+      </PageContainer>
+    </>
   )
 }
 

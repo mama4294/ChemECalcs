@@ -7,6 +7,7 @@ import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
 import { Equation, VariableDefinition } from '../../components/Equation'
 import { InputFieldConstant, InputFieldWithUnit } from '../../components/inputs/inputFieldObj'
+import Metadata from '../../components/Layout/MetaData'
 import { DefaultUnitContext, DefaultUnitContextType, DefaultUnits } from '../../contexts/defaultUnitContext'
 import { updateCalculatedValue } from '../../logic/logic'
 import { ShortInputType } from '../../types'
@@ -196,36 +197,44 @@ const UnitConversion: NextPage = () => {
   const isError = hasError(state)
 
   return (
-    <PageContainer>
-      <Breadcrumbs paths={paths} />
-      <CalcHeader title={'Reynolds Number'} text={'Calculate the flow regime in a length of pipe'} />
-      <CalcBody>
-        <CalcCard title={'Inputs'}>
-          <div className="mb-8 flex flex-col">
-            {inputs.map(key => {
-              const { name, label, placeholder, displayValue, error, unitType, focusText } = key
-              return (
-                <InputFieldWithUnit
-                  key={name}
-                  name={name}
-                  label={label}
-                  placeholder={placeholder}
-                  selected={false}
-                  displayValue={{ value: displayValue.value, unit: displayValue.unit }}
-                  error={error}
-                  unitType={unitType}
-                  focusText={focusText}
-                  onChangeValue={handleChangeValue}
-                  onChangeUnit={handleChangeUnit}
-                />
-              )
-            })}
-          </div>
-        </CalcCard>
-        <AnswerCard inputState={state} defaultUnits={defaultUnits} isError={isError} />
-        <EquationCard />
-      </CalcBody>
-    </PageContainer>
+    <>
+      <Metadata
+        title="Rynolds Number Calculator"
+        description="Chemical engineering calculations for process and plant engineers"
+        keywords="Fluid Dynamics, chemical, engineering, home, calculator, unit, conversion, geometry, fluid, dynamics, tank, volume, agitation, scaleup, efficiency, accuracy, process, engineers"
+      />
+
+      <PageContainer>
+        <Breadcrumbs paths={paths} />
+        <CalcHeader title={'Reynolds Number'} text={'Calculate the flow regime in a length of pipe'} />
+        <CalcBody>
+          <CalcCard title={'Inputs'}>
+            <div className="mb-8 flex flex-col">
+              {inputs.map(key => {
+                const { name, label, placeholder, displayValue, error, unitType, focusText } = key
+                return (
+                  <InputFieldWithUnit
+                    key={name}
+                    name={name}
+                    label={label}
+                    placeholder={placeholder}
+                    selected={false}
+                    displayValue={{ value: displayValue.value, unit: displayValue.unit }}
+                    error={error}
+                    unitType={unitType}
+                    focusText={focusText}
+                    onChangeValue={handleChangeValue}
+                    onChangeUnit={handleChangeUnit}
+                  />
+                )
+              })}
+            </div>
+          </CalcCard>
+          <AnswerCard inputState={state} defaultUnits={defaultUnits} isError={isError} />
+          <EquationCard />
+        </CalcBody>
+      </PageContainer>
+    </>
   )
 }
 

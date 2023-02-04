@@ -7,6 +7,7 @@ import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
 import { Equation, VariableDefinition } from '../../components/Equation'
 import { InputFieldWithUnit } from '../../components/inputs/inputFieldObj'
+import Metadata from '../../components/Layout/MetaData'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 import { updateCalculatedValue } from '../../logic/logic'
 import { ShortInputType } from '../../types'
@@ -313,45 +314,52 @@ const UnitConversion: NextPage = () => {
   }, [])
 
   return (
-    <PageContainer>
-      <Breadcrumbs paths={paths} />
-      <CalcHeader title={'Fluid Flow'} text={'Calculate the fluid velocity in a pipe'} />
-      <CalcBody>
-        <CalcCard title={'Calculator'}>
-          <>
-            <SolveForDropdown
-              options={solveForOptions}
-              selection={state.solveSelection}
-              onChange={handleChangeSolveSelection}
-            />
-            <div className="mb-8 flex flex-col">
-              {(Object.keys(state) as (keyof State)[]).map(key => {
-                if (key != 'solveSelection') {
-                  const { name, label, placeholder, displayValue, error, unitType, focusText } = state[key]
-                  return (
-                    <InputFieldWithUnit
-                      key={name}
-                      name={name}
-                      label={label}
-                      placeholder={placeholder}
-                      selected={state.solveSelection === name}
-                      displayValue={{ value: displayValue.value, unit: displayValue.unit }}
-                      error={error}
-                      unitType={unitType}
-                      focusText={focusText}
-                      onChangeValue={handleChangeValue}
-                      onChangeUnit={handleChangeUnit}
-                    />
-                  )
-                }
-              })}
-            </div>
-          </>
-        </CalcCard>
-        <EquationCard />
-        {/* <ExampleCard data={state} /> */}
-      </CalcBody>
-    </PageContainer>
+    <>
+      <Metadata
+        title="Fluid Flow Calculator"
+        description="Chemical engineering calculations for process and plant engineers"
+        keywords="Fluid, flow, pipe, velocity, diameter, thickness, flowrate, calculator, chemical, engineering, process, engineer, efficiency, accuracy"
+      />
+      <PageContainer>
+        <Breadcrumbs paths={paths} />
+        <CalcHeader title={'Fluid Flow'} text={'Calculate the fluid velocity in a pipe'} />
+        <CalcBody>
+          <CalcCard title={'Calculator'}>
+            <>
+              <SolveForDropdown
+                options={solveForOptions}
+                selection={state.solveSelection}
+                onChange={handleChangeSolveSelection}
+              />
+              <div className="mb-8 flex flex-col">
+                {(Object.keys(state) as (keyof State)[]).map(key => {
+                  if (key != 'solveSelection') {
+                    const { name, label, placeholder, displayValue, error, unitType, focusText } = state[key]
+                    return (
+                      <InputFieldWithUnit
+                        key={name}
+                        name={name}
+                        label={label}
+                        placeholder={placeholder}
+                        selected={state.solveSelection === name}
+                        displayValue={{ value: displayValue.value, unit: displayValue.unit }}
+                        error={error}
+                        unitType={unitType}
+                        focusText={focusText}
+                        onChangeValue={handleChangeValue}
+                        onChangeUnit={handleChangeUnit}
+                      />
+                    )
+                  }
+                })}
+              </div>
+            </>
+          </CalcCard>
+          <EquationCard />
+          {/* <ExampleCard data={state} /> */}
+        </CalcBody>
+      </PageContainer>
+    </>
   )
 }
 

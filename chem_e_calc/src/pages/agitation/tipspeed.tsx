@@ -11,6 +11,7 @@ import { ShortInputType } from '../../types'
 import { InputFieldConstant, InputFieldWithUnit } from '../../components/inputs/inputFieldObj'
 import { updateCalculatedValue } from '../../logic/logic'
 import { Equation, VariableDefinition } from '../../components/Equation'
+import Metadata from '../../components/Layout/MetaData'
 
 const TipSpeedPage: NextPage = () => {
   const paths = [
@@ -175,57 +176,64 @@ const TipSpeedPage: NextPage = () => {
   const { diameter, shaftSpeed, tipSpeed } = state
 
   return (
-    <PageContainer>
-      <Breadcrumbs paths={paths} />
-      <CalcHeader title={'Tip Speed'} text={'Calculate speed of an impeller tip'} />
-      <CalcBody>
-        <CalcCard title={'Calculator'}>
-          <>
-            <div className="mb-0 flex flex-col">
-              <InputFieldWithUnit
-                key={diameter.name}
-                name={diameter.name}
-                label={diameter.label}
-                placeholder={diameter.placeholder}
-                selected={false}
-                displayValue={diameter.displayValue}
-                error={diameter.error}
-                unitType={diameter.unitType}
-                focusText={diameter.focusText}
-                onChangeValue={handleChangeValue}
-                onChangeUnit={handleChangeUnit}
-              />
-              <InputFieldConstant
-                key={shaftSpeed.name}
-                name={shaftSpeed.name}
-                label={shaftSpeed.label}
-                placeholder={shaftSpeed.placeholder}
-                selected={false}
-                displayValue={shaftSpeed.displayValue}
-                error={shaftSpeed.error}
-                unitType={shaftSpeed.unitType}
-                focusText={shaftSpeed.focusText}
-                onChangeValue={handleChangeValueUnitless}
-              />
-              <InputFieldWithUnit
-                key={tipSpeed.name}
-                name={tipSpeed.name}
-                label={tipSpeed.label}
-                placeholder={tipSpeed.placeholder}
-                selected={true}
-                displayValue={tipSpeed.displayValue}
-                error={tipSpeed.error}
-                unitType={tipSpeed.unitType}
-                focusText={tipSpeed.focusText}
-                onChangeValue={handleChangeValue}
-                onChangeUnit={handleChangeUnit}
-              />
-            </div>
-          </>
-        </CalcCard>
-        <EquationCard />
-      </CalcBody>
-    </PageContainer>
+    <>
+      <Metadata
+        title="Tip Speed Calculator"
+        description="Chemical engineering calculations for process and plant engineers"
+        keywords="Agitation, chemical, engineering, home, calculator, unit, conversion, geometry, fluid, dynamics, tank, volume, agitation, scaleup, efficiency, accuracy, process, engineers"
+      />
+      <PageContainer>
+        <Breadcrumbs paths={paths} />
+        <CalcHeader title={'Tip Speed'} text={'Calculate speed of an impeller tip'} />
+        <CalcBody>
+          <CalcCard title={'Calculator'}>
+            <>
+              <div className="mb-0 flex flex-col">
+                <InputFieldWithUnit
+                  key={diameter.name}
+                  name={diameter.name}
+                  label={diameter.label}
+                  placeholder={diameter.placeholder}
+                  selected={false}
+                  displayValue={diameter.displayValue}
+                  error={diameter.error}
+                  unitType={diameter.unitType}
+                  focusText={diameter.focusText}
+                  onChangeValue={handleChangeValue}
+                  onChangeUnit={handleChangeUnit}
+                />
+                <InputFieldConstant
+                  key={shaftSpeed.name}
+                  name={shaftSpeed.name}
+                  label={shaftSpeed.label}
+                  placeholder={shaftSpeed.placeholder}
+                  selected={false}
+                  displayValue={shaftSpeed.displayValue}
+                  error={shaftSpeed.error}
+                  unitType={shaftSpeed.unitType}
+                  focusText={shaftSpeed.focusText}
+                  onChangeValue={handleChangeValueUnitless}
+                />
+                <InputFieldWithUnit
+                  key={tipSpeed.name}
+                  name={tipSpeed.name}
+                  label={tipSpeed.label}
+                  placeholder={tipSpeed.placeholder}
+                  selected={true}
+                  displayValue={tipSpeed.displayValue}
+                  error={tipSpeed.error}
+                  unitType={tipSpeed.unitType}
+                  focusText={tipSpeed.focusText}
+                  onChangeValue={handleChangeValue}
+                  onChangeUnit={handleChangeUnit}
+                />
+              </div>
+            </>
+          </CalcCard>
+          <EquationCard />
+        </CalcBody>
+      </PageContainer>
+    </>
   )
 }
 
