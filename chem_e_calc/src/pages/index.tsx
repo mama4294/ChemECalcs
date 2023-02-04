@@ -1,7 +1,6 @@
 import type { NextPage } from 'next'
-import Head from 'next/head'
 import { GridCard } from '../components/GridCard'
-import Metadata from '../components/Layout/MetaData'
+import { Metadata } from '../components/Layout/Metadata'
 
 const Home: NextPage = () => {
   return (

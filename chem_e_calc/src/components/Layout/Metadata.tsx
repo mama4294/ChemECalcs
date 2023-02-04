@@ -1,5 +1,4 @@
 import Head from 'next/head'
-import Image from 'next/image'
 
 type MetadataProps = {
   title: string
@@ -8,7 +7,7 @@ type MetadataProps = {
   image?: string
 }
 
-const Metadata = ({ title, description, keywords, image }: MetadataProps) => {
+export const Metadata = ({ title, description, keywords, image }: MetadataProps) => {
   return (
     <>
       <Head>
@@ -26,5 +25,3 @@ const Metadata = ({ title, description, keywords, image }: MetadataProps) => {
     </>
   )
 }
-
-export default Metadata
