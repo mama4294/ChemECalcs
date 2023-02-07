@@ -629,7 +629,7 @@ const EquationCard = () => {
           <VariableDefinition equation={`$$L = $$`} definition="Pipe length" />
           <VariableDefinition equation={`$$h = $$`} definition="Elevation" />
           <VariableDefinition equation={`$$\\epsilon = $$`} definition="Surface roughness" />
-          <VariableDefinition equation={`$$f = $$`} definition="Friction factor" />
+          <VariableDefinition equation={`$$f = $$`} definition="Darcy friction factor" />
           <VariableDefinition equation={`$$K = $$`} definition="Loss coefficient" />
         </div>
       </>
