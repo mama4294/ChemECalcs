@@ -199,7 +199,7 @@ const UnitConversion: NextPage = () => {
   return (
     <>
       <Metadata
-        title="Rynolds Number Calculator"
+        title="Reynolds Number Calculator"
         description="Chemical engineering calculations for process and plant engineers"
         keywords="Fluid Dynamics, chemical, engineering, home, calculator, unit, conversion, geometry, fluid, dynamics, tank, volume, agitation, scaleup, efficiency, accuracy, process, engineers"
       />
