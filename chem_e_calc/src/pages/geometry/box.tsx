@@ -1,17 +1,17 @@
-import { useState, useContext } from 'react'
+import { useContext, useReducer } from 'react'
 import { convertUnits } from '../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
 import { CalcCard } from '../../components/calculators/calcCard'
-import { Calculator, InputType } from '../../components/calculators/calculator'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
-import { OnChangeValueProps } from '../../components/inputs/inputField'
 import { IconBoxUnits } from '../../icons/IconBoxUnits'
 import { IconContainer } from '../../icons/IconContainer'
-import { handleChangeSolveSelection, updateAnswer, updateArray, validateNotBlank } from '../../logic/logic'
+import { updateCalculatedValue } from '../../logic/logic'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 import { Metadata } from '../../components/Layout/Metadata'
+import { ShortInputType } from '../../types'
+import { InputFieldWithUnit } from '../../components/inputs/inputFieldObj'
 
 const Box = () => {
   const paths = [
@@ -20,198 +20,244 @@ const Box = () => {
   ]
 
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
-  const [values, setValues] = useState<InputType[]>([
-    {
-      id: 1,
+
+  type SolveSelectionOptions = 'width' | 'length' | 'height' | 'volume'
+  type StateWithoutSolveSelection = Omit<State, 'solveSelection'>
+
+  type State = {
+    solveSelection: SolveSelectionOptions
+    width: ShortInputType
+    height: ShortInputType
+    length: ShortInputType
+    volume: ShortInputType
+  }
+
+  enum ActionKind {
+    CHANGE_VALUE = 'CHANGE_VALUE',
+    CHANGE_SOLVE_SELECTION = 'CHANGE_SOLVE_SELECTION',
+    REFRESH = 'REFRESH',
+  }
+
+  type Action =
+    | {
+        type: ActionKind.CHANGE_SOLVE_SELECTION
+        payload: SolveSelectionOptions
+      }
+    | {
+        type: ActionKind.CHANGE_VALUE
+        payload: ShortInputType
+      }
+    | {
+        type: ActionKind.REFRESH
+      }
+
+  const initialState: State = {
+    solveSelection: 'volume',
+    width: {
       name: 'width',
-      unitType: 'length',
-      type: 'number',
-      placeholder: 'Enter value',
       label: 'Width',
-      displayValue: { value: 1, unit: defaultUnits.length },
-      calculatedValue: {
-        value: convertUnits({ value: 1, fromUnit: defaultUnits.length, toUnit: 'm' }),
-        unit: 'm',
-      },
-      solveable: true,
-      selectiontext: 'Solve for Width',
-      equation: `d = 2 \\sqrt{\\frac{V}{\\pi*h}}`,
-      selected: false,
-      error: '',
-    },
-    {
-      id: 2,
-      name: 'height',
+      placeholder: '0',
       unitType: 'length',
-      type: 'number',
-      placeholder: 'Enter value',
-      label: 'Height',
-      displayValue: { value: 1, unit: defaultUnits.length },
-      calculatedValue: {
-        value: convertUnits({ value: 1, fromUnit: defaultUnits.length, toUnit: 'm' }),
-        unit: 'm',
+      displayValue: { value: '1', unit: defaultUnits.length },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'm',
+          }),
+          unit: 'm',
+        }
       },
-      solveable: true,
-      selectiontext: 'Solve for Height',
-      equation: `h = \\frac{V}{\\pi (\\frac{d}{2})^{2}}`,
-      selected: false,
+      selectiontext: '',
+      focusText: 'Enter width (w)',
       error: '',
     },
-    {
-      id: 3,
+    length: {
       name: 'length',
-      unitType: 'length',
-      type: 'number',
-      placeholder: 'Enter value',
       label: 'Length',
-      displayValue: { value: 1, unit: defaultUnits.length },
-      calculatedValue: {
-        value: convertUnits({ value: 1, fromUnit: defaultUnits.length, toUnit: 'm' }),
-        unit: 'm',
+      placeholder: '0',
+      unitType: 'length',
+      displayValue: { value: '1', unit: defaultUnits.length },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'm',
+          }),
+          unit: 'm',
+        }
       },
-      solveable: true,
-      selectiontext: 'Solve for Length',
-      equation: `h = \\frac{V}{\\pi (\\frac{d}{2})^{2}}`,
-      selected: false,
+      selectiontext: '',
+      focusText: 'Enter length (l)',
       error: '',
     },
-    {
-      id: 4,
+    height: {
+      name: 'height',
+      label: 'Height',
+      placeholder: '0',
+      unitType: 'length',
+      displayValue: { value: '1', unit: defaultUnits.length },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'm',
+          }),
+          unit: 'm',
+        }
+      },
+      selectiontext: '',
+      focusText: 'Enter height (h)',
+      error: '',
+    },
+    volume: {
       name: 'volume',
-      unitType: 'volume',
-      type: 'number',
-      placeholder: 'Enter value',
       label: 'Volume',
-      displayValue: { value: '', unit: defaultUnits.volume },
-      calculatedValue: {
-        value: convertUnits({ value: 0, fromUnit: defaultUnits.volume, toUnit: 'm3' }),
-        unit: 'm3',
+      placeholder: '0',
+      unitType: 'volume',
+      displayValue: { value: '1', unit: defaultUnits.volume },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'm3',
+          }),
+          unit: 'm3',
+        }
       },
-      solveable: true,
-      selectiontext: 'Solve for Volume',
-      equation: `V = \\pi (\\frac{d}{2})^{2}h`,
-      selected: true,
+      selectiontext: '',
+      focusText: 'Enter volume',
       error: '',
     },
-  ])
-  const onChangeSolveSelection = (id: number): void => {
-    const newArr = handleChangeSolveSelection({ id: id, array: values })
-    setValues(newArr)
   }
 
-  const onChangeValue = ({ id, unit, number }: OnChangeValueProps): void => {
-    //create a new values array with changed value
-    //Update array with new input
-    const updatedArr = updateArray({ id, number, unit, array: values })
+  const solveForOptions: { label: string; value: string }[] = [
+    { label: initialState.width.label, value: initialState.width.name },
+    { label: initialState.length.label, value: initialState.length.name },
+    { label: initialState.height.label, value: initialState.height.name },
+    { label: initialState.volume.label, value: initialState.volume.name },
+  ]
 
-    //Set answer
-    const answerArr = calculateAnswer(updatedArr)
-    const validated = validateNotBlank(answerArr)
-    if (validated) {
-      setValues(validated)
-    } else {
-      setValues(updatedArr)
+  const handleChangeSolveSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: ActionKind.CHANGE_SOLVE_SELECTION, payload: e.target.value as SolveSelectionOptions })
+  }
+
+  const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    const numericValue = value.replace(/[^\d.-]/g, '')
+    const unit = state[name as keyof StateWithoutSolveSelection].displayValue.unit
+    const payload = { ...state[name as keyof StateWithoutSolveSelection], displayValue: { value: numericValue, unit } }
+    dispatch({ type: ActionKind.CHANGE_VALUE, payload })
+  }
+
+  const handleChangeUnit = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    const existingValue = state[name as keyof StateWithoutSolveSelection].displayValue.value
+    const payload = {
+      ...state[name as keyof StateWithoutSolveSelection],
+      displayValue: { value: existingValue, unit: value },
     }
+    dispatch({ type: ActionKind.CHANGE_VALUE, payload })
   }
 
-  const calculateAnswer = (inputArray: InputType[]) => {
-    const solveSelection = inputArray.find(o => o.selected === true)?.name
-    if (!solveSelection) return []
+  const calculateAnswerState = (inputArray: State): State => {
+    console.log('Calculating Answer')
+    const solveSelection = inputArray.solveSelection
     if (solveSelection === 'volume') return calcVolume(inputArray)
     if (solveSelection === 'height') return calcHeight(inputArray)
     if (solveSelection === 'width') return calcWidth(inputArray)
     if (solveSelection === 'length') return calcLength(inputArray)
-    return []
+    return state
   }
 
-  const calcVolume = (inputArray: InputType[]) => {
-    const widthObj = inputArray.find(o => o.name === 'width')
-    const lengthObj = inputArray.find(o => o.name === 'length')
-    const heightObj = inputArray.find(o => o.name === 'height')
+  const calcVolume = (inputArray: State): State => {
+    const width = inputArray.width.calculatedValue.value
+    const length = inputArray.length.calculatedValue.value
+    const height = inputArray.height.calculatedValue.value
+    const volume = width * length * height
 
-    if (!widthObj || !heightObj || !lengthObj) {
-      alert('inputs to calculator undefined')
-      return null
+    const displayValue = convertUnits({ value: volume, fromUnit: 'm3', toUnit: inputArray.volume.displayValue.unit })
+    const volumeObj = {
+      ...inputArray.volume,
+      calculatedValue: { value: volume, unit: 'm3' },
+      displayValue: { value: displayValue.toLocaleString(), unit: inputArray.volume.displayValue.unit },
     }
 
-    const width = widthObj.calculatedValue.value
-    const length = lengthObj.calculatedValue.value
-    const height = heightObj.calculatedValue.value
-
-    let answerValue = 0
-    if (width !== 0 && height !== 0 && length !== 0) {
-      answerValue = width * length * height
-    }
-
-    return updateAnswer(inputArray, answerValue, 'volume')
+    return { ...inputArray, volume: volumeObj }
   }
 
-  const calcHeight = (inputArray: InputType[]) => {
-    const widthObj = inputArray.find(o => o.name === 'width')
-    const lengthObj = inputArray.find(o => o.name === 'length')
-    // const heightObj = inputArray.find(o => o.name === 'height')
-    const volumeObj = inputArray.find(o => o.name === 'volume')
+  const calcHeight = (inputArray: State): State => {
+    const width = inputArray.width.calculatedValue.value
+    const length = inputArray.length.calculatedValue.value
+    const volume = inputArray.volume.calculatedValue.value
+    const height = volume / (width * length)
 
-    if (!widthObj || !volumeObj || !lengthObj) {
-      alert('inputs to calculator undefined')
-      return null
+    const displayValue = convertUnits({ value: height, fromUnit: 'm', toUnit: inputArray.height.displayValue.unit })
+    const heightObj = {
+      ...inputArray.height,
+      calculatedValue: { value: height, unit: 'm' },
+      displayValue: { value: displayValue.toLocaleString(), unit: inputArray.height.displayValue.unit },
     }
 
-    const width = widthObj.calculatedValue.value
-    const length = lengthObj.calculatedValue.value
-    const volume = volumeObj.calculatedValue.value
-
-    let answerValue = 0
-    if (width !== 0 && volume !== 0 && length !== 0) {
-      answerValue = volume / (width * length)
-    }
-
-    return updateAnswer(inputArray, answerValue, 'height')
+    return { ...inputArray, height: heightObj }
   }
 
-  const calcWidth = (inputArray: InputType[]) => {
-    const volumeObj = inputArray.find(o => o.name === 'volume')
-    const lengthObj = inputArray.find(o => o.name === 'length')
-    const heightObj = inputArray.find(o => o.name === 'height')
+  const calcWidth = (inputArray: State): State => {
+    const height = initialState.height.calculatedValue.value
+    const length = initialState.length.calculatedValue.value
+    const volume = initialState.volume.calculatedValue.value
 
-    if (!heightObj || !volumeObj || !lengthObj) {
-      alert('inputs to calculator undefined')
-      return null
+    const width = volume / (height * length)
+    const displayValue = convertUnits({ value: width, fromUnit: 'm', toUnit: inputArray.width.displayValue.unit })
+    const widthObj = {
+      ...inputArray.width,
+      calculatedValue: { value: width, unit: 'm' },
+      displayValue: { value: displayValue.toLocaleString(), unit: inputArray.width.displayValue.unit },
     }
 
-    const height = heightObj.calculatedValue.value
-    const length = lengthObj.calculatedValue.value
-    const volume = volumeObj.calculatedValue.value
-
-    let answerValue = 0
-    if (height !== 0 && volume !== 0 && length !== 0) {
-      answerValue = volume / (height * length)
-    }
-
-    return updateAnswer(inputArray, answerValue, 'width')
+    return { ...inputArray, width: widthObj }
   }
 
-  const calcLength = (inputArray: InputType[]) => {
-    const widthObj = inputArray.find(o => o.name === 'width')
-    const volumeObj = inputArray.find(o => o.name === 'volume')
-    const heightObj = inputArray.find(o => o.name === 'height')
+  const calcLength = (inputArray: State): State => {
+    const height = inputArray.height.calculatedValue.value
+    const width = inputArray.width.calculatedValue.value
+    const volume = inputArray.volume.calculatedValue.value
+    const length = volume / (height * width)
 
-    if (!heightObj || !volumeObj || !widthObj) {
-      alert('inputs to calculator undefined')
-      return null
+    const displayValue = convertUnits({ value: length, fromUnit: 'm', toUnit: inputArray.length.displayValue.unit })
+    const lengthObj = {
+      ...inputArray.length,
+      calculatedValue: { value: length, unit: 'm' },
+      displayValue: { value: displayValue.toLocaleString(), unit: inputArray.length.displayValue.unit },
     }
 
-    const height = heightObj.calculatedValue.value
-    const width = widthObj.calculatedValue.value
-    const volume = volumeObj.calculatedValue.value
-
-    let answerValue = 0
-    if (height !== 0 && volume !== 0 && width !== 0) {
-      answerValue = volume / (height * width)
-    }
-
-    return updateAnswer(inputArray, answerValue, 'length')
+    return { ...inputArray, length: lengthObj }
   }
+
+  const stateReducer = (state: State, action: Action): State => {
+    switch (action.type) {
+      case ActionKind.CHANGE_SOLVE_SELECTION:
+        return {
+          ...state,
+          solveSelection: action.payload,
+        }
+      case ActionKind.CHANGE_VALUE:
+        const payloadWithCalculatedValue = updateCalculatedValue(action.payload)
+        return calculateAnswerState({ ...state, [action.payload.name]: payloadWithCalculatedValue })
+      case ActionKind.REFRESH:
+        return calculateAnswerState({ ...state })
+      default:
+        const neverEver: never = action
+        console.error('Error: State reducer action not recognized', neverEver)
+        return state
+    }
+  }
+
+  const [state, dispatch] = useReducer(stateReducer, initialState)
 
   return (
     <>
@@ -224,12 +270,38 @@ const Box = () => {
         <Breadcrumbs paths={paths} />
         <CalcHeader title={'Box'} text={'This calculates the volume of a box'} />
         <CalcBody>
-          <Calculator
-            title="Calculator"
-            values={values}
-            onChangeSolveSelection={onChangeSolveSelection}
-            onChangeValue={onChangeValue}
-          />
+          <CalcCard title="Calculator">
+            <>
+              <SolveForDropdown
+                options={solveForOptions}
+                selection={state.solveSelection}
+                onChange={handleChangeSolveSelection}
+              />
+
+              <div className="mb-8 flex flex-col">
+                {(Object.keys(state) as (keyof State)[]).map(key => {
+                  if (key != 'solveSelection') {
+                    const { name, label, placeholder, displayValue, error, unitType, focusText } = state[key]
+                    return (
+                      <InputFieldWithUnit
+                        key={name}
+                        name={name}
+                        label={label}
+                        placeholder={placeholder}
+                        selected={state.solveSelection === name}
+                        displayValue={{ value: displayValue.value, unit: displayValue.unit }}
+                        error={error}
+                        unitType={unitType}
+                        focusText={focusText}
+                        onChangeValue={handleChangeValue}
+                        onChangeUnit={handleChangeUnit}
+                      />
+                    )
+                  }
+                })}
+              </div>
+            </>
+          </CalcCard>
           <CalcCard title="Box">
             <IconContainer>
               <IconBoxUnits />
@@ -238,6 +310,32 @@ const Box = () => {
         </CalcBody>
       </PageContainer>
     </>
+  )
+}
+
+type SolveForDropdown = {
+  selection: string
+  options: { label: string; value: string }[]
+  onChange: any
+}
+
+const SolveForDropdown = ({ selection, options, onChange }: SolveForDropdown) => {
+  return (
+    <div className="form-control mb-2 w-full">
+      <label className="label">
+        <span className="label-text">Solve for</span>
+      </label>
+
+      <select className="select input-bordered w-full" value={selection} onChange={onChange}>
+        {options.map((option, index) => {
+          return (
+            <option key={index} value={option.value}>
+              {option.label}
+            </option>
+          )
+        })}
+      </select>
+    </div>
   )
 }
 
