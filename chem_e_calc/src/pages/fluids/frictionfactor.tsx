@@ -12,6 +12,7 @@ import { DefaultUnitContext, DefaultUnitContextType, DefaultUnits } from '../../
 import { solveColebrook, updateCalculatedValue } from '../../logic/logic'
 import { ShortInputType } from '../../types'
 import { convertUnits } from '../../utils/units'
+import { FlowRegimeHint, FrictionFactorModal, SurfaceRoughnessHint } from './pressuredrop'
 
 type State = {
   volumeFlowRate: ShortInputType
@@ -19,68 +20,24 @@ type State = {
   fluidViscosity: ShortInputType
   outerDiameter: ShortInputType
   thickness: ShortInputType
-  pipeLength: ShortInputType
-  elevationRise: ShortInputType
   surfaceRoughness: ShortInputType
-  lossCoefficient: ShortInputType
 }
 
 type AnswerState = {
-  pressureDrop: ShortInputType
   frictionFactor: ShortInputType
   reynoldsNumber: ShortInputType
   flowRegime: ShortInputType
   velocity: ShortInputType
 }
 
-const UnitConversion: NextPage = () => {
+const FrictionFactorPage: NextPage = () => {
   const paths = [
     { title: 'Fluid Dynamics', href: '/fluids/' },
-    { title: 'Pressure Drop', href: '/fluids/pressuredrop' },
+    { title: 'Friction Factor', href: '/fluids/frictionfactor' },
   ]
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
 
   const initialState: State = {
-    pipeLength: {
-      name: 'pipeLength',
-      label: 'Pipe Length',
-      placeholder: '0',
-      unitType: 'length',
-      displayValue: { value: '100', unit: defaultUnits.length },
-      get calculatedValue() {
-        return {
-          value: convertUnits({
-            value: Number(this.displayValue.value),
-            fromUnit: this.displayValue.unit,
-            toUnit: 'm',
-          }),
-          unit: 'm',
-        }
-      },
-      selectiontext: '',
-      focusText: 'Enter the total length of the pipe',
-      error: '',
-    },
-    elevationRise: {
-      name: 'elevationRise',
-      label: 'Elevation Rise',
-      placeholder: '2',
-      unitType: 'length',
-      displayValue: { value: '2', unit: defaultUnits.length },
-      get calculatedValue() {
-        return {
-          value: convertUnits({
-            value: Number(this.displayValue.value),
-            fromUnit: this.displayValue.unit,
-            toUnit: 'm',
-          }),
-          unit: 'm',
-        }
-      },
-      selectiontext: 'Solve for fluid velocity',
-      focusText: 'Enter the difference in elevation between the inlet and outlet (can be negative)',
-      error: '',
-    },
     surfaceRoughness: {
       name: 'surfaceRoughness',
       label: 'Pipe Surface Roughness',
@@ -201,17 +158,6 @@ const UnitConversion: NextPage = () => {
       focusText: 'Enter fluid dynamic viscosity',
       error: '',
     },
-    lossCoefficient: {
-      name: 'lossCoefficient',
-      label: 'Loss Coefficient',
-      placeholder: '0',
-      unitType: 'mass',
-      calculatedValue: { value: 0, unit: 'unitless' },
-      displayValue: { value: '0', unit: 'unitless' },
-      selectiontext: '',
-      focusText: 'Enter loss coefficient',
-      error: '',
-    },
   }
 
   type Action =
@@ -253,14 +199,6 @@ const UnitConversion: NextPage = () => {
     dispatch({ type: ActionKind.CHANGE_VALUE, payload })
   }
 
-  const handleChangeValueUnitless = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    const numericValue = value.replace(/[^\d.-]/g, '')
-    const unit = state[name as keyof State].displayValue.unit
-    const payload = { ...state[name as keyof State], displayValue: { value: numericValue, unit } }
-    dispatch({ type: ActionKind.CHANGE_VALUE_UNITLESS, payload })
-  }
-
   const handleChangeUnit = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     const existingValue = state[name as keyof State].displayValue.value
@@ -273,25 +211,20 @@ const UnitConversion: NextPage = () => {
 
   const fluidPropertyOptions: ShortInputType[] = [state.volumeFlowRate, state.fluidDensity, state.fluidViscosity]
 
-  const pipingPropertyOptions: ShortInputType[] = [
-    state.pipeLength,
-    state.elevationRise,
-    state.outerDiameter,
-    state.thickness,
-  ]
+  const pipingPropertyOptions: ShortInputType[] = [state.outerDiameter, state.thickness]
 
   const isError = hasError(state)
 
   return (
     <>
       <Metadata
-        title="Pressure Drop"
+        title="Friction Factor"
         description="Chemical engineering calculations for process and plant engineers"
         keywords="Fluid Dynamics, chemical, engineering, home, calculator, unit, conversion, geometry, fluid, dynamics, tank, volume, agitation, scaleup, efficiency, accuracy, process, engineers"
       />
       <PageContainer>
         <Breadcrumbs paths={paths} />
-        <CalcHeader title={'Fluid Flow'} text={'Calculate the pressure drop in a length of pipe'} />
+        <CalcHeader title={'Friction Factor'} text={'Calculate the Darcy–Weisbach friction factor in a system'} />
         <CalcBody>
           <CalcCard title={'Fluid Properties'}>
             <div className="mb-8 flex flex-col">
@@ -351,21 +284,6 @@ const UnitConversion: NextPage = () => {
                 onChangeUnit={handleChangeUnit}
                 topRight={<SurfaceRoughnessHint />}
               />
-              <InputFieldConstant
-                name={state.lossCoefficient.name}
-                label={state.lossCoefficient.label}
-                placeholder={state.lossCoefficient.placeholder}
-                selected={false}
-                displayValue={{
-                  value: state.lossCoefficient.displayValue.value,
-                  unit: state.lossCoefficient.displayValue.unit,
-                }}
-                error={state.lossCoefficient.error}
-                unitType={state.lossCoefficient.unitType}
-                focusText={state.lossCoefficient.focusText}
-                onChangeValue={handleChangeValueUnitless}
-                topRight={<LossCoefficientHint />}
-              />
             </div>
           </CalcCard>
           <AnswerCard inputState={state} defaultUnits={defaultUnits} isError={isError} />
@@ -376,7 +294,7 @@ const UnitConversion: NextPage = () => {
   )
 }
 
-export default UnitConversion
+export default FrictionFactorPage
 
 const AnswerCard = ({
   inputState,
@@ -388,7 +306,6 @@ const AnswerCard = ({
   isError: boolean
 }) => {
   const initalAnswerUnits = {
-    pressureDrop: defaultUnits.pressure,
     frictionFactor: defaultUnits.pressure,
     reynoldsNumber: defaultUnits.pressure,
     velocity: defaultUnits.speed,
@@ -401,30 +318,9 @@ const AnswerCard = ({
     setAnswerUnits({ ...answerUnits, [name]: value })
   }
 
-  const { dP, ff, ffDetails, re, regime, velocity, dP_friction, dP_elevation, dP_fittings } =
-    calculateAnswer(inputState)
+  const { ff, ffDetails, re, regime, velocity } = calculateAnswer(inputState)
 
   const answerState: AnswerState = {
-    pressureDrop: {
-      name: 'pressureDrop',
-      label: 'Pressure Drop',
-      placeholder: '0',
-      unitType: 'pressure',
-      calculatedValue: { value: dP, unit: 'Pa' },
-      get displayValue() {
-        return {
-          value: convertUnits({
-            value: Number(this.calculatedValue.value),
-            fromUnit: this.calculatedValue.unit,
-            toUnit: answerUnits.pressureDrop,
-          }).toLocaleString(),
-          unit: answerUnits.pressureDrop,
-        }
-      },
-      selectiontext: '',
-      focusText: 'Differential pressure calculation',
-      error: '',
-    },
     frictionFactor: {
       name: 'frictionFactor',
       label: 'Friction Factor',
@@ -497,30 +393,6 @@ const AnswerCard = ({
       <CalcCard title={'Answer'}>
         <div className="mb-8 flex flex-col">
           <InputFieldWithUnit
-            name={answerState.pressureDrop.name}
-            label={answerState.pressureDrop.label}
-            placeholder={answerState.pressureDrop.placeholder}
-            selected={true}
-            displayValue={{
-              value: answerState.pressureDrop.displayValue.value,
-              unit: answerState.pressureDrop.displayValue.unit,
-            }}
-            error={answerState.pressureDrop.error}
-            unitType={answerState.pressureDrop.unitType}
-            focusText={answerState.pressureDrop.focusText}
-            onChangeValue={logChange}
-            onChangeUnit={handleChangeUnit}
-            topRight={
-              <PressureDropModal
-                dP_total={dP}
-                dP_friction={dP_friction}
-                dP_elevation={dP_elevation}
-                dP_fittings={dP_fittings}
-                unit={answerUnits.pressureDrop}
-              />
-            }
-          />
-          <InputFieldWithUnit
             name={answerState.velocity.name}
             label={answerState.velocity.label}
             placeholder={answerState.velocity.placeholder}
@@ -590,47 +462,35 @@ const EquationCard = () => {
   return (
     <CalcCard title="Governing Equation">
       <>
-        <p className="mb-2 font-semibold">The Bernoulli Equation is used to determine pressure drop</p>
+        <p className="mb-2 font-semibold">Laminar flow:</p>
+        <p className="mb-2">The friction factor is easily determined for the laminar flow regime</p>
         <div className="mb-4">
-          <Equation
-            equation={`$$P_{1} + {\\rho}gh_{1} + \\frac{1}{2}{\\rho}v_{1}^{2} = P_{2}  + {\\rho}gh_{2}  + \\frac{1}{2}{\\rho}v_{2}^{2} + \\left ( {f_{d}\\frac{L}{d_i}} + \\sum K \\right )\\frac{1}{2}{\\rho}{v}^{2} $$`}
-          />
+          <Equation equation={`$$f =  \\frac{64}{Re}$$`} />
         </div>
-        <p className="mb-2 font-semibold">With the following assumptions: </p>
 
-        <ul className=" mb-2 ml-2 list-inside list-disc">
-          <li>The start and end are connected through a fluid streamline</li>
-          <li>The fluid has constant density</li>
-          <li>The fluid flow rate is constant</li>
-        </ul>
-
-        <p className="mb-2 font-semibold">Rearrage to solve for pressure drop:</p>
+        <p className="mb-2 font-semibold">The Colebrook–White equation:</p>
+        <p className="mb-2">
+          If the flow regime is not laminar, a more complicated equation is used to iteratively solve for the friction
+          factor.
+        </p>
         <Equation
-          equation={`$$P_{1} - P_{2} = {\\rho}g \\left (h_{2}-h_{1}\\right ) + \\frac{1}{2}{\\rho} \\left ( v_{2}^{2} - v_{1}^{2} \\right ) + \\left ( {f_{d}\\frac{L}{d_i}} + \\sum K \\right )\\frac{1}{2}{\\rho}v^{2} $$`}
+          equation={`$$f = \\frac{1}{ -2log_{10} \\left( \\frac{\\epsilon}{3.7 d_{i}} + \\frac{2.51}{Re\\sqrt{f}}\\right )}^{2}$$`}
         />
 
-        <p className="mb-2 font-semibold">Simplify:</p>
+        <p className="mb-2">This equation must be solved iteratively until convergence</p>
 
-        <Equation equation={`$$P_{1} - P_{2} =  \\Delta P$$`} />
-        <Equation equation={`$$h_{2} - h_{1} =  \\Delta h$$`} />
-        <Equation equation={`$$v_{2}^{2} - v_{1}^{2}  = 0$$`} />
-        <Equation
-          equation={`$$\\Delta P = {\\rho}g\\Delta h + \\left ( {f\\frac{L}{d_i}} + \\sum K \\right )\\frac{1}{2}{\\rho}v^{2}$$`}
-        />
-
+        <p className="mb-2">
+          The Darcy–Weisbach friction factor should not be confused with the Fanning friction factor which is 4 times
+          smaller
+        </p>
         <br />
 
         <p className="mb-2 text-lg font-medium">Definitions</p>
         <div className="ml-2">
-          <VariableDefinition equation={`$$P = $$`} definition="Pressure" />
-          <VariableDefinition equation={`$$v = $$`} definition="Fluid velocity" />
-          <VariableDefinition equation={`$$\\rho = $$`} definition="Fluid density" />
+          <VariableDefinition equation={`$$f = $$`} definition="Darcy–Weisbach friction factor" />
+          <VariableDefinition equation={`$$Re = $$`} definition="Reynolds Number" />
           <VariableDefinition equation={`$$d_i = $$`} definition="Inner pipe diameter" />
-          <VariableDefinition equation={`$$L = $$`} definition="Pipe length" />
-          <VariableDefinition equation={`$$h = $$`} definition="Elevation" />
           <VariableDefinition equation={`$$\\epsilon = $$`} definition="Surface roughness" />
-          <VariableDefinition equation={`$$f = $$`} definition="Friction factor" />
-          <VariableDefinition equation={`$$K = $$`} definition="Loss coefficient" />
         </div>
       </>
     </CalcCard>
@@ -639,26 +499,13 @@ const EquationCard = () => {
 
 const calculateAnswer = (state: State) => {
   //Inputs
-  const {
-    pipeLength,
-    thickness,
-    outerDiameter,
-    volumeFlowRate,
-    fluidDensity,
-    elevationRise,
-    fluidViscosity,
-    surfaceRoughness,
-    lossCoefficient,
-  } = state
-  const inputPipeLength = pipeLength.calculatedValue.value //m
+  const { thickness, outerDiameter, volumeFlowRate, fluidDensity, fluidViscosity, surfaceRoughness } = state
   const inputDensity = fluidDensity.calculatedValue.value //kg/m3
-  const inputElevation = elevationRise.calculatedValue.value //m
   const inputThickness = thickness.calculatedValue.value //m
   const inputPipeOD = outerDiameter.calculatedValue.value //m
   const inputFlowrate = volumeFlowRate.calculatedValue.value //m3/s
   const inputViscosity = fluidViscosity.calculatedValue.value //Pa*s
   const inputSurfaceRoughness = surfaceRoughness.calculatedValue.value //m
-  const inputLossCoefficient = +lossCoefficient.displayValue.value //unitless
 
   //Intermediate calculations
   const gravitationalConstant = 9.81 //m/s2
@@ -680,12 +527,6 @@ const calculateAnswer = (state: State) => {
     frictionFactorDetails = data.details
   }
 
-  //Pressure drop calculations
-  const dP_elevation = inputDensity * gravitationalConstant * inputElevation // kg/m3 * m/s2 * m = kg/m2/s2 = Pa
-  const dP_fittings = inputLossCoefficient * (1 / 2) * inputDensity * fluidVelocity ** 2 //Pa
-  const dP_friction = frictionFactor * (inputPipeLength / inputPipeID) * (1 / 2) * inputDensity * fluidVelocity ** 2 //Pa
-  const dP_total = dP_elevation + dP_fittings + dP_friction //Pa
-
   //Flow regime calculation
   let regime = 'Laminar'
   if (reynoldsNumber > 4000) {
@@ -695,15 +536,11 @@ const calculateAnswer = (state: State) => {
   }
 
   return {
-    dP: dP_total,
     ff: frictionFactor,
     ffDetails: frictionFactorDetails,
     re: reynoldsNumber,
     regime: regime,
     velocity: fluidVelocity,
-    dP_elevation,
-    dP_fittings,
-    dP_friction,
   }
 }
 
@@ -714,18 +551,15 @@ const resetErrorMessages = (state: State): State => {
     volumeFlowRate: { ...state.volumeFlowRate, error: '' },
     outerDiameter: { ...state.outerDiameter, error: '' },
     thickness: { ...state.thickness, error: '' },
-    pipeLength: { ...state.pipeLength, error: '' },
     fluidDensity: { ...state.fluidDensity, error: '' },
     fluidViscosity: { ...state.fluidViscosity, error: '' },
-    elevationRise: { ...state.elevationRise, error: '' },
     surfaceRoughness: { ...state.surfaceRoughness, error: '' },
   }
 }
 
 const validateInputs = (state: State) => {
   //Adds error messages to state if inputs are invalid
-  const { pipeLength, thickness, outerDiameter, volumeFlowRate, fluidDensity, fluidViscosity, surfaceRoughness } = state
-  const inputPipeLength = pipeLength.calculatedValue.value //m
+  const { thickness, outerDiameter, volumeFlowRate, fluidDensity, fluidViscosity, surfaceRoughness } = state
   const inputDensity = fluidDensity.calculatedValue.value //kg/m3
   const inputThickness = thickness.calculatedValue.value //m
   const inputPipeOD = outerDiameter.calculatedValue.value //m
@@ -734,13 +568,6 @@ const validateInputs = (state: State) => {
   const inputSurfaceRoughness = surfaceRoughness.calculatedValue.value //m
 
   let validatedState = resetErrorMessages(state)
-
-  if (inputPipeLength < 0) {
-    validatedState = {
-      ...validatedState,
-      pipeLength: { ...validatedState.pipeLength, error: 'Length must be positive' },
-    }
-  }
 
   if (inputPipeOD <= inputThickness * 2) {
     validatedState = {
@@ -803,290 +630,3 @@ const hasError = (state: State): boolean => {
   })
   return error
 }
-
-export type FrictionFactorModalProps = {
-  ffDetails: { i: number; ff: number }[]
-  reynoldsNumber: number
-}
-
-export const FrictionFactorModal = ({ ffDetails, reynoldsNumber }: FrictionFactorModalProps) => {
-  return (
-    <span className="label-text-alt">
-      <div className="dropdown-end dropdown">
-        <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
-          </svg>
-        </label>
-        <div tabIndex={0} className="compact card dropdown-content rounded-box min-w-[16rem] bg-base-100 shadow">
-          <div className="card-body overflow-x-auto overflow-y-auto">
-            <h2 className="card-title">Details</h2>
-            {reynoldsNumber < 2000 && (
-              <>
-                <p>Laminar flow. Friction factor found using this equation:</p>
-                <Equation equation={`$$f =  \\frac{64}{Re}$$`} />
-              </>
-            )}
-
-            {reynoldsNumber >= 2000 && (
-              <>
-                <p>Friction factor solved iteratively using the Colebrook White equation until ±0.000001 convergence</p>
-                {/* Equation for friction factor using Colebrook white equation */}
-                <Equation
-                  equation={`$$f = \\frac{1}{ -2log_{10} \\left( \\frac{\\epsilon}{3.7 d_{i}} + \\frac{2.51}{Re\\sqrt{f}}\\right )}^{2}$$`}
-                />
-
-                <table className="table w-full ">
-                  <thead>
-                    <tr>
-                      <th>Iteration</th>
-                      <th>Friction Factor</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ffDetails.map(iteration => (
-                      <tr key={iteration.i}>
-                        <td>{iteration.i}</td>
-                        <td>{iteration.ff}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </span>
-  )
-}
-
-type PressureDropModalProps = {
-  dP_friction: number
-  dP_elevation: number
-  dP_fittings: number
-  dP_total: number
-  unit: string
-}
-
-const PressureDropModal = ({ dP_friction, dP_elevation, dP_fittings, dP_total, unit }: PressureDropModalProps) => {
-  return (
-    <span className="label-text-alt">
-      <div className="dropdown-end dropdown">
-        <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
-          </svg>
-        </label>
-        <div tabIndex={0} className="compact card dropdown-content rounded-box bg-base-100 shadow">
-          <div className="card-body overflow-x-auto">
-            <h2 className="card-title">Details</h2>
-            <table className="table w-full">
-              {/* <!-- head --> */}
-              <thead>
-                <tr>
-                  <th>Loss Type</th>
-                  <th>Value</th>
-                  <th>Unit</th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* <!-- row 1 --> */}
-                <tr>
-                  <td>Elevation Losses</td>
-                  <td>
-                    {' '}
-                    {convertUnits({
-                      value: dP_elevation,
-                      fromUnit: 'Pa',
-                      toUnit: unit,
-                    }).toLocaleString()}
-                  </td>
-                  <td>{unit}</td>
-                </tr>
-                {/* <!-- row 2 --> */}
-                <tr>
-                  <td>Friction Losses</td>
-                  <td>
-                    {' '}
-                    {convertUnits({
-                      value: dP_friction,
-                      fromUnit: 'Pa',
-                      toUnit: unit,
-                    }).toLocaleString()}
-                  </td>
-                  <td>{unit}</td>
-                </tr>
-                {/* <!-- row 3 --> */}
-                <tr>
-                  <td>Fittings Losses</td>
-                  <td>
-                    {convertUnits({
-                      value: dP_fittings,
-                      fromUnit: 'Pa',
-                      toUnit: unit,
-                    }).toLocaleString()}
-                  </td>
-                  <td>{unit}</td>
-                </tr>
-                {/* <!-- total Row --> */}
-                <tr>
-                  <td>Total</td>
-                  <td>
-                    {convertUnits({
-                      value: dP_total,
-                      fromUnit: 'Pa',
-                      toUnit: unit,
-                    }).toLocaleString()}
-                  </td>
-                  <td>{unit}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </span>
-  )
-}
-
-export const FlowRegimeHint = () => (
-  <span className="label-text-alt">
-    <div className="dropdown-end dropdown">
-      <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          ></path>
-        </svg>
-      </label>
-      <div tabIndex={0} className="compact card dropdown-content rounded-box min-w-[16rem] bg-base-100 shadow">
-        <div className="card-body overflow-x-auto">
-          <h2 className="card-title">Details</h2>
-          <p>Flow regime is determined by the Reynolds number</p>
-          <ul className="list-inside list-disc space-y-1">
-            <li>{'Laminar: Re <= 2,000'}</li>
-            <li>{'Transition: 2,000 > Re < 4,000'}</li>
-            <li>{'Turbulent: Re >= 4,000'}</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </span>
-)
-
-const LossCoefficientHint = () => (
-  <span className="label-text-alt">
-    <div className="dropdown-end dropdown">
-      <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          ></path>
-        </svg>
-      </label>
-      <div tabIndex={0} className="compact card dropdown-content rounded-box min-w-[16rem] bg-base-100 shadow">
-        <div className="card-body overflow-x-auto">
-          <h2 className="card-title">Loss Coefficient (ΣK)</h2>
-          <div className="ml-2">
-            <p className="mb-2">
-              Each bend, valve, and fitting has a small amount of friction associated with it. It can be described as
-              the loss coeffient. The sum of all the loss coefficents (ΣK) can be used in the Bernoulli Equation to find
-              the pressure drop due to fittings. It is also known as the resistance coeffient.
-            </p>
-            <p className="mb-2">
-              Exact calculations for the loss coefficent for each type of valve and fitting can be found in the Crane
-              Technical Paper 410: Flow of Fluids through Valves, Fittings, and Pipe.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </span>
-)
-
-export const SurfaceRoughnessHint = () => (
-  <span className="label-text-alt">
-    <div className="dropdown-end dropdown">
-      <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          ></path>
-        </svg>
-      </label>
-      <div tabIndex={0} className="compact card dropdown-content rounded-box min-w-[16rem] bg-base-100 shadow">
-        <div className="card-body overflow-x-auto">
-          <h2 className="card-title">Surface Finish</h2>
-          <p className="mb-2">
-            The surface roughness depends on the pipe material. The table below gives typical roughnesses for specific
-            materials
-          </p>
-          <div className="w-full overflow-x-auto">
-            <table className=" table w-full">
-              <thead>
-                <tr>
-                  <th>Material</th>
-                  <th>Surface Roughness</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Stainless Steel</td>
-                  <td>5 μm</td>
-                </tr>
-                <tr>
-                  <td>Steel</td>
-                  <td>45 μm</td>
-                </tr>
-                <tr>
-                  <td>Galvanized Steel</td>
-                  <td>150 μm</td>
-                </tr>
-                <tr>
-                  <td>Aluminum</td>
-                  <td>1 μm</td>
-                </tr>
-                <tr>
-                  <td>Copper</td>
-                  <td>1 μm</td>
-                </tr>
-                <tr>
-                  <td>Brass</td>
-                  <td>1 μm</td>
-                </tr>
-                <tr>
-                  <td>PVC</td>
-                  <td>4 μm</td>
-                </tr>
-                <tr>
-                  <td>Cast Iron</td>
-                  <td>525 μm</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </span>
-)

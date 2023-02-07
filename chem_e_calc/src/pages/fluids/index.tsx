@@ -35,6 +35,11 @@ const Fluids = () => {
             description="Calculate pressure drop through a system"
             link="/fluids/pressuredrop"
           />
+          <GridCard
+            name="Friction Factor"
+            description="Iteratively calculate the friction factor"
+            link="/fluids/frictionfactor"
+          />
         </CalcBody>
       </PageContainer>
     </>
