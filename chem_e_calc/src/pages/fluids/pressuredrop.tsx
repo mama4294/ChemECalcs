@@ -615,7 +615,7 @@ const EquationCard = () => {
         <Equation equation={`$$h_{2} - h_{1} =  \\Delta h$$`} />
         <Equation equation={`$$v_{2}^{2} - v_{1}^{2}  = 0$$`} />
         <Equation
-          equation={`$$\\Delta P = {\\rho}g\\Delta h + \\left ( {f\\frac{L}{d_i}} + \\sum K \\right )\\frac{1}{2}{\\rho}v^{2}$$`}
+          equation={`$$\\Delta P = {\\rho}g\\Delta h + \\left ( {f_d\\frac{L}{d_i}} + \\sum K \\right )\\frac{1}{2}{\\rho}v^{2}$$`}
         />
 
         <br />
@@ -629,7 +629,7 @@ const EquationCard = () => {
           <VariableDefinition equation={`$$L = $$`} definition="Pipe length" />
           <VariableDefinition equation={`$$h = $$`} definition="Elevation" />
           <VariableDefinition equation={`$$\\epsilon = $$`} definition="Surface roughness" />
-          <VariableDefinition equation={`$$f = $$`} definition="Darcy friction factor" />
+          <VariableDefinition equation={`$$f_d = $$`} definition="Darcy friction factor" />
           <VariableDefinition equation={`$$K = $$`} definition="Loss coefficient" />
         </div>
       </>
@@ -829,7 +829,7 @@ export const FrictionFactorModal = ({ ffDetails, reynoldsNumber }: FrictionFacto
             {reynoldsNumber < 2000 && (
               <>
                 <p>Laminar flow. Friction factor found using this equation:</p>
-                <Equation equation={`$$f =  \\frac{64}{Re}$$`} />
+                <Equation equation={`$$f_d =  \\frac{64}{Re}$$`} />
               </>
             )}
 
@@ -838,7 +838,7 @@ export const FrictionFactorModal = ({ ffDetails, reynoldsNumber }: FrictionFacto
                 <p>Friction factor solved iteratively using the Colebrook White equation until ±0.000001 convergence</p>
                 {/* Equation for friction factor using Colebrook white equation */}
                 <Equation
-                  equation={`$$f = \\frac{1}{ -2log_{10} \\left( \\frac{\\epsilon}{3.7 d_{i}} + \\frac{2.51}{Re\\sqrt{f}}\\right )}^{2}$$`}
+                  equation={`$$f_d = \\frac{1}{ -2log_{10} \\left( \\frac{\\epsilon}{3.7 d_{i}} + \\frac{2.51}{Re\\sqrt{f_d}}\\right )}^{2}$$`}
                 />
 
                 <table className="table w-full ">

@@ -24,7 +24,8 @@ type State = {
 }
 
 type AnswerState = {
-  frictionFactor: ShortInputType
+  darcyFrictionFactor: ShortInputType
+  fanningFrictionFactor: ShortInputType
   reynoldsNumber: ShortInputType
   flowRegime: ShortInputType
   velocity: ShortInputType
@@ -321,13 +322,24 @@ const AnswerCard = ({
   const { ff, ffDetails, re, regime, velocity } = calculateAnswer(inputState)
 
   const answerState: AnswerState = {
-    frictionFactor: {
+    darcyFrictionFactor: {
       name: 'frictionFactor',
-      label: 'Friction Factor',
+      label: 'Darcy Friction Factor',
       placeholder: '0',
       unitType: 'pressure',
       calculatedValue: { value: ff, unit: 'unitless' },
       displayValue: { value: ff.toLocaleString(), unit: 'unitless' },
+      selectiontext: 'Solve for flowrate',
+      focusText: 'Enter fluid flowrate',
+      error: '',
+    },
+    fanningFrictionFactor: {
+      name: 'frictionFactor',
+      label: 'Fanning Friction Factor',
+      placeholder: '0',
+      unitType: 'pressure',
+      calculatedValue: { value: ff / 4, unit: 'unitless' },
+      displayValue: { value: (ff / 4).toLocaleString(), unit: 'unitless' },
       selectiontext: 'Solve for flowrate',
       focusText: 'Enter fluid flowrate',
       error: '',
@@ -392,6 +404,36 @@ const AnswerCard = ({
     return (
       <CalcCard title={'Answer'}>
         <div className="mb-8 flex flex-col">
+          <InputFieldConstant
+            name={answerState.darcyFrictionFactor.name}
+            label={answerState.darcyFrictionFactor.label}
+            placeholder={answerState.darcyFrictionFactor.placeholder}
+            selected={true}
+            displayValue={{
+              value: answerState.darcyFrictionFactor.displayValue.value,
+              unit: answerState.darcyFrictionFactor.displayValue.unit,
+            }}
+            error={answerState.darcyFrictionFactor.error}
+            unitType={answerState.darcyFrictionFactor.unitType}
+            focusText={answerState.darcyFrictionFactor.focusText}
+            onChangeValue={logChange}
+            topRight={<FrictionFactorModal ffDetails={ffDetails} reynoldsNumber={re} />}
+          />
+          <InputFieldConstant
+            name={answerState.fanningFrictionFactor.name}
+            label={answerState.fanningFrictionFactor.label}
+            placeholder={answerState.fanningFrictionFactor.placeholder}
+            selected={true}
+            displayValue={{
+              value: answerState.fanningFrictionFactor.displayValue.value,
+              unit: answerState.fanningFrictionFactor.displayValue.unit,
+            }}
+            error={answerState.fanningFrictionFactor.error}
+            unitType={answerState.fanningFrictionFactor.unitType}
+            focusText={answerState.fanningFrictionFactor.focusText}
+            onChangeValue={logChange}
+            topRight={<FanningFFHint />}
+          />
           <InputFieldWithUnit
             name={answerState.velocity.name}
             label={answerState.velocity.label}
@@ -406,22 +448,6 @@ const AnswerCard = ({
             focusText={answerState.velocity.focusText}
             onChangeValue={logChange}
             onChangeUnit={handleChangeUnit}
-          />
-
-          <InputFieldConstant
-            name={answerState.frictionFactor.name}
-            label={answerState.frictionFactor.label}
-            placeholder={answerState.frictionFactor.placeholder}
-            selected={true}
-            displayValue={{
-              value: answerState.frictionFactor.displayValue.value,
-              unit: answerState.frictionFactor.displayValue.unit,
-            }}
-            error={answerState.frictionFactor.error}
-            unitType={answerState.frictionFactor.unitType}
-            focusText={answerState.frictionFactor.focusText}
-            onChangeValue={logChange}
-            topRight={<FrictionFactorModal ffDetails={ffDetails} reynoldsNumber={re} />}
           />
 
           <InputFieldConstant
@@ -465,7 +491,7 @@ const EquationCard = () => {
         <p className="mb-2 font-semibold">Laminar flow:</p>
         <p className="mb-2">The friction factor is easily determined for the laminar flow regime</p>
         <div className="mb-4">
-          <Equation equation={`$$f =  \\frac{64}{Re}$$`} />
+          <Equation equation={`$$f_d =  \\frac{64}{Re}$$`} />
         </div>
 
         <p className="mb-2 font-semibold">The Colebrook–White equation:</p>
@@ -474,20 +500,23 @@ const EquationCard = () => {
           factor.
         </p>
         <Equation
-          equation={`$$f = \\frac{1}{ -2log_{10} \\left( \\frac{\\epsilon}{3.7 d_{i}} + \\frac{2.51}{Re\\sqrt{f}}\\right )}^{2}$$`}
+          equation={`$$f_d = \\frac{1}{ -2log_{10} \\left( \\frac{\\epsilon}{3.7 d_{i}} + \\frac{2.51}{Re\\sqrt{f}}\\right )}^{2}$$`}
         />
 
-        <p className="mb-2">This equation must be solved iteratively until convergence</p>
+        <p className="mb-4">This equation must be solved iteratively until convergence.</p>
 
+        <p className="mb-2 font-semibold">Fanning friction factor</p>
         <p className="mb-2">
           The Darcy–Weisbach friction factor should not be confused with the Fanning friction factor which is 4 times
-          smaller
+          smaller.
         </p>
+        <Equation equation={`$$f =  f_d / 4$$`} />
         <br />
 
         <p className="mb-2 text-lg font-medium">Definitions</p>
         <div className="ml-2">
-          <VariableDefinition equation={`$$f = $$`} definition="Darcy–Weisbach friction factor" />
+          <VariableDefinition equation={`$$f_d = $$`} definition="Darcy friction factor" />
+          <VariableDefinition equation={`$$f = $$`} definition="Fanning friction factor" />
           <VariableDefinition equation={`$$Re = $$`} definition="Reynolds Number" />
           <VariableDefinition equation={`$$d_i = $$`} definition="Inner pipe diameter" />
           <VariableDefinition equation={`$$\\epsilon = $$`} definition="Surface roughness" />
@@ -629,4 +658,30 @@ const hasError = (state: State): boolean => {
     if (state[key as keyof State].error != '') error = true
   })
   return error
+}
+const FanningFFHint = () => {
+  return (
+    <span className="label-text-alt">
+      <div className="dropdown-end dropdown">
+        <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+        </label>
+        <div tabIndex={0} className="compact card dropdown-content rounded-box min-w-[16rem] bg-base-100 shadow">
+          <div className="card-body overflow-x-auto overflow-y-auto">
+            <h2 className="card-title">Details</h2>
+
+            <p>The Fanning friction factor is 4 times smaller than the Darcy friction factor.</p>
+            <Equation equation={`$$f =  f_d / 4$$`} />
+          </div>
+        </div>
+      </div>
+    </span>
+  )
 }
