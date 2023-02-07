@@ -221,7 +221,7 @@ const FrictionFactorPage: NextPage = () => {
       <Metadata
         title="Friction Factor"
         description="Chemical engineering calculations for process and plant engineers"
-        keywords="Fluid Dynamics, chemical, engineering, home, calculator, unit, conversion, geometry, fluid, dynamics, tank, volume, agitation, scaleup, efficiency, accuracy, process, engineers"
+        keywords="Fluid Dynamics, fanning friction factor, darcy friction factor, chemical, engineering, home, calculator, unit, conversion, geometry, fluid, dynamics, tank, volume, agitation, scaleup, efficiency, accuracy, process, engineers"
       />
       <PageContainer>
         <Breadcrumbs paths={paths} />
@@ -537,7 +537,6 @@ const calculateAnswer = (state: State) => {
   const inputSurfaceRoughness = surfaceRoughness.calculatedValue.value //m
 
   //Intermediate calculations
-  const gravitationalConstant = 9.81 //m/s2
   const inputPipeID = inputPipeOD - 2 * inputThickness //m
   const fluidVelocity = inputFlowrate / (Math.PI * (inputPipeID / 2) ** 2) //m/s
   const reynoldsNumber = (inputDensity * fluidVelocity * inputPipeID) / inputViscosity //kg/m3 * m/s * m / Pa*s = unitless

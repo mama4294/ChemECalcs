@@ -16,6 +16,7 @@ const Search = () => {
     { id: 10, title: 'Tanks', href: '/geometry/tank', location: 'geometry' },
     { id: 11, title: 'Pressure Drop', href: '/fluids/pressuredrop', location: 'fluid dynamics' },
     { id: 12, title: 'Reynolds Number', href: '/fluids/reynoldsnumber', location: 'fluid dynamics' },
+    { id: 13, title: 'Friction Factor', href: '/fluids/frictionfactor', location: 'fluid dynamics' },
   ]
 
   const router = useRouter()
