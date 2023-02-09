@@ -1,4 +1,4 @@
-import { useContext, useReducer } from 'react'
+import { useContext } from 'react'
 import { convertUnits } from '../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
@@ -7,11 +7,12 @@ import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
 import { IconBoxUnits } from '../../icons/IconBoxUnits'
 import { IconContainer } from '../../icons/IconContainer'
-import { updateCalculatedValue } from '../../logic/logic'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 import { Metadata } from '../../components/Layout/Metadata'
 import { ShortInputType } from '../../types'
 import { InputFieldWithUnit } from '../../components/inputs/inputFieldObj'
+import { SolveForDropdown } from '../../components/inputs/solveForObj'
+import { ActionKind, useGeomentryStateReducer } from '../../logic/geometry'
 
 const Box = () => {
   const paths = [
@@ -31,25 +32,6 @@ const Box = () => {
     length: ShortInputType
     volume: ShortInputType
   }
-
-  enum ActionKind {
-    CHANGE_VALUE = 'CHANGE_VALUE',
-    CHANGE_SOLVE_SELECTION = 'CHANGE_SOLVE_SELECTION',
-    REFRESH = 'REFRESH',
-  }
-
-  type Action =
-    | {
-        type: ActionKind.CHANGE_SOLVE_SELECTION
-        payload: SolveSelectionOptions
-      }
-    | {
-        type: ActionKind.CHANGE_VALUE
-        payload: ShortInputType
-      }
-    | {
-        type: ActionKind.REFRESH
-      }
 
   const initialState: State = {
     solveSelection: 'volume',
@@ -238,26 +220,7 @@ const Box = () => {
     return { ...inputArray, length: lengthObj }
   }
 
-  const stateReducer = (state: State, action: Action): State => {
-    switch (action.type) {
-      case ActionKind.CHANGE_SOLVE_SELECTION:
-        return {
-          ...state,
-          solveSelection: action.payload,
-        }
-      case ActionKind.CHANGE_VALUE:
-        const payloadWithCalculatedValue = updateCalculatedValue(action.payload)
-        return calculateAnswerState({ ...state, [action.payload.name]: payloadWithCalculatedValue })
-      case ActionKind.REFRESH:
-        return calculateAnswerState({ ...state })
-      default:
-        const neverEver: never = action
-        console.error('Error: State reducer action not recognized', neverEver)
-        return state
-    }
-  }
-
-  const [state, dispatch] = useReducer(stateReducer, initialState)
+  const [state, dispatch] = useGeomentryStateReducer<SolveSelectionOptions, State>(initialState, calculateAnswerState)
 
   return (
     <>
@@ -310,32 +273,6 @@ const Box = () => {
         </CalcBody>
       </PageContainer>
     </>
-  )
-}
-
-type SolveForDropdown = {
-  selection: string
-  options: { label: string; value: string }[]
-  onChange: any
-}
-
-const SolveForDropdown = ({ selection, options, onChange }: SolveForDropdown) => {
-  return (
-    <div className="form-control mb-2 w-full">
-      <label className="label">
-        <span className="label-text">Solve for</span>
-      </label>
-
-      <select className="select input-bordered w-full" value={selection} onChange={onChange}>
-        {options.map((option, index) => {
-          return (
-            <option key={index} value={option.value}>
-              {option.label}
-            </option>
-          )
-        })}
-      </select>
-    </div>
   )
 }
 
