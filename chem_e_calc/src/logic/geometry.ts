@@ -1,4 +1,4 @@
-import { useReducer } from 'react'
+import { Dispatch, useReducer } from 'react'
 import { ShortInputType } from '../types'
 import { updateCalculatedValue } from './logic'
 
@@ -47,3 +47,34 @@ export function useGeomentryStateReducer<SolveOptionsT, DataT>(
   }
   return useReducer(stateReducer, initialState)
 }
+
+export const handleChangeSolveSelection =
+  <SolveSelectionOptions>(dispatch: Dispatch<Action<any>>) =>
+  (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: ActionKind.CHANGE_SOLVE_SELECTION, payload: e.target.value as SolveSelectionOptions })
+  }
+
+export const handleChangeValue =
+  <StateWithoutSolveSelection extends ShortInputType>(
+    input: State<StateWithoutSolveSelection>,
+    dispatch: Dispatch<Action<any>>
+  ) =>
+  (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target
+    const numericValue = value.replace(/[^\d.-]/g, '') //removes commas
+    const unit = input.displayValue.unit
+    const payload = { ...input, displayValue: { value: numericValue, unit } }
+    dispatch({ type: ActionKind.CHANGE_VALUE, payload })
+  }
+
+export const handleChangeUnit =
+  <StateWithoutSolveSelection extends ShortInputType>(
+    input: State<StateWithoutSolveSelection>,
+    dispatch: Dispatch<Action<any>>
+  ) =>
+  (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target
+    const existingValue = input.displayValue.value
+    const payload = { ...input, displayValue: { value: existingValue, unit: value } }
+    dispatch({ type: ActionKind.CHANGE_VALUE, payload })
+  }

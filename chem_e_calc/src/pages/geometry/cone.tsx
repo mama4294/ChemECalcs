@@ -11,7 +11,12 @@ import { Metadata } from '../../components/Layout/Metadata'
 import { ShortInputType } from '../../types'
 import { InputFieldWithUnit } from '../../components/inputs/inputFieldObj'
 import { SolveForDropdown } from '../../components/inputs/solveForObj'
-import { ActionKind, useGeomentryStateReducer } from '../../logic/geometry'
+import {
+  handleChangeSolveSelection,
+  handleChangeUnit,
+  handleChangeValue,
+  useGeomentryStateReducer,
+} from '../../logic/geometry'
 import { IconConeUnits } from '../../icons/iconConeUnits'
 
 const Box = () => {
@@ -51,7 +56,7 @@ const Box = () => {
         }
       },
       selectiontext: '',
-      focusText: 'Enter diameter (d)',
+      focusText: 'Enter diameter (D)',
       error: '',
     },
     height: {
@@ -71,7 +76,7 @@ const Box = () => {
         }
       },
       selectiontext: '',
-      focusText: 'Enter height (h)',
+      focusText: 'Enter height (H)',
       error: '',
     },
     volume: {
@@ -102,31 +107,10 @@ const Box = () => {
     { label: initialState.volume.label, value: initialState.volume.name },
   ]
 
-  const handleChangeSolveSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: ActionKind.CHANGE_SOLVE_SELECTION, payload: e.target.value as SolveSelectionOptions })
-  }
-
-  const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    const numericValue = value.replace(/[^\d.-]/g, '')
-    const unit = state[name as keyof StateWithoutSolveSelection].displayValue.unit
-    const payload = { ...state[name as keyof StateWithoutSolveSelection], displayValue: { value: numericValue, unit } }
-    dispatch({ type: ActionKind.CHANGE_VALUE, payload })
-  }
-
-  const handleChangeUnit = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    const existingValue = state[name as keyof StateWithoutSolveSelection].displayValue.value
-    const payload = {
-      ...state[name as keyof StateWithoutSolveSelection],
-      displayValue: { value: existingValue, unit: value },
-    }
-    dispatch({ type: ActionKind.CHANGE_VALUE, payload })
-  }
-
   const calculateAnswerState = (inputArray: State): State => {
-    console.log('Calculating Answer')
     const solveSelection = inputArray.solveSelection
+    console.log(solveSelection)
+    console.log(inputArray)
     if (solveSelection === 'volume') return calcVolume(inputArray)
     if (solveSelection === 'height') return calcHeight(inputArray)
     if (solveSelection === 'diameter') return calcDiameter(inputArray)
@@ -166,10 +150,10 @@ const Box = () => {
   const calcDiameter = (inputArray: State): State => {
     const height = initialState.height.calculatedValue.value
     const volume = initialState.volume.calculatedValue.value
-
     const diameter = Math.sqrt((volume * 3) / (height * Math.PI))
 
     const displayValue = convertUnits({ value: diameter, fromUnit: 'm', toUnit: inputArray.diameter.displayValue.unit })
+
     const diameterObj = {
       ...inputArray.diameter,
       calculatedValue: { value: diameter, unit: 'm' },
@@ -197,7 +181,7 @@ const Box = () => {
               <SolveForDropdown
                 options={solveForOptions}
                 selection={state.solveSelection}
-                onChange={handleChangeSolveSelection}
+                onChange={handleChangeSolveSelection<SolveSelectionOptions>(dispatch)}
               />
 
               <div className="mb-8 flex flex-col">
@@ -215,8 +199,8 @@ const Box = () => {
                         error={error}
                         unitType={unitType}
                         focusText={focusText}
-                        onChangeValue={handleChangeValue}
-                        onChangeUnit={handleChangeUnit}
+                        onChangeValue={handleChangeValue(state[name as keyof StateWithoutSolveSelection], dispatch)}
+                        onChangeUnit={handleChangeUnit(state[name as keyof StateWithoutSolveSelection], dispatch)}
                       />
                     )
                   }
