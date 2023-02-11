@@ -1,145 +1,170 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import { convertUnits } from '../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
 import { CalcCard } from '../../components/calculators/calcCard'
-import { Calculator, InputType } from '../../components/calculators/calculator'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
-import { OnChangeValueProps } from '../../components/inputs/inputField'
 import { IconContainer } from '../../icons/IconContainer'
-import { IconHemisphereUnits } from '../../icons/iconHemiphereUnits'
-import { handleChangeSolveSelection, updateAnswer, updateArray, validateNotBlank } from '../../logic/logic'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 import { Metadata } from '../../components/Layout/Metadata'
+import { ShortInputType } from '../../types'
+import { InputFieldWithUnit } from '../../components/inputs/inputFieldObj'
+import { SolveForDropdown } from '../../components/inputs/solveForObj'
+import {
+  handleChangeSolveSelection,
+  handleChangeUnit,
+  handleChangeValue,
+  useGeomentryStateReducer,
+} from '../../logic/geometry'
+import { IconHemisphereUnits } from '../../icons/iconHemiphereUnits'
 
-const Hemisphere = () => {
-  const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
+const Shape = () => {
   const paths = [
     { title: 'Geometry', href: '/geometry' },
-    { title: 'Sphere', href: '/geometry/hemisphere' },
+    { title: 'hemisphere', href: '/geometry/hemisphere' },
   ]
 
-  const [values, setValues] = useState<InputType[]>([
-    {
-      id: 1,
+  const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
+
+  type SolveSelectionOptions = 'diameter' | 'volume'
+  type StateWithoutSolveSelection = Omit<State, 'solveSelection'>
+
+  type State = {
+    solveSelection: SolveSelectionOptions
+    diameter: ShortInputType
+    volume: ShortInputType
+  }
+
+  const initialState: State = {
+    solveSelection: 'volume',
+    diameter: {
       name: 'diameter',
-      unitType: 'length',
-      type: 'number',
-      placeholder: 'Enter value',
       label: 'Diameter',
-      displayValue: { value: 1, unit: defaultUnits.length },
-      calculatedValue: {
-        value: convertUnits({ value: 1, fromUnit: defaultUnits.length, toUnit: 'm' }),
-        unit: 'm',
+      placeholder: '0',
+      unitType: 'length',
+      displayValue: { value: '1', unit: defaultUnits.length },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'm',
+          }),
+          unit: 'm',
+        }
       },
-      solveable: true,
-      selectiontext: 'Solve for Diameter',
-      equation: `d = 2 \\sqrt{\\frac{V}{\\pi*h}}`,
-      selected: false,
+      selectiontext: '',
+      focusText: 'Enter diameter (D)',
       error: '',
     },
-    {
-      id: 2,
+    volume: {
       name: 'volume',
-      unitType: 'volume',
-      type: 'number',
-      placeholder: 'Enter value',
       label: 'Volume',
-      displayValue: { value: 7.41, unit: defaultUnits.volume },
-      calculatedValue: {
-        value: convertUnits({ value: 7.41, fromUnit: defaultUnits.volume, toUnit: 'm3' }),
-        unit: 'm3',
+      placeholder: '0',
+      unitType: 'volume',
+      displayValue: { value: '0', unit: defaultUnits.volume },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'm3',
+          }),
+          unit: 'm3',
+        }
       },
-      solveable: true,
-      selectiontext: 'Solve for Volume',
-      equation: `V = \\pi (\\frac{d}{2})^{2}h`,
-      selected: true,
+      selectiontext: '',
+      focusText: 'Enter volume',
       error: '',
     },
-  ])
-
-  const onChangeSolveSelection = (id: number): void => {
-    const newArr = handleChangeSolveSelection({ id: id, array: values })
-    setValues(newArr)
   }
 
-  const onChangeValue = ({ id, unit, number }: OnChangeValueProps): void => {
-    //create a new values array with changed value
-    //Update array with new input
-    const updatedArr = updateArray({ id, number, unit, array: values })
+  const solveForOptions: { label: string; value: string }[] = [
+    { label: initialState.diameter.label, value: initialState.diameter.name },
+    { label: initialState.volume.label, value: initialState.volume.name },
+  ]
 
-    //Set answer
-    const answerArr = calculateAnswer(updatedArr)
-    const validatedArr = validateNotBlank(answerArr)
-    if (validatedArr) {
-      setValues(validatedArr)
-    } else {
-      setValues(updatedArr)
-    }
-  }
-
-  const calculateAnswer = (inputArray: InputType[]) => {
-    const solveSelection = inputArray.find(o => o.selected === true)?.name
-    if (!solveSelection) return []
+  const calculateAnswerState = (inputArray: State): State => {
+    const solveSelection = inputArray.solveSelection
+    console.log(solveSelection)
+    console.log(inputArray)
     if (solveSelection === 'volume') return calcVolume(inputArray)
     if (solveSelection === 'diameter') return calcDiameter(inputArray)
-    return []
+    return state
   }
 
-  const calcVolume = (inputArray: InputType[]) => {
-    const diameterObj = inputArray.find(o => o.name === 'diameter')
-
-    if (!diameterObj) {
-      alert('inputs to calculator undefined')
-      return null
+  const calcVolume = (inputArray: State): State => {
+    const diameter = inputArray.diameter.calculatedValue.value
+    const volume = (1 / 2) * (4 / 3) * Math.PI * (diameter / 2) ** 3
+    const displayValue = convertUnits({ value: volume, fromUnit: 'm3', toUnit: inputArray.volume.displayValue.unit })
+    const volumeObj = {
+      ...inputArray.volume,
+      calculatedValue: { value: volume, unit: 'm3' },
+      displayValue: { value: displayValue.toLocaleString(), unit: inputArray.volume.displayValue.unit },
     }
 
-    const diameter = diameterObj.calculatedValue.value
-
-    let answerValue = 0
-    if (diameter !== 0) {
-      answerValue = (1 / 2) * (4 / 3) * Math.PI * (diameter / 2) ** 3
-    }
-
-    return updateAnswer(inputArray, answerValue, 'volume')
+    return { ...inputArray, volume: volumeObj }
   }
 
-  const calcDiameter = (inputArray: InputType[]) => {
-    const volumeObj = inputArray.find(o => o.name === 'volume')
-
-    if (!volumeObj) {
-      alert('inputs to calculator undefined')
-      return null
+  const calcDiameter = (inputArray: State): State => {
+    const volume = initialState.volume.calculatedValue.value
+    const diameter = 2 * (volume / ((1 / 2) * (4 / 3) * Math.PI)) ** (1 / 3)
+    const displayValue = convertUnits({ value: diameter, fromUnit: 'm', toUnit: inputArray.diameter.displayValue.unit })
+    const diameterObj = {
+      ...inputArray.diameter,
+      calculatedValue: { value: diameter, unit: 'm' },
+      displayValue: { value: displayValue.toLocaleString(), unit: inputArray.diameter.displayValue.unit },
     }
 
-    const volume = volumeObj.calculatedValue.value
-
-    let answerValue = 0
-    if (volume !== 0) {
-      answerValue = 2 * (volume / ((1 / 2) * (4 / 3) * Math.PI)) ** (1 / 3)
-    }
-
-    return updateAnswer(inputArray, answerValue, 'diameter')
+    return { ...inputArray, diameter: diameterObj }
   }
+
+  const [state, dispatch] = useGeomentryStateReducer<SolveSelectionOptions, State>(initialState, calculateAnswerState)
 
   return (
     <>
       <Metadata
         title="Hemisphere"
         description="Chemical engineering calculations for process and plant engineers"
-        keywords="box, volume, lenght, width, height, calculator, chemical engineering, process engineering, chemical engineering calculations, process engineering calculations"
+        keywords="hemisphere, volume, lenght, width, height, calculator, chemical engineering, process engineering, chemical engineering calculations, process engineering calculations"
       />
       <PageContainer>
         <Breadcrumbs paths={paths} />
         <CalcHeader title={'Hemisphere'} text={'This calculates the volume of a hemisphere'} />
         <CalcBody>
-          <Calculator
-            title="Calculator"
-            values={values}
-            onChangeSolveSelection={onChangeSolveSelection}
-            onChangeValue={onChangeValue}
-          />
+          <CalcCard title="Calculator">
+            <>
+              <SolveForDropdown
+                options={solveForOptions}
+                selection={state.solveSelection}
+                onChange={handleChangeSolveSelection<SolveSelectionOptions>(dispatch)}
+              />
+
+              <div className="mb-8 flex flex-col">
+                {(Object.keys(state) as (keyof State)[]).map(key => {
+                  if (key != 'solveSelection') {
+                    const { name, label, placeholder, displayValue, error, unitType, focusText } = state[key]
+                    return (
+                      <InputFieldWithUnit
+                        key={name}
+                        name={name}
+                        label={label}
+                        placeholder={placeholder}
+                        selected={state.solveSelection === name}
+                        displayValue={{ value: displayValue.value, unit: displayValue.unit }}
+                        error={error}
+                        unitType={unitType}
+                        focusText={focusText}
+                        onChangeValue={handleChangeValue(state[name as keyof StateWithoutSolveSelection], dispatch)}
+                        onChangeUnit={handleChangeUnit(state[name as keyof StateWithoutSolveSelection], dispatch)}
+                      />
+                    )
+                  }
+                })}
+              </div>
+            </>
+          </CalcCard>
           <CalcCard title="Hemisphere">
             <IconContainer>
               <IconHemisphereUnits />
@@ -151,4 +176,4 @@ const Hemisphere = () => {
   )
 }
 
-export default Hemisphere
+export default Shape
