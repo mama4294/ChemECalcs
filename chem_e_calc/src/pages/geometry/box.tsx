@@ -10,8 +10,8 @@ import { IconContainer } from '../../icons/IconContainer'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 import { Metadata } from '../../components/Layout/Metadata'
 import { ShortInputType } from '../../types'
-import { InputFieldWithUnit } from '../../components/inputs/inputFieldObj'
-import { SolveForDropdown } from '../../components/inputs/solveForObj'
+import { InputFieldWithUnit } from '../../components/inputs/inputField'
+import { SolveForDropdown } from '../../components/inputs/solveForDropdown'
 import {
   ActionKind,
   handleChangeSolveSelection,

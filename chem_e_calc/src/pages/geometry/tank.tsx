@@ -5,12 +5,7 @@ import { CalcBody } from '../../components/calculators/calcBody'
 import { CalcCard } from '../../components/calculators/calcCard'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
-import {
-  InputDropdown,
-  InputFieldConstant,
-  InputFieldWithUnit,
-  InputSlider,
-} from '../../components/inputs/inputFieldObj'
+import { InputDropdown, InputFieldConstant, InputFieldWithUnit, InputSlider } from '../../components/inputs/inputField'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 import { updateCalculatedValue } from '../../logic/logic'
 import { ShortInputType } from '../../types'

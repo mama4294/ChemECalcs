@@ -10,7 +10,7 @@ import { CalcHeader } from '../components/calculators/header'
 import { convertUnits, UnitOption, UnitOptions, unitOptions, UnitTypes, unitTypes } from '../utils/units'
 import { updateCalculatedValue } from '../logic/logic'
 import { ShortInputType } from '../types'
-import { InputFieldWithUnit } from '../components/inputs/inputFieldObj'
+import { InputFieldWithUnit } from '../components/inputs/inputField'
 import { Metadata } from '../components/Layout/Metadata'
 
 const UnitConversion: NextPage = () => {
