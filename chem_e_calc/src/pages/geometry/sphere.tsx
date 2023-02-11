@@ -124,8 +124,9 @@ const Shape = () => {
   const [state, dispatch] = useGeomentryStateReducer<SolveSelectionOptions, State>(initialState, calculateAnswerState)
 
   useEffect(() => {
+    //refresh calculated answer on initial page load
     dispatch({ type: ActionKind.REFRESH })
-  }, [])
+  }, [dispatch])
 
   return (
     <>
