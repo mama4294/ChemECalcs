@@ -1,201 +1,218 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import { convertUnits } from '../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
 import { CalcCard } from '../../components/calculators/calcCard'
-import { Calculator, InputType } from '../../components/calculators/calculator'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
-import { OnChangeValueProps } from '../../components/inputs/inputField'
 import { IconContainer } from '../../icons/IconContainer'
-import { IconCylinderUnits } from '../../icons/iconCylinderUnits'
-import { handleChangeSolveSelection, updateAnswer, updateArray, validateNotBlank } from '../../logic/logic'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 import { Metadata } from '../../components/Layout/Metadata'
+import { ShortInputType } from '../../types'
+import { InputFieldWithUnit } from '../../components/inputs/inputFieldObj'
+import { SolveForDropdown } from '../../components/inputs/solveForObj'
+import {
+  handleChangeSolveSelection,
+  handleChangeUnit,
+  handleChangeValue,
+  useGeomentryStateReducer,
+} from '../../logic/geometry'
+import { IconCylinderUnits } from '../../icons/iconCylinderUnits'
 
-const Geometry = () => {
-  const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
-  const [values, setValues] = useState<InputType[]>([
-    {
-      id: 1,
-      name: 'diameter',
-      unitType: 'length',
-      type: 'number',
-      placeholder: 'Enter value',
-      label: 'Diameter',
-      displayValue: { value: 1, unit: defaultUnits.length },
-      calculatedValue: {
-        value: convertUnits({ value: 1, fromUnit: defaultUnits.length, toUnit: 'm' }),
-        unit: 'm',
-      },
-      solveable: true,
-      selectiontext: 'Solve for Diameter',
-      equation: `d = 2 \\sqrt{\\frac{V}{\\pi*h}}`,
-      selected: false,
-      error: '',
-    },
-    {
-      id: 2,
-      name: 'height',
-      unitType: 'length',
-      type: 'number',
-      placeholder: 'Enter value',
-      label: 'Height',
-      displayValue: { value: 1, unit: defaultUnits.length },
-      calculatedValue: {
-        value: convertUnits({ value: 1, fromUnit: defaultUnits.length, toUnit: 'm' }),
-        unit: 'm',
-      },
-      solveable: true,
-      selectiontext: 'Solve for Height',
-      equation: `h = \\frac{V}{\\pi (\\frac{d}{2})^{2}}`,
-      selected: false,
-      error: '',
-    },
-    {
-      id: 3,
-      name: 'volume',
-      unitType: 'volume',
-      type: 'number',
-      placeholder: 'Enter value',
-      label: 'Volume',
-      displayValue: { value: 22.24, unit: defaultUnits.volume },
-      calculatedValue: {
-        value: convertUnits({ value: 22.24, fromUnit: defaultUnits.volume, toUnit: 'm3' }),
-        unit: 'm3',
-      },
-      solveable: true,
-      selectiontext: 'Solve for Volume',
-      equation: `V = \\pi (\\frac{d}{2})^{2}h`,
-      selected: true,
-      error: '',
-    },
-  ])
-
-  const onChangeSolveSelection = (id: number): void => {
-    const newArr = handleChangeSolveSelection({ id: id, array: values })
-    setValues(newArr)
-  }
-
-  const onChangeValue = ({ id, unit, number }: OnChangeValueProps): void => {
-    //create a new values array with changed value
-    //Update array with new input
-    const updatedArr = updateArray({ id, number, unit, array: values })
-
-    //Set answer
-    const answerArr = calculateAnswer(updatedArr)
-    const validatedArr = validateNotBlank(answerArr)
-    if (validatedArr) {
-      setValues(validatedArr)
-    } else {
-      setValues(updatedArr)
-    }
-  }
-
-  const calculateAnswer = (inputArray: InputType[]) => {
-    const solveSelection = inputArray.find(o => o.selected === true)?.name
-    if (!solveSelection) return []
-    if (solveSelection === 'volume') return calcVolume(inputArray)
-    if (solveSelection === 'height') return calcHeight(inputArray)
-    if (solveSelection === 'diameter') return calcDiameter(inputArray)
-    return []
-  }
-
-  const calcVolume = (inputArray: InputType[]) => {
-    const diameterObj = inputArray.find(o => o.name === 'diameter')
-    const heightObj = inputArray.find(o => o.name === 'height')
-
-    if (!diameterObj || !heightObj) {
-      alert('inputs to calculator undefined')
-      return null
-    }
-
-    const diameter = diameterObj.calculatedValue.value
-    const height = heightObj.calculatedValue.value
-
-    let answerValue = 0
-    if (diameter !== 0 && height !== 0) {
-      answerValue = Math.PI * (diameter / 2) ** 2 * height
-    }
-
-    return updateAnswer(inputArray, answerValue, 'volume')
-  }
-
-  const calcHeight = (inputArray: InputType[]) => {
-    const diameterObj = inputArray.find(o => o.name === 'diameter')
-    const volumeObj = inputArray.find(o => o.name === 'volume')
-
-    if (!diameterObj || !volumeObj) {
-      alert('inputs to calculator undefined')
-      return null
-    }
-
-    const diameter = diameterObj.calculatedValue.value
-    const volume = volumeObj.calculatedValue.value
-
-    let answerValue = 0
-    if (diameter !== 0 && volume !== 0) {
-      answerValue = volume / (Math.PI * (diameter / 2) ** 2)
-    }
-
-    return updateAnswer(inputArray, answerValue, 'height')
-  }
-
-  const calcDiameter = (inputArray: InputType[]) => {
-    const heightObj = inputArray.find(o => o.name === 'height')
-    const volumeObj = inputArray.find(o => o.name === 'volume')
-
-    if (!heightObj || !volumeObj) {
-      alert('inputs to calculator undefined')
-      return null
-    }
-
-    const volume = volumeObj.calculatedValue.value
-    const height = heightObj.calculatedValue.value
-
-    let answerValue = 0
-    if (volume !== 0 && height !== 0) {
-      answerValue = 2 * Math.sqrt(volume / (Math.PI * height))
-    }
-
-    return updateAnswer(inputArray, answerValue, 'diameter')
-  }
-
+const Shape = () => {
   const paths = [
     { title: 'Geometry', href: '/geometry' },
     { title: 'Cylinder', href: '/geometry/cylinder' },
   ]
+
+  const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
+
+  type SolveSelectionOptions = 'diameter' | 'height' | 'volume'
+  type StateWithoutSolveSelection = Omit<State, 'solveSelection'>
+
+  type State = {
+    solveSelection: SolveSelectionOptions
+    diameter: ShortInputType
+    height: ShortInputType
+    volume: ShortInputType
+  }
+
+  const initialState: State = {
+    solveSelection: 'volume',
+    diameter: {
+      name: 'diameter',
+      label: 'Diameter',
+      placeholder: '0',
+      unitType: 'length',
+      displayValue: { value: '1', unit: defaultUnits.length },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'm',
+          }),
+          unit: 'm',
+        }
+      },
+      selectiontext: '',
+      focusText: 'Enter diameter (D)',
+      error: '',
+    },
+    height: {
+      name: 'height',
+      label: 'Height',
+      placeholder: '0',
+      unitType: 'length',
+      displayValue: { value: '1', unit: defaultUnits.length },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'm',
+          }),
+          unit: 'm',
+        }
+      },
+      selectiontext: '',
+      focusText: 'Enter height (H)',
+      error: '',
+    },
+    volume: {
+      name: 'volume',
+      label: 'Volume',
+      placeholder: '0',
+      unitType: 'volume',
+      displayValue: { value: '0', unit: defaultUnits.volume },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'm3',
+          }),
+          unit: 'm3',
+        }
+      },
+      selectiontext: '',
+      focusText: 'Enter volume',
+      error: '',
+    },
+  }
+
+  const solveForOptions: { label: string; value: string }[] = [
+    { label: initialState.diameter.label, value: initialState.diameter.name },
+    { label: initialState.height.label, value: initialState.height.name },
+    { label: initialState.volume.label, value: initialState.volume.name },
+  ]
+
+  const calculateAnswerState = (inputArray: State): State => {
+    const solveSelection = inputArray.solveSelection
+    console.log(solveSelection)
+    console.log(inputArray)
+    if (solveSelection === 'volume') return calcVolume(inputArray)
+    if (solveSelection === 'height') return calcHeight(inputArray)
+    if (solveSelection === 'diameter') return calcDiameter(inputArray)
+    return state
+  }
+
+  const calcVolume = (inputArray: State): State => {
+    const diameter = inputArray.diameter.calculatedValue.value
+    const height = inputArray.height.calculatedValue.value
+    const volume = Math.PI * (diameter / 2) ** 2 * height
+    const displayValue = convertUnits({ value: volume, fromUnit: 'm3', toUnit: inputArray.volume.displayValue.unit })
+    const volumeObj = {
+      ...inputArray.volume,
+      calculatedValue: { value: volume, unit: 'm3' },
+      displayValue: { value: displayValue.toLocaleString(), unit: inputArray.volume.displayValue.unit },
+    }
+
+    return { ...inputArray, volume: volumeObj }
+  }
+
+  const calcHeight = (inputArray: State): State => {
+    const diameter = inputArray.diameter.calculatedValue.value
+    const volume = inputArray.volume.calculatedValue.value
+    const height = volume / (Math.PI * (diameter / 2) ** 2)
+    const displayValue = convertUnits({ value: height, fromUnit: 'm', toUnit: inputArray.height.displayValue.unit })
+    const heightObj = {
+      ...inputArray.height,
+      calculatedValue: { value: height, unit: 'm' },
+      displayValue: { value: displayValue.toLocaleString(), unit: inputArray.height.displayValue.unit },
+    }
+
+    return { ...inputArray, height: heightObj }
+  }
+
+  const calcDiameter = (inputArray: State): State => {
+    const height = initialState.height.calculatedValue.value
+    const volume = initialState.volume.calculatedValue.value
+    const diameter = 2 * Math.sqrt(volume / (Math.PI * height))
+    const displayValue = convertUnits({ value: diameter, fromUnit: 'm', toUnit: inputArray.diameter.displayValue.unit })
+    const diameterObj = {
+      ...inputArray.diameter,
+      calculatedValue: { value: diameter, unit: 'm' },
+      displayValue: { value: displayValue.toLocaleString(), unit: inputArray.diameter.displayValue.unit },
+    }
+
+    return { ...inputArray, diameter: diameterObj }
+  }
+
+  const [state, dispatch] = useGeomentryStateReducer<SolveSelectionOptions, State>(initialState, calculateAnswerState)
 
   return (
     <>
       <Metadata
         title="Cylinder"
         description="Chemical engineering calculations for process and plant engineers"
-        keywords="box, volume, lenght, width, height, calculator, chemical engineering, process engineering, chemical engineering calculations, process engineering calculations"
+        keywords="Cylinder, volume, lenght, width, height, calculator, chemical engineering, process engineering, chemical engineering calculations, process engineering calculations"
       />
       <PageContainer>
-        <>
-          <Breadcrumbs paths={paths} />
-          <CalcHeader title={'Cylinder'} text={'This calculates the volume of a cylinder'} />
+        <Breadcrumbs paths={paths} />
+        <CalcHeader title={'Cylinder'} text={'This calculates the volume of a cylinder'} />
+        <CalcBody>
+          <CalcCard title="Calculator">
+            <>
+              <SolveForDropdown
+                options={solveForOptions}
+                selection={state.solveSelection}
+                onChange={handleChangeSolveSelection<SolveSelectionOptions>(dispatch)}
+              />
 
-          {/* Calculator */}
-          <CalcBody>
-            <Calculator
-              title="Calculator"
-              values={values}
-              onChangeSolveSelection={onChangeSolveSelection}
-              onChangeValue={onChangeValue}
-            />
-            <CalcCard title="Cylinder">
-              <IconContainer>
-                <IconCylinderUnits />
-              </IconContainer>
-            </CalcCard>
-          </CalcBody>
-        </>
+              <div className="mb-8 flex flex-col">
+                {(Object.keys(state) as (keyof State)[]).map(key => {
+                  if (key != 'solveSelection') {
+                    const { name, label, placeholder, displayValue, error, unitType, focusText } = state[key]
+                    return (
+                      <InputFieldWithUnit
+                        key={name}
+                        name={name}
+                        label={label}
+                        placeholder={placeholder}
+                        selected={state.solveSelection === name}
+                        displayValue={{ value: displayValue.value, unit: displayValue.unit }}
+                        error={error}
+                        unitType={unitType}
+                        focusText={focusText}
+                        onChangeValue={handleChangeValue(state[name as keyof StateWithoutSolveSelection], dispatch)}
+                        onChangeUnit={handleChangeUnit(state[name as keyof StateWithoutSolveSelection], dispatch)}
+                      />
+                    )
+                  }
+                })}
+              </div>
+            </>
+          </CalcCard>
+          <CalcCard title="Cylinder">
+            <IconContainer>
+              <IconCylinderUnits />
+            </IconContainer>
+          </CalcCard>
+        </CalcBody>
       </PageContainer>
     </>
   )
 }
 
-export default Geometry
+export default Shape
