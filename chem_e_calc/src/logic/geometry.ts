@@ -1,4 +1,4 @@
-import { Dispatch, useReducer } from 'react'
+import { Dispatch, useEffect, useReducer } from 'react'
 import { ShortInputType } from '../types'
 import { updateCalculatedValue } from './logic'
 

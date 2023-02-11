@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { convertUnits } from '../../utils/units'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
@@ -12,6 +12,7 @@ import { ShortInputType } from '../../types'
 import { InputFieldWithUnit } from '../../components/inputs/inputFieldObj'
 import { SolveForDropdown } from '../../components/inputs/solveForObj'
 import {
+  ActionKind,
   handleChangeSolveSelection,
   handleChangeUnit,
   handleChangeValue,
@@ -164,6 +165,11 @@ const Box = () => {
   }
 
   const [state, dispatch] = useGeomentryStateReducer<SolveSelectionOptions, State>(initialState, calculateAnswerState)
+
+  useEffect(() => {
+    //refresh calculated answer on initial page load
+    dispatch({ type: ActionKind.REFRESH })
+  }, [])
 
   return (
     <>
