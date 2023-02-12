@@ -29,7 +29,7 @@ export const GridCard = ({ name, children, description, link, span }: GridCardPr
   return (
     <Link href={link}>
       <section
-        className={`gridCard shadow-nuetral card cursor-pointer bg-base-100 text-base-content shadow-2xl duration-500 motion-safe:hover:scale-105 ${spanClass}`}
+        className={`gridCard shadow-nuetral card flex cursor-pointer flex-row items-center bg-base-100 text-base-content shadow-2xl duration-500 motion-safe:hover:scale-105 ${spanClass}`}
       >
         <div className="card-body">
           <h2 className="card-title justify-center ">{name}</h2>
