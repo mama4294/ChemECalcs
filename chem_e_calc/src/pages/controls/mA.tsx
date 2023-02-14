@@ -17,6 +17,8 @@ type State = {
   url: string
   lrl: string
   unit: string
+  urlError: string
+  lrlError: string
 }
 
 const Page: NextPage = () => {
@@ -32,6 +34,8 @@ const Page: NextPage = () => {
     url: '150',
     lrl: '0',
     unit: '°C',
+    urlError: '',
+    lrlError: '',
   }
 
   type Action = {
@@ -90,18 +94,22 @@ const Page: NextPage = () => {
       case ActionKind.CHANGE_LRL:
         percent = linearInterpolation(Number(state.transmitter), input, url, 0, 100)
         milliAmps = percentToMA(percent)
+        const lrlError = input > Number(state.url) ? 'Must be smaller than URL' : ''
         return {
           ...state,
           lrl: action.payload,
+          lrlError,
           percent: percent.toLocaleString(),
           milliAmps: milliAmps.toLocaleString(),
         }
       case ActionKind.CHANGE_URL:
         percent = linearInterpolation(Number(state.transmitter), lrl, input, 0, 100)
         milliAmps = percentToMA(percent)
+        const urlError = input < Number(state.lrl) ? 'Must be larger than LRL' : ''
         return {
           ...state,
           url: action.payload,
+          urlError,
           percent: percent.toLocaleString(),
           milliAmps: milliAmps.toLocaleString(),
         }
@@ -113,10 +121,6 @@ const Page: NextPage = () => {
         return state
     }
   }
-
-  useEffect(() => {
-    console.table({ state })
-  }, [])
 
   const mAToPercent = (mA: number): number => {
     return ((mA - 4) / 16) * 100
@@ -202,7 +206,7 @@ const Page: NextPage = () => {
                   selected={false}
                   displayValue={{ value: state.lrl, unit: '' }}
                   focusText="Transmitter Lower Range Limit"
-                  error=""
+                  error={state.lrlError}
                   onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
                     dispatch({ type: ActionKind.CHANGE_LRL, payload: e.target.value })
                   }
@@ -214,7 +218,7 @@ const Page: NextPage = () => {
                   selected={false}
                   displayValue={{ value: state.url, unit: '' }}
                   focusText="Transmitter Upper Range Limit"
-                  error=""
+                  error={state.urlError}
                   onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
                     dispatch({ type: ActionKind.CHANGE_URL, payload: e.target.value })
                   }
