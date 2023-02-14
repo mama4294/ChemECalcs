@@ -108,8 +108,8 @@ const Page: NextPage = () => {
       case ActionKind.CHANGE_UNIT:
         return { ...state, unit: action.payload }
       default:
-        const neverEver: never = action
-        console.error('Error: State reducer action not recognized', neverEver)
+        // const neverEver: never = action
+        // console.error('Error: State reducer action not recognized', neverEver)
         return state
     }
   }
@@ -246,27 +246,31 @@ export default Page
 
 const EquationCard = () => {
   return (
-    <CalcCard title="Governing Equation">
+    <CalcCard title="Details">
       <>
-        <p className="mb-2 font-semibold">The Reynolds number equation is:</p>
+        <p className="mb-2 ">
+          4-20mA analog signals are a widely used method of transmitting information in industrial settings. They work
+          by sending a current of between 4 and 20 milliamps through a circuit, with the magnitude of the current
+          indicating the value being transmitted. This method of signal transmission is known for its simplicity,
+          reliability, and resistance to interference. Because 4mA is the minimum value that can be transmitted, it's
+          easy to tell if the signal has failed, making troubleshooting straightforward. Additionally, this type of
+          signal can be transmitted over long distances with minimal loss of accuracy.
+        </p>
+        <p className="mb-2 ">Use linear interpolation to convert 4-20mA signals to process values</p>
+        <p className="mb-2 font-semibold">Linear interpolation </p>
         <div className="mb-4">
-          <Equation equation={`$$Re = \\frac{d_{i}* v* \\rho}{\\mu} $$`} />
+          <Equation equation={`$$y = y_{1} + \\frac{x - x_1}{x_2 - x_1} * \\left( y_2 - y_1 \\right) $$`} />
         </div>
-        <p className="mb-2 font-semibold">Where: </p>
-        <div className="mb-2">
-          <VariableDefinition equation={`$$Re = $$`} definition="Reynolds Number" />
-          <VariableDefinition equation={`$$v = $$`} definition="Fluid velocity" />
-          <VariableDefinition equation={`$$\\rho = $$`} definition="Fluid density" />
-          <VariableDefinition equation={`$$d_{i} = $$`} definition="Inner pipe diameter" />
-          <VariableDefinition equation={`$$\\mu = $$`} definition="Fluid dynamic viscosity" />
+        <div className="mb-4">
+          <Equation equation={`$$y = lrl + \\frac{x - 4mA}{20mA - 4mA} * \\left(url - lrl \\right) $$`} />
         </div>
 
-        <p className="mb-2 font-semibold">The flow regime is:</p>
-        <ul className="list-inside list-disc space-y-1">
-          <li>{'Laminar: Re <= 2,000'}</li>
-          <li>{'Transition: 2,000 > Re < 4,000'}</li>
-          <li>{'Turbulent: Re >= 4,000'}</li>
-        </ul>
+        <div className="mb-2">
+          <VariableDefinition equation={`$$x = $$`} definition="4-20mA signal" />
+          <VariableDefinition equation={`$$y = $$`} definition="Transmitter process value" />
+          <VariableDefinition equation={`$$url = $$`} definition="Transmitter upper range limit" />
+          <VariableDefinition equation={`$$lrl = $$`} definition="Transmitter lower range limit" />
+        </div>
       </>
     </CalcCard>
   )
