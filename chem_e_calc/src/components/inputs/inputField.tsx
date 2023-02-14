@@ -96,7 +96,7 @@ type InputFieldUnitlessProps = {
     unit: string
   }
   error: string
-  unitType: string
+  unitType?: string
   focusText: string
   onChangeValue: any
   topRight?: React.ReactNode
