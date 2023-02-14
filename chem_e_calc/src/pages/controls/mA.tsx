@@ -60,13 +60,13 @@ const Page: NextPage = () => {
 
   const stateReducer = (state: State, action: Action) => {
     const input = Number(action.payload)
-    const lrl = Number(state.lrl)
-    const url = Number(state.url)
+    const numLrl = Number(state.lrl)
+    const numUrl = Number(state.url)
 
     switch (action.type) {
       case ActionKind.CHANGE_MA:
         let percent = mAToPercent(input)
-        let transmitter = linearInterpolation(percent, 0, 100, lrl, url)
+        let transmitter = linearInterpolation(percent, 0, 100, numLrl, numUrl)
         return {
           ...state,
           milliAmps: action.payload,
@@ -75,7 +75,7 @@ const Page: NextPage = () => {
         }
       case ActionKind.CHANGE_PERCENT:
         let milliAmps = percentToMA(input)
-        transmitter = linearInterpolation(input, 0, 100, lrl, url)
+        transmitter = linearInterpolation(input, 0, 100, numLrl, numUrl)
         return {
           ...state,
           percent: action.payload,
@@ -83,7 +83,7 @@ const Page: NextPage = () => {
           transmitter: transmitter.toLocaleString(),
         }
       case ActionKind.CHANGE_TRANSMITTER:
-        percent = linearInterpolation(input, lrl, url, 0, 100)
+        percent = linearInterpolation(input, numLrl, numUrl, 0, 100)
         milliAmps = percentToMA(percent)
         return {
           ...state,
@@ -92,9 +92,15 @@ const Page: NextPage = () => {
           milliAmps: milliAmps.toLocaleString(),
         }
       case ActionKind.CHANGE_LRL:
-        percent = linearInterpolation(Number(state.transmitter), input, url, 0, 100)
+        percent = linearInterpolation(Number(state.transmitter), input, numUrl, 0, 100)
         milliAmps = percentToMA(percent)
-        const lrlError = input > Number(state.url) ? 'Must be smaller than URL' : ''
+        let lrlError = ''
+        if (input > Number(state.url)) {
+          lrlError = 'Must be smaller than URL'
+        } else if (isNaN(input)) {
+          lrlError = 'Must be a number'
+        }
+        input > Number(state.url) ? 'Must be smaller than URL' : ''
         return {
           ...state,
           lrl: action.payload,
@@ -103,9 +109,14 @@ const Page: NextPage = () => {
           milliAmps: milliAmps.toLocaleString(),
         }
       case ActionKind.CHANGE_URL:
-        percent = linearInterpolation(Number(state.transmitter), lrl, input, 0, 100)
+        percent = linearInterpolation(Number(state.transmitter), numLrl, input, 0, 100)
         milliAmps = percentToMA(percent)
-        const urlError = input < Number(state.lrl) ? 'Must be larger than LRL' : ''
+        let urlError = ''
+        if (input < Number(state.lrl)) {
+          urlError = 'Must be larger than LRL'
+        } else if (isNaN(input)) {
+          urlError = 'Must be a number'
+        }
         return {
           ...state,
           url: action.payload,
@@ -210,7 +221,7 @@ const Page: NextPage = () => {
                   placeholder="0"
                   selected={false}
                   displayValue={{ value: state.lrl, unit: '' }}
-                  focusText="Transmitter Lower Range Limit"
+                  focusText=""
                   error={state.lrlError}
                   onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
                     dispatch({ type: ActionKind.CHANGE_LRL, payload: e.target.value })
@@ -222,7 +233,7 @@ const Page: NextPage = () => {
                   placeholder="0"
                   selected={false}
                   displayValue={{ value: state.url, unit: '' }}
-                  focusText="Transmitter Upper Range Limit"
+                  focusText=""
                   error={state.urlError}
                   onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
                     dispatch({ type: ActionKind.CHANGE_URL, payload: e.target.value })
@@ -235,7 +246,7 @@ const Page: NextPage = () => {
                   placeholder="0"
                   selected={false}
                   displayValue={{ value: state.unit, unit: '' }}
-                  focusText="Transmitter Unit"
+                  focusText=""
                   error=""
                   onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
                     dispatch({ type: ActionKind.CHANGE_UNIT, payload: e.target.value })
