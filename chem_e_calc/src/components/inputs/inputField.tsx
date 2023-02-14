@@ -128,7 +128,7 @@ export const InputFieldConstant = ({
           id={label}
           disabled={selected}
           onChange={onChangeValue}
-          className="disabled:border-1 input input-bordered block w-full pr-16 disabled:cursor-text "
+          className="disabled:border-1 input input-bordered block h-full w-full pr-16 disabled:cursor-text "
           placeholder={selected ? 'N/A' : placeholder}
         />
         <div className="h-{46} absolute inset-y-0 right-0 mr-4 flex items-center">{unit}</div>
