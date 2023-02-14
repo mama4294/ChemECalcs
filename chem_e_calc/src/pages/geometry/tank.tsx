@@ -396,6 +396,7 @@ const Tank: NextPage = () => {
                   onChange={handleChangeLiquidHeight}
                   max={100}
                   min={0}
+                  unit="%"
                 />
               </div>
             </>

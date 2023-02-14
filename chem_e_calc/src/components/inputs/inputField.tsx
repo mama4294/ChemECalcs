@@ -221,14 +221,27 @@ type InputSliderProps = {
   name: string
   label: string
   error: string
-  value: number
+  value: number | string
   onChange: any
-  max: number
-  min: number
+  max: number | string
+  min: number | string
+  unit: string
+  step?: number | string
   topRight?: React.ReactNode
 }
 
-export const InputSlider = ({ name, label, error, value, onChange, max, min, topRight }: InputSliderProps) => {
+export const InputSlider = ({
+  name,
+  label,
+  error,
+  value,
+  onChange,
+  max,
+  min,
+  topRight,
+  unit,
+  step,
+}: InputSliderProps) => {
   return (
     <div className="mb-2">
       <label htmlFor={label} className="label ">
@@ -240,18 +253,27 @@ export const InputSlider = ({ name, label, error, value, onChange, max, min, top
           error ? 'input-error text-error' : ' text-base-content'
         }`}
       >
-        <input type="range" className="range" min={min} max={max} value={value} onChange={onChange} name={name} />
+        <input
+          type="range"
+          className="range"
+          min={min}
+          max={max}
+          value={value}
+          onChange={onChange}
+          name={name}
+          step={step || 1}
+        />
         <label className="relative w-auto">
           <input
             type="text"
-            className="input input-bordered w-[8ch] pr-8 text-right"
+            className="input input-bordered w-[8ch] pr-8"
             min={min}
             max={max}
             value={value}
             onChange={onChange}
             name={name}
           />
-          <span className={'absolute top-0 right-3 translate-y-2/4'}>%</span>
+          <span className={'absolute top-0 right-3 translate-y-2/4'}>{unit}</span>
         </label>
       </div>
 
@@ -263,20 +285,3 @@ export const InputSlider = ({ name, label, error, value, onChange, max, min, top
     </div>
   )
 }
-
-// const InfoIcon = () => (
-//   <svg
-//     xmlns="http://www.w3.org/2000/svg"
-//     fill="none"
-//     viewBox="0 0 24 24"
-//     strokeWidth="1.5"
-//     stroke="currentColor"
-//     className="h-6 w-6"
-//   >
-//     <path
-//       strokeLinecap="round"
-//       strokeLinejoin="round"
-//       d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
-//     />
-//   </svg>
-// )
