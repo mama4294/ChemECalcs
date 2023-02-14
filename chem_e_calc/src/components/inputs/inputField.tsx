@@ -261,10 +261,10 @@ export const InputSlider = ({
           name={name}
           step={step || 1}
         />
-        <label className="relative w-auto">
+        <label className="relative">
           <input
             type="text"
-            className="input input-bordered w-[8ch] pr-8"
+            className="input input-bordered w-[10ch] text-clip pr-[4ch]"
             min={min}
             max={max}
             value={value}
