@@ -24,7 +24,7 @@ type State = {
 const Page: NextPage = () => {
   const paths = [
     { title: 'Controls', href: '/controls/' },
-    { title: 'Milliamps', href: '/controls/mA' },
+    { title: 'Analog Signals', href: '/controls/mA' },
   ]
 
   const initialState: State = {
@@ -270,7 +270,7 @@ const EquationCard = () => {
       <>
         <p className="mb-2 ">
           4-20mA analog signals are known for their simplicity, reliability, and resistance to interference. Because 4mA
-          is the minimum value that can be transmitted, it's easy to tell if the signal has failed, making
+          is the minimum value that can be transmitted, it&apos;s easy to tell if the signal has failed, making
           troubleshooting straightforward. Additionally, this type of signal can be transmitted over long distances with
           minimal loss of accuracy.
         </p>
