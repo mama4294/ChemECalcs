@@ -160,7 +160,12 @@ const Page: NextPage = () => {
 
       <PageContainer>
         <Breadcrumbs paths={paths} />
-        <CalcHeader title={'Analog Signal Calculator'} text={'Calculatation for 4-20mA signals'} />
+        <CalcHeader
+          title={'Analog Signal Calculator'}
+          text={
+            '4-20mA analog signals are a widely used method of transmitting information in industrial settings. They work by sending a current of between 4 and 20 milliamps through a circuit, with the magnitude of the current indicating the value being transmitted.'
+          }
+        />
         <CalcBody>
           <CalcCard title={'Calculator'}>
             <div className="mb-8 flex flex-col">
@@ -253,12 +258,10 @@ const EquationCard = () => {
     <CalcCard title="Details">
       <>
         <p className="mb-2 ">
-          4-20mA analog signals are a widely used method of transmitting information in industrial settings. They work
-          by sending a current of between 4 and 20 milliamps through a circuit, with the magnitude of the current
-          indicating the value being transmitted. This method of signal transmission is known for its simplicity,
-          reliability, and resistance to interference. Because 4mA is the minimum value that can be transmitted, it's
-          easy to tell if the signal has failed, making troubleshooting straightforward. Additionally, this type of
-          signal can be transmitted over long distances with minimal loss of accuracy.
+          4-20mA analog signals are known for their simplicity, reliability, and resistance to interference. Because 4mA
+          is the minimum value that can be transmitted, it's easy to tell if the signal has failed, making
+          troubleshooting straightforward. Additionally, this type of signal can be transmitted over long distances with
+          minimal loss of accuracy.
         </p>
         <p className="mb-2 ">Use linear interpolation to convert 4-20mA signals to process values</p>
         <p className="mb-2 font-semibold">Linear interpolation </p>

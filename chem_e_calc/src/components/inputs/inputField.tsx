@@ -120,9 +120,7 @@ export const InputFieldConstant = ({
         {label}
         {topRight}
       </label>
-      <div
-        className={`peer input relative h-full w-full px-0 ${error ? 'input-error text-error' : ' text-base-content'}`}
-      >
+      <div className={`peer input relative w-full px-0 ${error ? 'input-error text-error' : ' text-base-content'}`}>
         <input
           type="text"
           name={name}
