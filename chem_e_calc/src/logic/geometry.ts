@@ -49,7 +49,7 @@ export function useGeomentryStateReducer<SolveOptionsT, DataT>(
 }
 
 export const handleChangeSolveSelection =
-  <SolveSelectionOptions>(dispatch: Dispatch<Action<any>>) =>
+  <SolveSelectionOptions>(dispatch: Dispatch<Action<SolveSelectionOptions>>) =>
   (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: ActionKind.CHANGE_SOLVE_SELECTION, payload: e.target.value as SolveSelectionOptions })
   }
