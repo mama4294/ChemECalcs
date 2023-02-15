@@ -1,4 +1,4 @@
-import { convertUnits, dynamicRound } from '../utils/units'
+import { convertUnits } from '../utils/units'
 import { ShortInputType } from '../types'
 
 export const updateCalculatedValue = (object: ShortInputType): ShortInputType => {

@@ -1,5 +1,5 @@
 import { NextPage } from 'next'
-import React, { useEffect, useReducer } from 'react'
+import React, { useReducer } from 'react'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
 import { CalcCard } from '../../components/calculators/calcCard'
