@@ -103,6 +103,7 @@ export const units = {
   voltage: ['V', 'mV', 'kV'],
   current: ['A', 'mA', 'kA'],
   power: ['W', 'mW', 'kW', 'MW', 'GW'],
+  flowCoefficient: ['Cv', 'Kv'],
 }
 
 export type UnitOption = {

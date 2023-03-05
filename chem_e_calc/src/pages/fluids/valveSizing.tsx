@@ -6,14 +6,12 @@ import { CalcCard } from '../../components/calculators/calcCard'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
 import { Equation, VariableDefinition } from '../../components/Equation'
-import { InputFieldWithUnit } from '../../components/inputs/inputField'
+import { InputFieldConstant, InputFieldWithUnit } from '../../components/inputs/inputField'
 import { Metadata } from '../../components/Layout/Metadata'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 import { updateCalculatedValue } from '../../logic/logic'
 import { ShortInputType } from '../../types'
 import { convertUnits } from '../../utils/units'
-
-//TODO add equations
 
 type SolveSelectionOptions = 'volumeFlowRate' | 'flowCoefficient' | 'pressureDrop'
 
@@ -136,12 +134,12 @@ const updatedisplayValue = (object: ShortInputType): ShortInputType => {
 const UnitConversion: NextPage = () => {
   const paths = [
     { title: 'Fluid Dynamics', href: '/fluids/' },
-    { title: 'Fluid Flow', href: '/fluids/fluidflow' },
+    { title: 'Valve Sizing', href: '/fluids/valveSizing' },
   ]
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
 
   const initialState: State = {
-    solveSelection: 'volumeFlowRate',
+    solveSelection: 'flowCoefficient',
     pressureDrop: {
       name: 'pressureDrop',
       label: 'Pressure Drop',
@@ -186,16 +184,16 @@ const UnitConversion: NextPage = () => {
       name: 'flowCoefficient',
       label: 'Flow Coefficient',
       placeholder: '0',
-      unitType: 'length',
-      displayValue: { value: '12', unit: defaultUnits.length },
+      unitType: 'flowCoefficient',
+      displayValue: { value: '12', unit: 'Cv' },
       get calculatedValue() {
         return {
           value: convertUnits({
             value: Number(this.displayValue.value),
             fromUnit: this.displayValue.unit,
-            toUnit: 'm',
+            toUnit: 'Cv',
           }),
-          unit: 'm',
+          unit: 'Cv',
         }
       },
       selectiontext: '',
@@ -310,7 +308,10 @@ const UnitConversion: NextPage = () => {
       />
       <PageContainer>
         <Breadcrumbs paths={paths} />
-        <CalcHeader title={'Valve Sizing'} text={'Calculate the CV or KV for a valve in a liquid application'} />
+        <CalcHeader
+          title={'Valve Sizing'}
+          text={'Calculate the flow coefficient (Cv or Kv) for a valve in a liquid application'}
+        />
         <CalcBody>
           <CalcCard title={'Calculator'}>
             <>
@@ -323,21 +324,39 @@ const UnitConversion: NextPage = () => {
                 {(Object.keys(state) as (keyof State)[]).map(key => {
                   if (key != 'solveSelection') {
                     const { name, label, placeholder, displayValue, error, unitType, focusText } = state[key]
-                    return (
-                      <InputFieldWithUnit
-                        key={name}
-                        name={name}
-                        label={label}
-                        placeholder={placeholder}
-                        selected={state.solveSelection === name}
-                        displayValue={{ value: displayValue.value, unit: displayValue.unit }}
-                        error={error}
-                        unitType={unitType}
-                        focusText={focusText}
-                        onChangeValue={handleChangeValue}
-                        onChangeUnit={handleChangeUnit}
-                      />
-                    )
+
+                    if (key === 'specificGravity') {
+                      return (
+                        <InputFieldConstant
+                          key={name}
+                          name={name}
+                          label={label}
+                          placeholder={placeholder}
+                          selected={state.solveSelection === name}
+                          displayValue={{ value: displayValue.value, unit: 'unitless' }}
+                          error={error}
+                          unitType={unitType}
+                          focusText={focusText}
+                          onChangeValue={handleChangeValue}
+                        />
+                      )
+                    } else {
+                      return (
+                        <InputFieldWithUnit
+                          key={name}
+                          name={name}
+                          label={label}
+                          placeholder={placeholder}
+                          selected={state.solveSelection === name}
+                          displayValue={{ value: displayValue.value, unit: displayValue.unit }}
+                          error={error}
+                          unitType={unitType}
+                          focusText={focusText}
+                          onChangeValue={handleChangeValue}
+                          onChangeUnit={handleChangeUnit}
+                        />
+                      )
+                    }
                   }
                 })}
               </div>
@@ -388,22 +407,17 @@ const EquationCard = () => {
     <CalcCard title="Governing Equation">
       <>
         <p>
-          This calculator finds the velocity of fluid in a pipe. This is useful for more advanced calculations like
-          determining the Reynolds number and pressure drop through a system. The governing equation is a function of
-          flow rate and pipe geometery
+          This calculator helps select a valve for a flow application. If sized too small, the desired flow rate will
+          not be acchieved. If sized too large, the flow control will be difficult.
         </p>
-        <Equation equation={`$$v = Q/A_{i}$$`} />
-        <p>The following equations are used to find the pipe geometery:</p>
-        <Equation equation={`$$d_{i} = d_{0} - 2x_{w}$$`} />
-        <Equation equation={`$$r_{i} = d_{i}/2$$`} />
-        <Equation equation={`$$A_{i} = \\pi{r_{i}^{2}}$$`} />
-        <p className="text-lg font-medium">Definitions</p>
-        <VariableDefinition equation={`$$v = $$`} definition="Fluid velocity" />
+        <p>The valve flow coefficient (Cv) is a convenient way to represent flow capacity of a valve</p>
+        <Equation equation={`$$Q = C_v * \\sqrt{\\frac{\\Delta P}{g}}$$`} />
+        <p>This equation is only applicable for liquids</p>
+        <p className="mt-4 mb-2 text-lg font-medium">Definitions</p>
         <VariableDefinition equation={`$$Q = $$`} definition="Fluid volumentric flow rate" />
-        <VariableDefinition equation={`$$A_{i} = $$`} definition="Inner pipe area" />
-        <VariableDefinition equation={`$$d_{i} = $$`} definition="Inner pipe diameter" />
-        <VariableDefinition equation={`$$d_{o} = $$`} definition="Inner pipe diameter" />
-        <VariableDefinition equation={`$$r_{i} = $$`} definition="Inner pipe radius" />
+        <VariableDefinition equation={`$$C_{v} = $$`} definition="Flow coefficient" />
+        <VariableDefinition equation={`$$\\Delta P = $$`} definition="Pressure drop across the valve" />
+        <VariableDefinition equation={`$$g = $$`} definition="Gravitational constant" />
       </>
     </CalcCard>
   )
