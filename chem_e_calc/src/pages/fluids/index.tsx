@@ -40,6 +40,11 @@ const Fluids = () => {
             description="Iteratively calculate the friction factor"
             link="/fluids/frictionfactor"
           />
+          <GridCard
+            name="Valve Sizing"
+            description="Size a valve using the flow coefficient"
+            link="/fluids/valveSizing"
+          />
         </CalcBody>
       </PageContainer>
     </>

@@ -141,6 +141,11 @@ const DesktopMenu = () => {
                 <a className="hover:bg-neutral-focus">Friction Factor</a>
               </Link>
             </li>
+            <li>
+              <Link href={'/fluids/valveSizing'}>
+                <a className="hover:bg-neutral-focus">Valve Sizing</a>
+              </Link>
+            </li>
           </ul>
         </li>
       </ul>
@@ -303,6 +308,11 @@ const MobileMenu = () => {
               <li>
                 <Link href={'/fluids/frictionfactor'}>
                   <a className="hover:bg-neutral-focus">Friction Factor</a>
+                </Link>
+              </li>
+              <li>
+                <Link href={'/fluids/valveSizing'}>
+                  <a className="hover:bg-neutral-focus">Valve Sizing</a>
                 </Link>
               </li>
             </ul>
