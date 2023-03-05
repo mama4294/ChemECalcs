@@ -13,6 +13,8 @@ import { updateCalculatedValue } from '../../logic/logic'
 import { ShortInputType } from '../../types'
 import { convertUnits } from '../../utils/units'
 
+//TODO fix calculation
+
 type SolveSelectionOptions = 'volumeFlowRate' | 'flowCoefficient' | 'pressureDrop'
 
 type State = {
@@ -180,6 +182,26 @@ const UnitConversion: NextPage = () => {
       focusText: 'Enter fluid specific gravity',
       error: '',
     },
+    volumeFlowRate: {
+      name: 'volumeFlowRate',
+      label: 'Flowrate',
+      placeholder: '0',
+      unitType: 'volumeFlowRate',
+      displayValue: { value: '100', unit: defaultUnits.volumeFlowRate },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'm3/s',
+          }),
+          unit: 'm3/s',
+        }
+      },
+      selectiontext: '',
+      focusText: 'Enter fluid flowrate',
+      error: '',
+    },
     flowCoefficient: {
       name: 'flowCoefficient',
       label: 'Flow Coefficient',
@@ -200,32 +222,12 @@ const UnitConversion: NextPage = () => {
       focusText: 'Enter valve flow coefficient',
       error: '',
     },
-    volumeFlowRate: {
-      name: 'volumeFlowRate',
-      label: 'Flowrate',
-      placeholder: '0',
-      unitType: 'volumeFlowRate',
-      displayValue: { value: '0', unit: defaultUnits.volumeFlowRate },
-      get calculatedValue() {
-        return {
-          value: convertUnits({
-            value: Number(this.displayValue.value),
-            fromUnit: this.displayValue.unit,
-            toUnit: 'm3/s',
-          }),
-          unit: 'm3/s',
-        }
-      },
-      selectiontext: '',
-      focusText: 'Enter fluid flowrate',
-      error: '',
-    },
   }
 
   const solveForOptions: SolveType[] = [
+    { label: initialState.flowCoefficient.label, value: initialState.flowCoefficient.name },
     { label: initialState.volumeFlowRate.label, value: initialState.volumeFlowRate.name },
     { label: initialState.pressureDrop.label, value: initialState.pressureDrop.name },
-    { label: initialState.flowCoefficient.label, value: initialState.flowCoefficient.name },
   ]
 
   type Action =
