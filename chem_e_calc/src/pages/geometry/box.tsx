@@ -173,9 +173,9 @@ const Box = () => {
   }
 
   const calcWidth = (inputArray: State): State => {
-    const height = initialState.height.calculatedValue.value
-    const length = initialState.length.calculatedValue.value
-    const volume = initialState.volume.calculatedValue.value
+    const height = inputArray.height.calculatedValue.value
+    const length = inputArray.length.calculatedValue.value
+    const volume = inputArray.volume.calculatedValue.value
 
     const width = volume / (height * length)
     const displayValue = convertUnits({ value: width, fromUnit: 'm', toUnit: inputArray.width.displayValue.unit })
