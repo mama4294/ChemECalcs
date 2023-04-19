@@ -119,7 +119,7 @@ const Agitation: NextPage = () => {
     },
 
     flowNumber: {
-      name: 'baseFlowNumber',
+      name: 'flowNumber',
       label: 'Agitator Flow Number',
       placeholder: '0',
 
@@ -131,7 +131,7 @@ const Agitation: NextPage = () => {
       error: '',
     },
     powerNumber: {
-      name: 'basePowerNumber',
+      name: 'powerNumber',
       label: 'Impeller Power Number',
       placeholder: '0',
       unitType: 'length',
@@ -325,6 +325,8 @@ const Agitation: NextPage = () => {
       case ActionKind.CHANGE_VALUE_WITHOUT_UNIT:
         name = action.payload.name
         numericValue = action.payload.value.replace(/[^\d.-]/g, '')
+        console.log('name', name)
+        console.log('numericValue', numericValue)
         unit = state[name as keyof StateWithoutStrings].displayValue.unit
         payload = {
           ...state[name as keyof StateWithoutStrings],
@@ -654,9 +656,6 @@ const Agitation: NextPage = () => {
               })
             }
           />
-
-          {/* <EquationCard /> */}
-          {/* <ExampleCard data={state} /> */}
           <EquationCard />
         </CalcBody>
       </PageContainer>
@@ -1065,7 +1064,7 @@ const ScaleUpMathodHint = () => (
           ></path>
         </svg>
       </label>
-      <div tabIndex={0} className="compact card dropdown-content rounded-box w-64 bg-base-100 shadow">
+      <div tabIndex={0} className="card dropdown-content compact rounded-box w-64 bg-base-100 shadow">
         <div className="card-body">
           <h2 className="card-title">Need help deciding?</h2>
           <p>
