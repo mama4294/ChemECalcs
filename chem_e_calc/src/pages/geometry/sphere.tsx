@@ -109,7 +109,7 @@ const Shape = () => {
   }
 
   const calcDiameter = (inputArray: State): State => {
-    const volume = initialState.volume.calculatedValue.value
+    const volume = inputArray.volume.calculatedValue.value
     const diameter = 2 * (volume / ((4 / 3) * Math.PI)) ** (1 / 3)
     const displayValue = convertUnits({ value: diameter, fromUnit: 'm', toUnit: inputArray.diameter.displayValue.unit })
     const diameterObj = {
