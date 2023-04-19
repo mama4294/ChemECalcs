@@ -149,8 +149,8 @@ const Box = () => {
   }
 
   const calcDiameter = (inputArray: State): State => {
-    const height = initialState.height.calculatedValue.value
-    const volume = initialState.volume.calculatedValue.value
+    const height = inputArray.height.calculatedValue.value
+    const volume = inputArray.volume.calculatedValue.value
     const diameter = Math.sqrt((volume * 3) / (height * Math.PI))
 
     const displayValue = convertUnits({ value: diameter, fromUnit: 'm', toUnit: inputArray.diameter.displayValue.unit })
