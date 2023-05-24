@@ -13,48 +13,37 @@ import { updateCalculatedValue } from '../../logic/logic'
 import { Equation, VariableDefinition } from '../../components/Equation'
 import { Metadata } from '../../components/Layout/Metadata'
 
+type State = {
+  flowrate: ShortInputType
+  volume: ShortInputType
+  conc_in: ShortInputType
+  conc_out: ShortInputType
+}
+
+const airFlowrateOptions = ['nlpm', 'scfm', 'nVVM', 'sVVM']
+
 const OURPage: NextPage = () => {
   const paths = [
     { title: 'Agitation', href: '/agitation' },
-    { title: 'Oxygen Update Rate', href: '/agitation/our' },
+    { title: 'Oxygen Uptake Rate', href: '/agitation/our' },
   ]
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
-
-
-
-  type State = {
-    flowrate: ShortInputType
-    volume: ShortInputType
-    conc_in: ShortInputType
-    conc_out: ShortInputType
-  }
-
-
 
   const initialState: State = {
     flowrate: {
       name: 'flowrate',
-      label: 'Flowrate',
+      label: 'Air Flowrate',
       placeholder: '0',
       unitType: 'volumeFlowRate',
-      displayValue: { value: '1', unit: defaultUnits.volumeFlowRate },
-      get calculatedValue() {
-        return {
-          value: convertUnits({
-            value: Number(this.displayValue.value),
-            fromUnit: this.displayValue.unit,
-            toUnit: 'm3/s',
-          }),
-          unit: 'm3/s',
-        }
-      },
+      displayValue: { value: '1', unit: airFlowrateOptions[0]! },
+      calculatedValue: { value: 21, unit: airFlowrateOptions[0]! },
       selectiontext: '',
-      focusText: 'Enter impeller outer diameter',
+      focusText: 'Enter the air flowrate into the bioreactor',
       error: '',
-    },    
+    },
     volume: {
-      name: 'flowrate',
-      label: 'Flowrate',
+      name: 'volume',
+      label: 'Volume',
       placeholder: '0',
       unitType: 'volume',
       displayValue: { value: '1', unit: defaultUnits.volume },
@@ -69,29 +58,29 @@ const OURPage: NextPage = () => {
         }
       },
       selectiontext: '',
-      focusText: 'Enter impeller outer diameter',
+      focusText: 'Enter the liquid volume',
       error: '',
     },
     conc_in: {
       name: 'conc_in',
-      label: 'Concentration In',
+      label: 'Oxygen Concentration In',
       placeholder: '0',
       unitType: 'volume',
-      displayValue: { value: '21', unit: "%" },
-      calculatedValue: {value: 21, unit: "%"},
+      displayValue: { value: '21', unit: '%' },
+      calculatedValue: { value: 21, unit: '%' },
       selectiontext: '',
-      focusText: 'Enter the oxygen contentration of the air going in',
+      focusText: 'Typically 21% unless enriching with pure O2',
       error: '',
     },
     conc_out: {
       name: 'conc_out',
-      label: 'Concentration Out',
+      label: 'Oxygen Concentration Out',
       placeholder: '0',
       unitType: 'volume',
-      displayValue: { value: '0', unit: "%" },
-      calculatedValue: {value: 0, unit: "%"},
+      displayValue: { value: '20', unit: '%' },
+      calculatedValue: { value: 20, unit: '%' },
       selectiontext: '',
-      focusText: 'Enter oxygen measured coming out of the fermenter',
+      focusText: 'Enter the exit gas analyzers oxygen concentration',
       error: '',
     },
   }
@@ -123,7 +112,7 @@ const OURPage: NextPage = () => {
         let payload = { ...state[name as keyof State], displayValue: { value: numericValue, unit } }
         let payloadWithCalculatedValue = updateCalculatedValue(payload)
         return { ...state, [name]: payloadWithCalculatedValue }
-        // return calculateAnswer({ ...state, [name]: payloadWithCalculatedValue })
+      // return calculateAnswer({ ...state, [name]: payloadWithCalculatedValue })
 
       case ActionKind.CHANGE_VALUE_WITHOUT_UNIT:
         name = action.payload.name
@@ -135,7 +124,7 @@ const OURPage: NextPage = () => {
           calculatedValue: { value: Number(numericValue), unit },
         }
         return { ...state, [name]: payload }
-        // return calculateAnswer({ ...state, [name]: payload })
+      // return calculateAnswer({ ...state, [name]: payload })
 
       case ActionKind.CHANGE_UNIT:
         name = action.payload.name
@@ -146,28 +135,12 @@ const OURPage: NextPage = () => {
         }
         payloadWithCalculatedValue = updateCalculatedValue(payload)
         return { ...state, [name]: payloadWithCalculatedValue }
-        // return calculateAnswer({ ...state, [name]: payloadWithCalculatedValue })
+      // return calculateAnswer({ ...state, [name]: payloadWithCalculatedValue })
       default:
         alert('Error: State reducer action not recognized')
         return state
     }
   }
-
-  // const calculateAnswer = (state: State) => {
-  //   const { diameter, shaftSpeed, tipSpeed } = state
-  //   const answer = (diameter.calculatedValue.value * shaftSpeed.calculatedValue.value * Math.PI) / 60 // m/s
-  //   const convertedAnswer = convertUnits({
-  //     value: answer,
-  //     fromUnit: 'm/s',
-  //     toUnit: tipSpeed.displayValue.unit,
-  //   })
-  //   const answerObj = {
-  //     ...tipSpeed,
-  //     displayValue: { value: convertedAnswer.toLocaleString(), unit: tipSpeed.displayValue.unit }, //user specified unit
-  //     calculatedValue: { value: answer, unit: 'm/s' }, //m/s
-  //   }
-  //   return { ...state, tipSpeed: answerObj }
-  // }
 
   const [state, dispatch] = useReducer(stateReducer, initialState)
 
@@ -203,10 +176,17 @@ const OURPage: NextPage = () => {
       />
       <PageContainer>
         <Breadcrumbs paths={paths} />
-        <CalcHeader title={'Oxygen Uptake'} text={'Calculate the oxygen uptake rate of an organism during fermentation'} />
+        <CalcHeader
+          title={'Oxygen Uptake'}
+          text={'Calculate the oxygen uptake rate of an organism using the global mass balance method'}
+        />
         <CalcBody>
           <CalcCard title={'Calculator'}>
             <>
+              <p>
+                The global mass balance OUR calculation requires a air flowmeter and an exit gas analyzer. The
+                measurement can be performined online without impacting fermentation.
+              </p>
               <div className="mb-0 flex flex-col">
                 <InputFieldWithUnit
                   key={flowrate.name}
@@ -218,6 +198,19 @@ const OURPage: NextPage = () => {
                   error={flowrate.error}
                   unitType={flowrate.unitType}
                   focusText={flowrate.focusText}
+                  onChangeValue={handleChangeValue}
+                  onChangeUnit={handleChangeUnit}
+                />
+                <InputFieldWithUnit
+                  key={volume.name}
+                  name={volume.name}
+                  label={volume.label}
+                  placeholder={volume.placeholder}
+                  selected={false}
+                  displayValue={volume.displayValue}
+                  error={volume.error}
+                  unitType={volume.unitType}
+                  focusText={volume.focusText}
                   onChangeValue={handleChangeValue}
                   onChangeUnit={handleChangeUnit}
                 />
@@ -233,7 +226,7 @@ const OURPage: NextPage = () => {
                   focusText={conc_in.focusText}
                   onChangeValue={handleChangeValueUnitless}
                 />
-                                <InputFieldConstant
+                <InputFieldConstant
                   key={conc_out.name}
                   name={conc_out.name}
                   label={conc_out.label}
@@ -245,26 +238,35 @@ const OURPage: NextPage = () => {
                   focusText={conc_out.focusText}
                   onChangeValue={handleChangeValueUnitless}
                 />
-                <InputFieldWithUnit
-                  key={volume.name}
-                  name={volume.name}
-                  label={volume.label}
-                  placeholder={volume.placeholder}
-                  selected={true}
-                  displayValue={volume.displayValue}
-                  error={volume.error}
-                  unitType={volume.unitType}
-                  focusText={volume.focusText}
-                  onChangeValue={handleChangeValue}
-                  onChangeUnit={handleChangeUnit}
-                />
               </div>
             </>
           </CalcCard>
+          <AnswerCard state={state} />
           <EquationCard />
         </CalcBody>
       </PageContainer>
     </>
+  )
+}
+
+const AnswerCard = ({ state }: { state: State }) => {
+  return (
+    <CalcCard title="Answer">
+      <>
+        <p>
+          This calculator finds the steady state oxygen ouptake rate of a fermenting organism through an oxygen mass
+          balance
+        </p>
+
+        <br />
+        <Equation equation={`$$OUR = \\frac{o2in - o2out}{V}$$`} />
+
+        <p className="text-lg font-medium">Definitions</p>
+        <VariableDefinition equation={`$$OUR = $$`} definition="Oxygen update rate" />
+        <VariableDefinition equation={`$$V = $$`} definition="Ungassed liquid volume" />
+        <VariableDefinition equation={`$$N = $$`} definition="Shaft speed" />
+      </>
+    </CalcCard>
   )
 }
 

@@ -53,6 +53,7 @@ export interface Units {
   time: string[]
   viscosity: string[]
   flowCoefficient: string[]
+  airFlowRate: string[]
 }
 
 export const units = {
@@ -127,6 +128,7 @@ export interface UnitOptions {
   time: UnitOption[]
   viscosity: UnitOption[]
   flowCoefficient: UnitOption[]
+  airFlowRate: UnitOption[]
 }
 
 export const unitOptions: UnitOptions = {
@@ -270,6 +272,12 @@ export const unitOptions: UnitOptions = {
   flowCoefficient: [
     { value: 'Kv', label: 'Kv' },
     { value: 'Cv', label: 'Cv' },
+  ],
+  airFlowRate: [
+    { value: 'nlpm', label: 'nlpm' },
+    { value: 'scfm', label: 'scfm' },
+    { value: 'nVVM', label: 'nVVM' },
+    { value: 'sVVM', label: 'sVVM' },
   ],
 }
 
