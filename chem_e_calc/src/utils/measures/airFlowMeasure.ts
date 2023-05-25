@@ -1,36 +1,50 @@
 import { Measure, Unit } from 'convert-units'
 
 export type AirFlowSystems = 'metric' | 'imperial'
-type AirFlowMetricUnits = 'NLPM' | 'NLPH'
-type AirFlowImperialUnits = 'SCFM' | 'SCFH'
+type AirFlowMetricUnits = 'nlpm' | 'nlph' | 'nm3/m' | 'nm3/h'
+type AirFlowImperialUnits = 'scfm' | 'scfh'
 export type AirFlowUnits = AirFlowMetricUnits | AirFlowImperialUnits
 
 const metric: Record<AirFlowMetricUnits, Unit> = {
-  NLPM: {
+  nlpm: {
     name: {
       singular: 'Normal liter per minute',
       plural: 'Normal liters per minute',
     },
-    to_anchor: 1,
+    to_anchor: 60,
   },
-  NLPH: {
+  nlph: {
     name: {
       singular: 'Normal liter per hour',
       plural: 'Normal liters per hour',
     },
     to_anchor: 1,
   },
+  'nm3/m': {
+    name: {
+      singular: 'Normal cubic meters per minute',
+      plural: 'Normal cubic meters per minute',
+    },
+    to_anchor: 1000 * 60,
+  },
+  'nm3/h': {
+    name: {
+      singular: 'Normal cubic meters per hour',
+      plural: 'Normal cubic meters per hour',
+    },
+    to_anchor: 1000,
+  },
 }
 
 const imperial: Record<AirFlowImperialUnits, Unit> = {
-  SCFM: {
+  scfm: {
     name: {
       singular: 'Standard cubic feet per minute',
       plural: 'Standard cubic feet per minute',
     },
-    to_anchor: 1,
+    to_anchor: 60,
   },
-  SCFH: {
+  scfh: {
     name: {
       singular: 'Standard cubic feet per hour',
       plural: 'Standard cubic feet per hour',
@@ -39,7 +53,7 @@ const imperial: Record<AirFlowImperialUnits, Unit> = {
   },
 }
 
-const AirFlow: Measure<AirFlowSystems, AirFlowUnits> = {
+const airFlow: Measure<AirFlowSystems, AirFlowUnits> = {
   systems: {
     metric,
     imperial,
@@ -47,15 +61,15 @@ const AirFlow: Measure<AirFlowSystems, AirFlowUnits> = {
   anchors: {
     metric: {
       imperial: {
-        ratio: 1.156,
+        ratio: 273.15 / (15.55 + 273.15),
       },
     },
     imperial: {
       metric: {
-        ratio: 1 / 1.156,
+        ratio: (273.15 + 15.55) / 273.15,
       },
     },
   },
 }
 
-export default AirFlow
+export default airFlow

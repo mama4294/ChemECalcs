@@ -2,11 +2,12 @@ import configureMeasurements, { allMeasures, AllMeasuresUnits, AllMeasures, AllM
 import density, { DensityUnits } from './measures/densityMeasure'
 import viscosity, { ViscosityUnits } from './measures/dynamicViscosityMeasure'
 import flowCoefficient, { FlowCoefficientUnits } from './measures/flowCoefficientMeasure'
+import airFlow, { AirFlowUnits } from './measures/airFlowMeasure'
 
-const customMeasures = { ...allMeasures, density, viscosity, flowCoefficient }
+const customMeasures = { ...allMeasures, density, viscosity, flowCoefficient, airFlow }
 
-export type CustomMeasureUnits = AllMeasuresUnits | DensityUnits | ViscosityUnits | FlowCoefficientUnits
-export type UnitTypes = AllMeasures | 'density' | 'viscosity' | 'time' | 'flowCoefficient'
+export type CustomMeasureUnits = AllMeasuresUnits | DensityUnits | ViscosityUnits | FlowCoefficientUnits | AirFlowUnits
+export type UnitTypes = AllMeasures | 'density' | 'viscosity' | 'time' | 'flowCoefficient' | 'airFlow'
 
 const convert = configureMeasurements<UnitTypes, AllMeasuresSystems, CustomMeasureUnits>(customMeasures)
 
@@ -53,7 +54,7 @@ export interface Units {
   time: string[]
   viscosity: string[]
   flowCoefficient: string[]
-  airFlowRate: string[]
+  airFlow: string[]
 }
 
 export const units = {
@@ -128,7 +129,7 @@ export interface UnitOptions {
   time: UnitOption[]
   viscosity: UnitOption[]
   flowCoefficient: UnitOption[]
-  airFlowRate: UnitOption[]
+  airFlow: UnitOption[]
 }
 
 export const unitOptions: UnitOptions = {
@@ -273,11 +274,13 @@ export const unitOptions: UnitOptions = {
     { value: 'Kv', label: 'Kv' },
     { value: 'Cv', label: 'Cv' },
   ],
-  airFlowRate: [
+  airFlow: [
     { value: 'nlpm', label: 'nlpm' },
+    { value: 'nlph', label: 'nlph' },
+    { value: 'nm3/m', label: 'nm3/m' },
+    { value: 'nm3/h', label: 'nm3/h' },
     { value: 'scfm', label: 'scfm' },
-    { value: 'nVVM', label: 'nVVM' },
-    { value: 'sVVM', label: 'sVVM' },
+    { value: 'scfh', label: 'scfh' },
   ],
 }
 

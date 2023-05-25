@@ -8,6 +8,7 @@ export const updateCalculatedValue = (object: ShortInputType): ShortInputType =>
     fromUnit: displayValue.unit,
     toUnit: calculatedValue.unit,
   })
+
   return { ...object, calculatedValue: { value: convertedValue, unit: calculatedValue.unit } }
 }
 

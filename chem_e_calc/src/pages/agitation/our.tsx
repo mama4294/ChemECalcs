@@ -16,11 +16,11 @@ import { Metadata } from '../../components/Layout/Metadata'
 type State = {
   flowrate: ShortInputType
   volume: ShortInputType
-  conc_in: ShortInputType
-  conc_out: ShortInputType
+  O2_in: ShortInputType
+  O2_out: ShortInputType
+  CO2_in: ShortInputType
+  CO2_out: ShortInputType
 }
-
-const airFlowrateOptions = ['nlpm', 'scfm', 'nVVM', 'sVVM']
 
 const OURPage: NextPage = () => {
   const paths = [
@@ -34,9 +34,18 @@ const OURPage: NextPage = () => {
       name: 'flowrate',
       label: 'Air Flowrate',
       placeholder: '0',
-      unitType: 'volumeFlowRate',
-      displayValue: { value: '1', unit: airFlowrateOptions[0]! },
-      calculatedValue: { value: 21, unit: airFlowrateOptions[0]! },
+      unitType: 'airFlow',
+      displayValue: { value: '1', unit: 'nlpm' },
+      get calculatedValue() {
+        return {
+          value: convertUnits({
+            value: Number(this.displayValue.value),
+            fromUnit: this.displayValue.unit,
+            toUnit: 'nlph',
+          }),
+          unit: 'nlph',
+        }
+      },
       selectiontext: '',
       focusText: 'Enter the air flowrate into the bioreactor',
       error: '',
@@ -52,35 +61,57 @@ const OURPage: NextPage = () => {
           value: convertUnits({
             value: Number(this.displayValue.value),
             fromUnit: this.displayValue.unit,
-            toUnit: 'm3',
+            toUnit: 'l',
           }),
-          unit: 'm3',
+          unit: 'l',
         }
       },
       selectiontext: '',
       focusText: 'Enter the liquid volume',
       error: '',
     },
-    conc_in: {
-      name: 'conc_in',
+    O2_in: {
+      name: 'O2_in',
       label: 'Oxygen Concentration In',
       placeholder: '0',
       unitType: 'volume',
-      displayValue: { value: '21', unit: '%' },
-      calculatedValue: { value: 21, unit: '%' },
+      displayValue: { value: '20.946', unit: '%' },
+      calculatedValue: { value: 20.946, unit: '%' },
       selectiontext: '',
-      focusText: 'Typically 21% unless enriching with pure O2',
+      focusText: 'Typically 20.946% unless enriching with pure O2',
       error: '',
     },
-    conc_out: {
-      name: 'conc_out',
+    O2_out: {
+      name: 'O2_out',
       label: 'Oxygen Concentration Out',
       placeholder: '0',
       unitType: 'volume',
-      displayValue: { value: '20', unit: '%' },
-      calculatedValue: { value: 20, unit: '%' },
+      displayValue: { value: '18', unit: '%' },
+      calculatedValue: { value: 18, unit: '%' },
       selectiontext: '',
       focusText: 'Enter the exit gas analyzers oxygen concentration',
+      error: '',
+    },
+    CO2_in: {
+      name: 'CO2_in',
+      label: 'Carbon Dioxide Concentration In',
+      placeholder: '0',
+      unitType: 'volume',
+      displayValue: { value: '0.0412', unit: '%' },
+      calculatedValue: { value: 0.0412, unit: '%' },
+      selectiontext: '',
+      focusText: 'Typically 0.0412%',
+      error: '',
+    },
+    CO2_out: {
+      name: 'CO2_out',
+      label: 'Carbon Dioxide Concentration Out',
+      placeholder: '0',
+      unitType: 'volume',
+      displayValue: { value: '2', unit: '%' },
+      calculatedValue: { value: 2, unit: '%' },
+      selectiontext: '',
+      focusText: 'Enter the exit gas analyzers CO2 concentration',
       error: '',
     },
   }
@@ -112,7 +143,6 @@ const OURPage: NextPage = () => {
         let payload = { ...state[name as keyof State], displayValue: { value: numericValue, unit } }
         let payloadWithCalculatedValue = updateCalculatedValue(payload)
         return { ...state, [name]: payloadWithCalculatedValue }
-      // return calculateAnswer({ ...state, [name]: payloadWithCalculatedValue })
 
       case ActionKind.CHANGE_VALUE_WITHOUT_UNIT:
         name = action.payload.name
@@ -124,7 +154,6 @@ const OURPage: NextPage = () => {
           calculatedValue: { value: Number(numericValue), unit },
         }
         return { ...state, [name]: payload }
-      // return calculateAnswer({ ...state, [name]: payload })
 
       case ActionKind.CHANGE_UNIT:
         name = action.payload.name
@@ -135,7 +164,6 @@ const OURPage: NextPage = () => {
         }
         payloadWithCalculatedValue = updateCalculatedValue(payload)
         return { ...state, [name]: payloadWithCalculatedValue }
-      // return calculateAnswer({ ...state, [name]: payloadWithCalculatedValue })
       default:
         alert('Error: State reducer action not recognized')
         return state
@@ -165,7 +193,7 @@ const OURPage: NextPage = () => {
     })
   }
 
-  const { flowrate, volume, conc_in, conc_out } = state
+  const { flowrate, volume, O2_in, O2_out, CO2_in, CO2_out } = state
 
   return (
     <>
@@ -214,35 +242,61 @@ const OURPage: NextPage = () => {
                   onChangeValue={handleChangeValue}
                   onChangeUnit={handleChangeUnit}
                 />
+                <div className="divider">Gas In</div>
                 <InputFieldConstant
-                  key={conc_in.name}
-                  name={conc_in.name}
-                  label={conc_in.label}
-                  placeholder={conc_in.placeholder}
+                  key={O2_in.name}
+                  name={O2_in.name}
+                  label={O2_in.label}
+                  placeholder={O2_in.placeholder}
                   selected={false}
-                  displayValue={conc_in.displayValue}
-                  error={conc_in.error}
-                  unitType={conc_in.unitType}
-                  focusText={conc_in.focusText}
+                  displayValue={O2_in.displayValue}
+                  error={O2_in.error}
+                  unitType={O2_in.unitType}
+                  focusText={O2_in.focusText}
                   onChangeValue={handleChangeValueUnitless}
                 />
                 <InputFieldConstant
-                  key={conc_out.name}
-                  name={conc_out.name}
-                  label={conc_out.label}
-                  placeholder={conc_out.placeholder}
+                  key={CO2_in.name}
+                  name={CO2_in.name}
+                  label={CO2_in.label}
+                  placeholder={CO2_in.placeholder}
                   selected={false}
-                  displayValue={conc_out.displayValue}
-                  error={conc_out.error}
-                  unitType={conc_out.unitType}
-                  focusText={conc_out.focusText}
+                  displayValue={CO2_in.displayValue}
+                  error={CO2_in.error}
+                  unitType={CO2_in.unitType}
+                  focusText={CO2_in.focusText}
+                  onChangeValue={handleChangeValueUnitless}
+                />
+                <div className="divider">Exit Gas Analyzer</div>
+                <InputFieldConstant
+                  key={O2_out.name}
+                  name={O2_out.name}
+                  label={O2_out.label}
+                  placeholder={O2_out.placeholder}
+                  selected={false}
+                  displayValue={O2_out.displayValue}
+                  error={O2_out.error}
+                  unitType={O2_out.unitType}
+                  focusText={O2_out.focusText}
+                  onChangeValue={handleChangeValueUnitless}
+                />
+                <InputFieldConstant
+                  key={CO2_out.name}
+                  name={CO2_out.name}
+                  label={CO2_out.label}
+                  placeholder={CO2_out.placeholder}
+                  selected={false}
+                  displayValue={CO2_out.displayValue}
+                  error={CO2_out.error}
+                  unitType={CO2_out.unitType}
+                  focusText={CO2_out.focusText}
                   onChangeValue={handleChangeValueUnitless}
                 />
               </div>
             </>
           </CalcCard>
           <AnswerCard state={state} />
-          <EquationCard />
+          <ExampleCard />
         </CalcBody>
       </PageContainer>
     </>
@@ -250,6 +304,39 @@ const OURPage: NextPage = () => {
 }
 
 const AnswerCard = ({ state }: { state: State }) => {
+  const {
+    flowrate: Objflow_in,
+    volume: ObjVolume,
+    O2_in: objO2_in,
+    O2_out: objO2_out,
+    CO2_in: objCO2_in,
+    CO2_out: objCO2_out,
+  } = state
+
+  const O2_in = objO2_in.calculatedValue.value / 100 // % vol/vol
+  const O2_out = objO2_out.calculatedValue.value / 100 // % vol/vol
+  const CO2_in = objCO2_in.calculatedValue.value / 100 // % vol/vol
+  const CO2_out = objCO2_out.calculatedValue.value / 100 // % vol/vol
+  const flow_in = Objflow_in.calculatedValue.value //nlph
+  const volume = ObjVolume.calculatedValue.value //L
+
+  console.log(Objflow_in.calculatedValue, Objflow_in.displayValue)
+
+  const flowToMoles = ({ flow, temp, pressure }: { flow: number; temp: number; pressure: number }): number => {
+    //converts flow (liters), temperature (C), and pressure (atm) into mmoles using the ideal gas law
+    const R = 8.20573660809596 * 10 ** -5 //units of L⋅atm⋅K-1⋅mmol-1
+    return (flow * pressure) / (R * (temp + 273.15))
+  }
+
+  const flow_out = (flow_in * (1 - O2_in - CO2_in)) / (1 - O2_out - CO2_out) //Nitrogen balance assuming no nitrogen accumulation in the bioreactor
+  const flow_O2_in = flow_in * O2_in
+  const flow_O2_out = flow_out * O2_out
+  const O2_moles_in = flowToMoles({ flow: flow_O2_in, temp: 0, pressure: 1 }) //mmoles/hr
+  const O2_moles_out = flowToMoles({ flow: flow_O2_out, temp: 0, pressure: 1 }) //mmoles/hr
+  const OUR = (O2_moles_in - O2_moles_out) / volume
+
+  // console.table({ flow_in, flow_out, O2_in, O2_out, CO2_in, CO2_out, O2_moles_in, O2_moles_out })
+
   return (
     <CalcCard title="Answer">
       <>
@@ -259,34 +346,113 @@ const AnswerCard = ({ state }: { state: State }) => {
         </p>
 
         <br />
-        <Equation equation={`$$OUR = \\frac{o2in - o2out}{V}$$`} />
-
-        <p className="text-lg font-medium">Definitions</p>
-        <VariableDefinition equation={`$$OUR = $$`} definition="Oxygen update rate" />
-        <VariableDefinition equation={`$$V = $$`} definition="Ungassed liquid volume" />
-        <VariableDefinition equation={`$$N = $$`} definition="Shaft speed" />
+        <InputFieldConstant
+          name="Oxygen In"
+          label="Oxygen In"
+          placeholder="0"
+          selected={true}
+          displayValue={{ value: O2_moles_in.toLocaleString(), unit: 'mmoles/hr' }}
+          error=""
+          unitType=""
+          focusText=""
+          onChangeValue={() => console.log()}
+        />
+        <InputFieldConstant
+          name="Oxygen Out"
+          label="Oxygen Out"
+          placeholder="0"
+          selected={true}
+          displayValue={{ value: O2_moles_out.toLocaleString(), unit: 'mmoles/hr' }}
+          error=""
+          unitType=""
+          focusText=""
+          onChangeValue={() => console.log()}
+        />
+        <InputFieldConstant
+          name="OUR"
+          label="Oxygen Uptake Rate"
+          placeholder="0"
+          selected={true}
+          displayValue={{ value: OUR.toLocaleString(), unit: 'mmoles/L/hr' }}
+          error=""
+          unitType=""
+          focusText=""
+          onChangeValue={() => console.log()}
+        />
       </>
     </CalcCard>
   )
 }
 
-const EquationCard = () => {
+const ExampleCard = () => {
   return (
-    <CalcCard title="Governing Equation">
+    <CalcCard title="Example">
       <>
-        <p>
-          This calculator finds how fast the tip of an agitator impeller is moving given a specific shaft speed and
-          impeller diameter.
+        <p className="mb-6">
+          Use a global mass balance to determine the oxygen update rate of the organism in a bioreactor with an air
+          flowrate of 60 nlph entering into a 1L working volume bioreactor with an exit gas analzyer displaying the
+          following readings: O2: 18%, CO2: 2%.
         </p>
 
-        <br />
-        <p>Tip Speed</p>
-        <Equation equation={`$$v_{t} = \\pi d_{im} N$$`} />
+        <p>
+          <span className="font-bold">Step 1:</span> Calculate gas flow out of the vessel using a nitrogen balance
+        </p>
+        <p className="text-sm italic">
+          Assume all nitrogen which enters the vessel exits through the vent. No accumulation in the fermenter.
+        </p>
+        <div className="mb-6">
+          <Equation equation={`$$\\dot{V}_{in} ⋅ C_{in N_{2}} = \\dot{V}_{out} ⋅ C_{out N_{2}}$$`} />
+          <Equation equation={`$$ C_{N_{2}} = 1 - C_{O_{2}} - C_{CO_{2}}$$`} />
+          <Equation
+            equation={`$$\\dot{V}_{out} = \\frac{\\dot{V}_{in} ⋅ C_{in N_{2}}}{1 - C_{out O_{2}} - C_{out CO_{2}}}$$`}
+          />
+          <Equation equation={`$$\\dot{V}_{out} = \\frac{60 nlpm ⋅ 78\\%}{1 - 18\\% - 2\\%}$$`} />
+          <Equation equation={`$$\\dot{V}_{out} = 58.5 nlpm$$`} />
+        </div>
 
-        <p className="text-lg font-medium">Definitions</p>
-        <VariableDefinition equation={`$$v_{t} = $$`} definition="Tip speed" />
-        <VariableDefinition equation={`$$d_{im} = $$`} definition="Impeller diameter" />
-        <VariableDefinition equation={`$$N = $$`} definition="Shaft speed" />
+        <p>
+          <span className="font-bold">Step 2:</span> Calculate the oxygen flow in and out of the bioreactor
+        </p>
+        <div className="mb-6">
+          <Equation equation={`$$\\dot{V}_{O_{2}} = \\dot{V}*C_{O_{2}}$$`} />
+          <Equation equation={`$$\\dot{V}_{in O_{2}} = 60 nlpm * 21\\% = 12.6 nlpm$$`} />
+          <Equation equation={`$$\\dot{V}_{out O_{2}} = 58.5 nlpm * 18\\% = 10.53 nlpm$$`} />
+        </div>
+        <p>
+          <span className="font-bold">Step 3:</span> Calculate molar oxygen flow into the bioreactor using the ideal gas
+          law
+        </p>
+        <p className="text-sm italic">
+          Normal flow is assumed to be 1 atm and 0°C. Standard flow is assumed to be 14.696 psia and 60°F.
+        </p>
+        <div className="mb-6">
+          <Equation equation={`$$P\\dot{V} = \\dot{n}RT$$`} />
+          <Equation equation={`$$\\dot{n} = \\frac{P\\dot{V}}{RT}$$`} />
+          <Equation
+            equation={`$$\\dot{n}_{in O_{2}} = \\frac{1 atm ⋅ 12.6 nlph}{8.2*10^{-5} \\frac{L⋅atm}{K⋅mmol} ⋅ 273.15K} = 562 mmol/hr$$`}
+          />
+          <Equation
+            equation={`$$\\dot{n}_{out O_{2}} = \\frac{1 atm ⋅ 10.53 nlph}{8.2*10^{-5} \\frac{L⋅atm}{K⋅mmol} ⋅ 273.15K} = 476 mmol/hr$$`}
+          />
+        </div>
+
+        <p>
+          <span className="font-bold">Step 4:</span>Calculate oxygen update rate
+        </p>
+        <div className="mb-6">
+          <Equation equation={`$$OUR = \\frac{\\dot{n}_{in O_{2}} - \\dot{n}_{out O_{2}}}{V_l}$$`} />
+          <Equation equation={`$$OUR = \\frac{562 - 476 mmol/hr}{1 L}$$`} />
+          <Equation equation={`$$OUR = 86.3 mmol/L/hr$$`} />
+        </div>
+
+        <p className="mb-2 text-lg font-medium">Definitions</p>
+        <VariableDefinition equation={`$$\\dot{V} = $$`} definition="Volumetric air flowrate" />
+        <VariableDefinition equation={`$$C = $$`} definition="Volumetric concentration" />
+        <VariableDefinition equation={`$$P = $$`} definition="Pressure at standard conditions" />
+        <VariableDefinition equation={`$$T = $$`} definition="Temperature at standard conditions" />
+        <VariableDefinition equation={`$$R = $$`} definition="Ideal gas constant" />
+        <VariableDefinition equation={`$$\\dot{n} = $$`} definition="Molar air flowrate" />
+        <VariableDefinition equation={`$$OUR = $$`} definition="Oxygen uptake rate" />
       </>
     </CalcCard>
   )
