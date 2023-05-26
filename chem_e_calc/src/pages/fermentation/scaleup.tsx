@@ -38,7 +38,7 @@ type StateWithoutStrings = Omit<State, 'solveSelection' | 'baseImpellerType'>
 
 const Agitation: NextPage = () => {
   const paths = [
-    { title: 'Agitation', href: '/agitation' },
+    { title: 'Fermentation', href: '/fermentation' },
     { title: 'Scaleup', href: '/agitation/scaleup' },
   ]
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
@@ -1053,7 +1053,7 @@ const ResultsTable = ({ state, onChangeSolveSelection, defaultUnits }: ResultsTa
 
 const ScaleUpMathodHint = () => (
   <span className="label-text-alt">
-    <div className="dropdown-end dropdown">
+    <div className="dropdown dropdown-end">
       <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
           <path

@@ -11,14 +11,15 @@ const Search = () => {
     { id: 5, title: 'Sphere', href: '/geometry/sphere', location: 'geometry' },
     { id: 6, title: 'Unit Conversion', href: '/conversion', location: 'home' },
     { id: 7, title: 'Fluid Flow', href: '/fluids/fluidflow', location: 'fluid dynamics' },
-    { id: 8, title: 'Scale Up', href: '/agitation/scaleup', location: 'agitation' },
-    { id: 9, title: 'Tip Speed', href: '/agitation/tipspeed', location: 'agitation' },
+    { id: 8, title: 'Scale Up', href: '/fermentation/scaleup', location: 'fermentation' },
+    { id: 9, title: 'Tip Speed', href: '/fermentation/tipspeed', location: 'fermentation' },
     { id: 10, title: 'Tanks', href: '/geometry/tank', location: 'geometry' },
     { id: 11, title: 'Pressure Drop', href: '/fluids/pressuredrop', location: 'fluid dynamics' },
     { id: 12, title: 'Reynolds Number', href: '/fluids/reynoldsnumber', location: 'fluid dynamics' },
     { id: 13, title: 'Friction Factor', href: '/fluids/frictionfactor', location: 'fluid dynamics' },
     { id: 14, title: '4-20mA Signals', href: '/controls/mA', location: 'controls' },
     { id: 15, title: 'Valve Sizing', href: '/fluids/valveSizing', location: 'fluid dynamics' },
+    { id: 16, title: 'Oxygen Uptake Rate', href: '/fermentation/our', location: 'fermentation' },
   ]
 
   const router = useRouter()

@@ -79,20 +79,25 @@ const DesktopMenu = () => {
         </li>
         <li tabIndex={0}>
           <a className="hover:bg-neutral-focus">
-            Agitation
+            Fermentation
             <svg className="fill-current" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
               <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
             </svg>
           </a>
           <ul className="dropdown-content rounded-box z-10 w-52 bg-neutral p-2 text-neutral-content shadow">
             <li>
-              <Link href={'/agitation/tipspeed'}>
+              <Link href={'/fermentation/tipspeed'}>
                 <a className="hover:bg-neutral-focus">Tip Speed</a>
               </Link>
             </li>
             <li>
-              <Link href={'/agitation/scaleup'}>
+              <Link href={'/fermentation/scaleup'}>
                 <a className="hover:bg-neutral-focus">Scale Up</a>
+              </Link>
+            </li>
+            <li>
+              <Link href={'/fermentation/our'}>
+                <a className="hover:bg-neutral-focus">OUR</a>
               </Link>
             </li>
           </ul>
@@ -231,7 +236,7 @@ const MobileMenu = () => {
           </li>
           <li tabIndex={0}>
             <a className="justify-between hover:bg-neutral-focus">
-              Agitation
+              Fermentation
               <svg
                 className="fill-current"
                 xmlns="http://www.w3.org/2000/svg"
@@ -244,13 +249,18 @@ const MobileMenu = () => {
             </a>
             <ul className="rounded-box bg-neutral p-2 text-neutral-content shadow">
               <li>
-                <Link href={'/agitation/tipspeed'}>
+                <Link href={'/fermentation/tipspeed'}>
                   <a className="hover:bg-neutral-focus">Tip Speed</a>
                 </Link>
               </li>
               <li>
-                <Link href={'/agitation/scaleup'}>
+                <Link href={'/fermentation/scaleup'}>
                   <a className="hover:bg-neutral-focus">Scale Up</a>
+                </Link>
+              </li>
+              <li>
+                <Link href={'/fermentation/our'}>
+                  <a className="hover:bg-neutral-focus">OUR</a>
                 </Link>
               </li>
             </ul>

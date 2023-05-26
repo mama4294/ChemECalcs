@@ -15,7 +15,7 @@ import { Metadata } from '../../components/Layout/Metadata'
 
 const TipSpeedPage: NextPage = () => {
   const paths = [
-    { title: 'Agitation', href: '/agitation' },
+    { title: 'Fermentation', href: '/fermentation' },
     { title: 'Tip Speed', href: '/agitation/tipspeed' },
   ]
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType

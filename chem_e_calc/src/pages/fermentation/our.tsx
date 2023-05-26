@@ -24,7 +24,7 @@ type State = {
 
 const OURPage: NextPage = () => {
   const paths = [
-    { title: 'Agitation', href: '/agitation' },
+    { title: 'Fermentation', href: '/fermentation' },
     { title: 'Oxygen Uptake Rate', href: '/agitation/our' },
   ]
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType

@@ -21,7 +21,7 @@ const Home: NextPage = () => {
           <GridCard name="Fluid Dynamics" description="Calculators for fluid dynamics" link="/fluids" />
           <GridCard name="Tank Volume" description="Tank volume visualization" link="/geometry/tank" />
           <GridCard name="Controls" description="Calculators for controls and instrumentation" link="/controls" />
-          <GridCard name="Agitation" description="Agitation scaleup calculation" link="/agitation" />
+          <GridCard name="Fermentation" description="Calculators for fermenters and bioreactors" link="/fermentation" />
         </div>
       </div>
     </>
