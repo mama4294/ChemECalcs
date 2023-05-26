@@ -97,7 +97,7 @@ const DesktopMenu = () => {
             </li>
             <li>
               <Link href={'/fermentation/our'}>
-                <a className="hover:bg-neutral-focus">OUR</a>
+                <a className="hover:bg-neutral-focus">Respiration</a>
               </Link>
             </li>
           </ul>
@@ -260,7 +260,7 @@ const MobileMenu = () => {
               </li>
               <li>
                 <Link href={'/fermentation/our'}>
-                  <a className="hover:bg-neutral-focus">OUR</a>
+                  <a className="hover:bg-neutral-focus">Respiration</a>
                 </Link>
               </li>
             </ul>

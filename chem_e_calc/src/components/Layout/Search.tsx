@@ -19,7 +19,7 @@ const Search = () => {
     { id: 13, title: 'Friction Factor', href: '/fluids/frictionfactor', location: 'fluid dynamics' },
     { id: 14, title: '4-20mA Signals', href: '/controls/mA', location: 'controls' },
     { id: 15, title: 'Valve Sizing', href: '/fluids/valveSizing', location: 'fluid dynamics' },
-    { id: 16, title: 'Oxygen Uptake Rate', href: '/fermentation/our', location: 'fermentation' },
+    { id: 16, title: 'Fermentation Respiration', href: '/fermentation/our', location: 'fermentation' },
   ]
 
   const router = useRouter()

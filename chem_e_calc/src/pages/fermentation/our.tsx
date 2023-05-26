@@ -25,7 +25,7 @@ type State = {
 const OURPage: NextPage = () => {
   const paths = [
     { title: 'Fermentation', href: '/fermentation' },
-    { title: 'Oxygen Uptake Rate', href: '/agitation/our' },
+    { title: 'Respiration', href: '/agitation/respiration' },
   ]
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
 
@@ -198,22 +198,19 @@ const OURPage: NextPage = () => {
   return (
     <>
       <Metadata
-        title="Oxygen Uptake Rate Calculator"
+        title="Fermentation Respiration Calculator"
         description="Chemical engineering calculations for process and plant engineers"
         keywords="Agitation, chemical, engineering, home, calculator, unit, conversion, geometry, fluid, dynamics, tank, volume, agitation, scaleup, efficiency, accuracy, process, engineers"
       />
       <PageContainer>
         <Breadcrumbs paths={paths} />
-        <CalcHeader
-          title={'Oxygen Uptake'}
-          text={'Calculate the oxygen uptake rate of an organism using the global mass balance method'}
-        />
+        <CalcHeader title={'Fermentation Respiration'} text={'Calculate OUR, CER, and RQ'} />
         <CalcBody>
           <CalcCard title={'Calculator'}>
             <>
               <p>
-                The global mass balance OUR calculation requires a air flowmeter and an exit gas analyzer. The
-                measurement can be performined online without impacting fermentation.
+                The global mass balance calculation requires a air flowmeter and an exit gas analyzer. The measurement
+                can be performined online and continuously trended over the course of fermentation.
               </p>
               <div className="mb-0 flex flex-col">
                 <InputFieldWithUnit
@@ -313,56 +310,51 @@ const AnswerCard = ({ state }: { state: State }) => {
     CO2_out: objCO2_out,
   } = state
 
-  const O2_in = objO2_in.calculatedValue.value / 100 // % vol/vol
-  const O2_out = objO2_out.calculatedValue.value / 100 // % vol/vol
-  const CO2_in = objCO2_in.calculatedValue.value / 100 // % vol/vol
-  const CO2_out = objCO2_out.calculatedValue.value / 100 // % vol/vol
-  const flow_in = Objflow_in.calculatedValue.value //nlph
-  const volume = ObjVolume.calculatedValue.value //L
-
-  console.log(Objflow_in.calculatedValue, Objflow_in.displayValue)
-
   const flowToMoles = ({ flow, temp, pressure }: { flow: number; temp: number; pressure: number }): number => {
     //converts flow (liters), temperature (C), and pressure (atm) into mmoles using the ideal gas law
     const R = 8.20573660809596 * 10 ** -5 //units of L⋅atm⋅K-1⋅mmol-1
     return (flow * pressure) / (R * (temp + 273.15))
   }
 
+  const O2_in = objO2_in.calculatedValue.value / 100 // % vol/vol
+  const O2_out = objO2_out.calculatedValue.value / 100 // % vol/vol
+  const CO2_in = objCO2_in.calculatedValue.value / 100 // % vol/vol
+  const CO2_out = objCO2_out.calculatedValue.value / 100 // % vol/vol
+  const flow_in = Objflow_in.calculatedValue.value //nlph
+  const volume = ObjVolume.calculatedValue.value //L
   const flow_out = (flow_in * (1 - O2_in - CO2_in)) / (1 - O2_out - CO2_out) //Nitrogen balance assuming no nitrogen accumulation in the bioreactor
-  const flow_O2_in = flow_in * O2_in
-  const flow_O2_out = flow_out * O2_out
-  const O2_moles_in = flowToMoles({ flow: flow_O2_in, temp: 0, pressure: 1 }) //mmoles/hr
-  const O2_moles_out = flowToMoles({ flow: flow_O2_out, temp: 0, pressure: 1 }) //mmoles/hr
-  const OUR = (O2_moles_in - O2_moles_out) / volume
-
-  // console.table({ flow_in, flow_out, O2_in, O2_out, CO2_in, CO2_out, O2_moles_in, O2_moles_out })
+  const moles_in = flowToMoles({ flow: flow_in, temp: 0, pressure: 1 }) //mmoles/hr
+  const moles_out = flowToMoles({ flow: flow_out, temp: 0, pressure: 1 }) //mmoles/hr
+  const OUR = (moles_in * O2_in - moles_out * O2_out) / volume
+  const CER = (moles_out / volume) * (CO2_out - CO2_in)
+  const RQ = CER / OUR
 
   return (
     <CalcCard title="Answer">
       <>
         <p>
-          This calculator finds the steady state oxygen ouptake rate of a fermenting organism through an oxygen mass
-          balance
+          This calculator find the oxygen uptake rate (OUR), carbion dioxide evolution rate (CER), and the repiratory
+          quotent (RQ).
         </p>
 
         <br />
         <InputFieldConstant
-          name="Oxygen In"
-          label="Oxygen In"
+          name="flow in"
+          label="Flow In"
           placeholder="0"
           selected={true}
-          displayValue={{ value: O2_moles_in.toLocaleString(), unit: 'mmoles/hr' }}
+          displayValue={{ value: moles_in.toLocaleString(), unit: 'mmoles/hr' }}
           error=""
           unitType=""
           focusText=""
           onChangeValue={() => console.log()}
         />
         <InputFieldConstant
-          name="Oxygen Out"
-          label="Oxygen Out"
+          name="flow Out"
+          label="Flow Out"
           placeholder="0"
           selected={true}
-          displayValue={{ value: O2_moles_out.toLocaleString(), unit: 'mmoles/hr' }}
+          displayValue={{ value: moles_out.toLocaleString(), unit: 'mmoles/hr' }}
           error=""
           unitType=""
           focusText=""
@@ -378,6 +370,31 @@ const AnswerCard = ({ state }: { state: State }) => {
           unitType=""
           focusText=""
           onChangeValue={() => console.log()}
+          topRight={<OURHint />}
+        />
+        <InputFieldConstant
+          name="CER"
+          label="Carbon Dioxide Evolution Rate"
+          placeholder="0"
+          selected={true}
+          displayValue={{ value: CER.toLocaleString(), unit: 'mmoles/L/hr' }}
+          error=""
+          unitType=""
+          focusText=""
+          onChangeValue={() => console.log()}
+          topRight={<CERHint />}
+        />
+        <InputFieldConstant
+          name="RQ"
+          label="Respiratory Quotent"
+          placeholder="0"
+          selected={true}
+          displayValue={{ value: RQ.toLocaleString(), unit: 'mmoles/L/hr' }}
+          error=""
+          unitType=""
+          focusText=""
+          onChangeValue={() => console.log()}
+          topRight={<RQHint />}
         />
       </>
     </CalcCard>
@@ -389,60 +406,70 @@ const ExampleCard = () => {
     <CalcCard title="Example">
       <>
         <p className="mb-6">
-          Use a global mass balance to determine the oxygen update rate of the organism in a bioreactor with an air
-          flowrate of 60 nlph entering into a 1L working volume bioreactor with an exit gas analzyer displaying the
-          following readings: O2: 18%, CO2: 2%.
+          Use a global mass balance to determine the respiration parameters (OUR, CER, RQ) of the organism in a
+          bioreactor with an air flowrate of 60 nlph entering into a 1L working volume bioreactor with an exit gas
+          analzyer displaying the following readings: O2: 18%, CO2: 2%.
         </p>
 
         <p>
-          <span className="font-bold">Step 1:</span> Calculate gas flow out of the vessel using a nitrogen balance
+          <span className="font-bold">Step 1:</span> Calculate the molar air flowrate into the vessel
         </p>
         <p className="text-sm italic">
-          Assume all nitrogen which enters the vessel exits through the vent. No accumulation in the fermenter.
-        </p>
-        <div className="mb-6">
-          <Equation equation={`$$\\dot{V}_{in} ⋅ C_{in N_{2}} = \\dot{V}_{out} ⋅ C_{out N_{2}}$$`} />
-          <Equation equation={`$$ C_{N_{2}} = 1 - C_{O_{2}} - C_{CO_{2}}$$`} />
-          <Equation
-            equation={`$$\\dot{V}_{out} = \\frac{\\dot{V}_{in} ⋅ C_{in N_{2}}}{1 - C_{out O_{2}} - C_{out CO_{2}}}$$`}
-          />
-          <Equation equation={`$$\\dot{V}_{out} = \\frac{60 nlpm ⋅ 78\\%}{1 - 18\\% - 2\\%}$$`} />
-          <Equation equation={`$$\\dot{V}_{out} = 58.5 nlpm$$`} />
-        </div>
-
-        <p>
-          <span className="font-bold">Step 2:</span> Calculate the oxygen flow in and out of the bioreactor
-        </p>
-        <div className="mb-6">
-          <Equation equation={`$$\\dot{V}_{O_{2}} = \\dot{V}*C_{O_{2}}$$`} />
-          <Equation equation={`$$\\dot{V}_{in O_{2}} = 60 nlpm * 21\\% = 12.6 nlpm$$`} />
-          <Equation equation={`$$\\dot{V}_{out O_{2}} = 58.5 nlpm * 18\\% = 10.53 nlpm$$`} />
-        </div>
-        <p>
-          <span className="font-bold">Step 3:</span> Calculate molar oxygen flow into the bioreactor using the ideal gas
-          law
-        </p>
-        <p className="text-sm italic">
-          Normal flow is assumed to be 1 atm and 0°C. Standard flow is assumed to be 14.696 psia and 60°F.
+          Use the ideal gas law. Normal flow is assumed to be 1 atm and 0°C. Standard flow is assumed to be 14.696 psia
+          and 60°F.
         </p>
         <div className="mb-6">
           <Equation equation={`$$P\\dot{V} = \\dot{n}RT$$`} />
           <Equation equation={`$$\\dot{n} = \\frac{P\\dot{V}}{RT}$$`} />
           <Equation
-            equation={`$$\\dot{n}_{in O_{2}} = \\frac{1 atm ⋅ 12.6 nlph}{8.2*10^{-5} \\frac{L⋅atm}{K⋅mmol} ⋅ 273.15K} = 562 mmol/hr$$`}
-          />
-          <Equation
-            equation={`$$\\dot{n}_{out O_{2}} = \\frac{1 atm ⋅ 10.53 nlph}{8.2*10^{-5} \\frac{L⋅atm}{K⋅mmol} ⋅ 273.15K} = 476 mmol/hr$$`}
+            equation={`$$\\dot{n} = \\frac{1 atm ⋅ 60 nlph}{8.2*10^{-5} \\frac{L⋅atm}{K⋅mmol} ⋅ 273.15K} = 2,677 mmol/hr$$`}
           />
         </div>
 
         <p>
-          <span className="font-bold">Step 4:</span>Calculate oxygen update rate
+          <span className="font-bold">Step 2:</span> Calculate oxygen uptake rate
+        </p>
+        <p className="text-sm italic">
+          Assume all nitrogen which enters the vessel exits through the vent. Use a nitrogen balance to determine the
+          exit gas rate.
         </p>
         <div className="mb-6">
-          <Equation equation={`$$OUR = \\frac{\\dot{n}_{in O_{2}} - \\dot{n}_{out O_{2}}}{V_l}$$`} />
-          <Equation equation={`$$OUR = \\frac{562 - 476 mmol/hr}{1 L}$$`} />
-          <Equation equation={`$$OUR = 86.3 mmol/L/hr$$`} />
+          <Equation equation={`$$OUR = \\frac{\\dot{n} ⋅ C_{in CO_{2}} - \\dot{n}_{out} ⋅ C_{out CO_{2}}}{V_l}$$`} />
+          <Equation
+            equation={`$$\\dot{n}_{out} = \\dot{n} ⋅ \\frac{1 - C_{in O_{2}}- C_{in CO_{2}}}{1 - C_{out O_{2}}- C_{out CO_{2}}}$$`}
+          />
+          <Equation
+            equation={`$$OUR = \\frac{\\dot{n}}{V_l} (C_{in O_{2}} - \\frac{1 - C_{in O_{2}}- C_{in CO_{2}}}{1 - C_{out O_{2}}- C_{out CO_{2}}} ⋅ C_{out CO_{2}})$$`}
+          />
+          <Equation
+            equation={`$$OUR = \\frac{2,677 mmol/hr}{1 L} (21\\% - \\frac{1 - 0\\% - 21\\%}{1 - 18\\% - 2\\%} ⋅ 18\\% )$$`}
+          />
+          <Equation equation={`$$OUR = 84.8 mmol/L/hr$$`} />
+        </div>
+        <p>
+          <span className="font-bold">Step 3:</span> Calculate carbon dioxide evolution rate
+        </p>
+        <div className="mb-6">
+          <Equation equation={`$$CER = \\frac{\\dot{n}_{out}}{V_l} ⋅ (C_{out CO_{2}} - C_{in CO_{2}}) $$`} />
+          <Equation
+            equation={`$$\\dot{n}_{out} = \\dot{n} ⋅ \\frac{1 - C_{in O_{2}}- C_{in CO_{2}}}{1 - C_{out O_{2}}- C_{out CO_{2}}}$$`}
+          />
+          <Equation
+            equation={`$$CER = \\frac{\\dot{n}}{V_l} ⋅ \\frac{1 - C_{in O_{2}}- C_{in CO_{2}}}{1 - C_{out O_{2}}- C_{out CO_{2}}} ⋅ (C_{out CO_{2}} - C_{in CO_{2}}) $$`}
+          />
+          <Equation
+            equation={`$$CER = \\frac{2,677 mmol/hr}{1 L} ⋅ \\frac{1 - 0\\% - 21\\%}{1 - 18\\% - 2\\%} ⋅ (2\\% - 0\\%) $$`}
+          />
+          <Equation equation={`$$CER = 52.9 mmol/L/hr $$`} />
+        </div>
+
+        <p>
+          <span className="font-bold">Step 4:</span> Calculate respiratory quotent
+        </p>
+        <div className="mb-6">
+          <Equation equation={`$$RQ = CER/OUR$$`} />
+          <Equation equation={`$$RQ = \\frac{52.9 mmol/L/hr}{84.8 mmol/L/hr}$$`} />
+          <Equation equation={`$$RQ = 0.62$$`} />
         </div>
 
         <p className="mb-2 text-lg font-medium">Definitions</p>
@@ -451,11 +478,130 @@ const ExampleCard = () => {
         <VariableDefinition equation={`$$P = $$`} definition="Pressure at standard conditions" />
         <VariableDefinition equation={`$$T = $$`} definition="Temperature at standard conditions" />
         <VariableDefinition equation={`$$R = $$`} definition="Ideal gas constant" />
-        <VariableDefinition equation={`$$\\dot{n} = $$`} definition="Molar air flowrate" />
+        <VariableDefinition equation={`$$\\dot{n} = $$`} definition="Molar air flowrate in" />
+        <VariableDefinition equation={`$$\\dot{n}_{out} = $$`} definition="Molar air flowrate out" />
         <VariableDefinition equation={`$$OUR = $$`} definition="Oxygen uptake rate" />
+        <VariableDefinition equation={`$$CER = $$`} definition="Carbon dioxide evolution rate" />
+        <VariableDefinition equation={`$$OUR = $$`} definition="respiratory quotient" />
       </>
     </CalcCard>
   )
 }
+
+const OURHint = () => (
+  <span className="label-text-alt">
+    <div className="dropdown dropdown-end">
+      <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          ></path>
+        </svg>
+      </label>
+      <div tabIndex={0} className="card dropdown-content compact rounded-box w-64 bg-base-100 shadow">
+        <div className="card-body">
+          <h2 className="card-title">Oxygen Uptake Rate</h2>
+          <p>
+            The <span className="font-bold">OUR</span> is the measurment of the organisms oxygen consumption.
+          </p>
+          <Equation equation={`$$OUR = \\frac{\\dot{n} ⋅ C_{in CO_{2}} - \\dot{n}_{out} ⋅ C_{out CO_{2}}}{V_l}$$`} />
+          <p>
+            The max <span className="font-bold">OUR</span> is used for the scale-up and design of fermentation vessels.
+            A higher <span className="font-bold">OUR</span> requires the fermenter to be designed with a higher target
+            <span className="font-bold">OTR </span> with increased agitation and aeration. (Oxygen Transfer Rate)
+          </p>
+          <p>
+            The max <span className="font-bold">OUR</span> shows how difficult the fermention will be in terms of oxygen
+            transfer
+          </p>
+          <table className="table w-full">
+            <tbody>
+              {/* row 1 */}
+              <tr>
+                <td>Easy</td>
+                <td>{`< 150 mmol/L/hr`}</td>
+              </tr>
+              {/* row 2 */}
+              <tr>
+                <td>Average</td>
+                <td>{`150-300 mmol/L/hr`}</td>
+              </tr>
+              {/* row 3 */}
+              <tr>
+                <td>Difficult</td>
+                <td>{`> 300 mmol/L/hr`}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </span>
+)
+
+const CERHint = () => (
+  <span className="label-text-alt">
+    <div className="dropdown dropdown-end">
+      <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          ></path>
+        </svg>
+      </label>
+      <div tabIndex={0} className="card dropdown-content compact rounded-box w-64 bg-base-100 shadow">
+        <div className="card-body">
+          <h2 className="card-title">CO2 Evolution Rate</h2>
+          <p>
+            The <span className="font-bold">CER</span> is the measurment of the organism's carbon dioxide production.
+          </p>
+          <Equation equation={`$$CER = \\frac{\\dot{n}_{out}}{V_l} ⋅ (C_{out CO_{2}} - C_{in CO_{2}}) $$`} />
+          <p>
+            Changes in <span className="font-bold">CER</span> can be used to identify different fermentation stages
+            (lag, exponential, stationary, death) or to calculate the specific growth rate of the organism
+            <span className="font-bold"> µ</span>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </span>
+)
+
+const RQHint = () => (
+  <span className="label-text-alt">
+    <div className="dropdown dropdown-end">
+      <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          ></path>
+        </svg>
+      </label>
+      <div tabIndex={0} className="card dropdown-content compact rounded-box w-64 bg-base-100 shadow">
+        <div className="card-body">
+          <h2 className="card-title">Respiratory Quotient </h2>
+          <p>
+            The <span className="font-bold">RQ</span> is the ratio between carbon dioxide production and oxygen
+            consumption.
+          </p>
+          <Equation equation={`$$RQ = CER/OUR$$`} />
+          <p>
+            In an optimal system, the <span className="font-bold">RQ</span> should not exceed{' '}
+            <span className="font-bold">1.0</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </span>
+)
 
 export default OURPage

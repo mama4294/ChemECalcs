@@ -21,7 +21,7 @@ const Agitation = () => {
         <CalcBody>
           <GridCard name="Tip Speed" description="Calculate impeller tip speed" link="/fermentation/tipspeed" />
           <GridCard name="Agitation Scale Up" description="Scaleup to a larger vessel" link="/fermentation/scaleup" />
-          <GridCard name="Oxygen Uptake Rate" description="Calculate OUR in a fermentation" link="/fermentation/our" />
+          <GridCard name="Respiration" description="Calculate OUR, CER, and RQ" link="/fermentation/our" />
         </CalcBody>
       </PageContainer>
     </>
