@@ -490,7 +490,7 @@ const ExampleCard = () => {
 
 const OURHint = () => (
   <span className="label-text-alt">
-    <div className="dropdown dropdown-end">
+    <div className="dropdown-end dropdown">
       <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
           <path
@@ -505,7 +505,7 @@ const OURHint = () => (
         <div className="card-body">
           <h2 className="card-title">Oxygen Uptake Rate</h2>
           <p>
-            The <span className="font-bold">OUR</span> is the measurment of the organisms oxygen consumption.
+            The <span className="font-bold">OUR</span> is the measurment of the organism&apos;s oxygen consumption.
           </p>
           <Equation equation={`$$OUR = \\frac{\\dot{n} ⋅ C_{in CO_{2}} - \\dot{n}_{out} ⋅ C_{out CO_{2}}}{V_l}$$`} />
           <p>
@@ -544,7 +544,7 @@ const OURHint = () => (
 
 const CERHint = () => (
   <span className="label-text-alt">
-    <div className="dropdown dropdown-end">
+    <div className="dropdown-end dropdown">
       <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
           <path
@@ -559,7 +559,8 @@ const CERHint = () => (
         <div className="card-body">
           <h2 className="card-title">CO2 Evolution Rate</h2>
           <p>
-            The <span className="font-bold">CER</span> is the measurment of the organism's carbon dioxide production.
+            The <span className="font-bold">CER</span> is the measurment of the organism&apos;s carbon dioxide
+            production.
           </p>
           <Equation equation={`$$CER = \\frac{\\dot{n}_{out}}{V_l} ⋅ (C_{out CO_{2}} - C_{in CO_{2}}) $$`} />
           <p>
@@ -575,7 +576,7 @@ const CERHint = () => (
 
 const RQHint = () => (
   <span className="label-text-alt">
-    <div className="dropdown dropdown-end">
+    <div className="dropdown-end dropdown">
       <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
           <path
