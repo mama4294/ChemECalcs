@@ -19,6 +19,7 @@ import {
   handleChangeValue,
   useGeomentryStateReducer,
 } from '../../logic/geometry'
+import Rectangle3D from '../../components/3D shapes/Rectangle3D'
 
 const Box = () => {
   const paths = [
@@ -255,9 +256,15 @@ const Box = () => {
             </>
           </CalcCard>
           <CalcCard title="Box">
-            <IconContainer>
+            <Rectangle3D
+              width={state.width.calculatedValue.value}
+              length={state.length.calculatedValue.value}
+              height={state.height.calculatedValue.value}
+            />
+
+            {/* <IconContainer>
               <IconBoxUnits />
-            </IconContainer>
+            </IconContainer> */}
           </CalcCard>
         </CalcBody>
       </PageContainer>

@@ -10,6 +10,8 @@
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json|tsx|jsx)\""
   },
   "dependencies": {
+    "@react-three/drei": "^9.80.9",
+    "@react-three/fiber": "^8.13.7",
     "@types/react-latex": "^2.0.0",
     "canvas": "^2.10.2",
     "convert-units": "^3.0.0-beta.5",
@@ -21,6 +23,7 @@
     "react-dom": "18.2.0",
     "react-katex": "^3.0.1",
     "react-latex": "^2.0.0",
+    "three": "^0.155.0",
     "zod": "^3.18.0"
   },
   "devDependencies": {
