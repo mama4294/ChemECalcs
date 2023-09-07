@@ -9,7 +9,7 @@ const ShapeContainer = ({ children }: { children: JSX.Element }) => {
 
   return (
     <div className="h-[500px]">
-      <Canvas camera={{ position: [3, 3, 0], fov: 40 }}>
+      <Canvas camera={{ position: [3, 1, 0], fov: 40 }}>
         <OrbitControls enableZoom={false} />
         <LightScene />
         {children}
