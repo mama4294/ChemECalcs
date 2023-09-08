@@ -5,7 +5,6 @@ import { CalcBody } from '../../components/calculators/calcBody'
 import { CalcCard } from '../../components/calculators/calcCard'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
-import { IconContainer } from '../../icons/IconContainer'
 import { DefaultUnitContext, DefaultUnitContextType } from '../../contexts/defaultUnitContext'
 import { Metadata } from '../../components/Layout/Metadata'
 import { ShortInputType } from '../../types'
@@ -18,12 +17,13 @@ import {
   handleChangeValue,
   useGeomentryStateReducer,
 } from '../../logic/geometry'
-import { IconHemisphereUnits } from '../../icons/iconHemiphereUnits'
+import ShapeContainer from '../../components/3D shapes/DyanmicShapes'
+import { Hemisphere3D } from '../../components/3D shapes/StaticShapes'
 
 const Shape = () => {
   const paths = [
     { title: 'Geometry', href: '/geometry' },
-    { title: 'hemisphere', href: '/geometry/hemisphere' },
+    { title: 'Hemisphere', href: '/geometry/hemisphere' },
   ]
 
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
@@ -172,9 +172,11 @@ const Shape = () => {
             </>
           </CalcCard>
           <CalcCard title="Hemisphere">
-            <IconContainer>
-              <IconHemisphereUnits />
-            </IconContainer>
+            <div className="h-[500px]">
+              <ShapeContainer>
+                <Hemisphere3D />
+              </ShapeContainer>
+            </div>
           </CalcCard>
         </CalcBody>
       </PageContainer>

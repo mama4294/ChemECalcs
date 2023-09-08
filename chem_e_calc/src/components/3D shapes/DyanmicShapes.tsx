@@ -4,17 +4,17 @@ import { OrbitControls } from '@react-three/drei'
 import { PointLight } from 'three'
 import { COLOR3D } from '../../constants/colors'
 
-const ShapeContainer = ({ children }: { children: JSX.Element }) => {
+const ShapeContainer = ({ orbit = true, children }: { orbit?: boolean; children: JSX.Element }) => {
   // console.table({ width, length, height })
 
   return (
-    <div className="h-[500px]">
-      <Canvas camera={{ position: [3, 1, 0], fov: 40 }}>
-        <OrbitControls enableZoom={false} />
+    <>
+      <Canvas camera={{ position: [3, 1, 0], fov: 60 }}>
+        {orbit && <OrbitControls enableZoom={false} />}
         <LightScene />
         {children}
       </Canvas>
-    </div>
+    </>
   )
 }
 
@@ -30,16 +30,26 @@ const LightScene = () => {
   )
 }
 
-export const Box3D = ({ width, length, height }: { width: number; length: number; height: number }) => {
-  const scaleBoxToFit = ({ width, length, height }: { width: number; length: number; height: number }) => {
-    const max = Math.max(width, length, height)
-    return { width: width / max, length: length / max, height: height / max }
-  }
+const scaleBoxToFit = ({ width, length, height }: { width: number; length: number; height: number }) => {
+  const max = Math.max(width, length, height)
+  return { width: width / max, length: length / max, height: height / max }
+}
 
+export const Box3D = ({ width, length, height }: { width: number; length: number; height: number }) => {
   const scaled = scaleBoxToFit({ width, length, height })
   return (
     <mesh rotation={[0, Math.PI / 4, 0]}>
       <boxGeometry args={[scaled.width, scaled.height, scaled.length]} />
+      <meshStandardMaterial color={COLOR3D} />
+    </mesh>
+  )
+}
+
+export const Pyramid3D = ({ width, length, height }: { width: number; length: number; height: number }) => {
+  const scaled = scaleBoxToFit({ width, length, height })
+  return (
+    <mesh rotation={[0, Math.PI / 4, 0]}>
+      <cylinderGeometry args={[0, scaled.width, scaled.height, 4, 1]} />
       <meshStandardMaterial color={COLOR3D} />
     </mesh>
   )

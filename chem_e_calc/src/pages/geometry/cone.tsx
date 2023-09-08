@@ -19,7 +19,7 @@ import {
   useGeomentryStateReducer,
 } from '../../logic/geometry'
 import { IconConeUnits } from '../../icons/iconConeUnits'
-import ShapeContainer, { Cylinder3D } from '../../components/3D shapes/ThreeJSShapes'
+import ShapeContainer, { Cylinder3D } from '../../components/3D shapes/DyanmicShapes'
 
 const Box = () => {
   const paths = [
@@ -216,13 +216,15 @@ const Box = () => {
             </>
           </CalcCard>
           <CalcCard title="Cone">
-            <ShapeContainer>
-              <Cylinder3D
-                topDiameter={0}
-                bottomDiameter={state.diameter.calculatedValue.value}
-                height={state.height.calculatedValue.value}
-              />
-            </ShapeContainer>
+            <div className="h-[500px]">
+              <ShapeContainer>
+                <Cylinder3D
+                  topDiameter={0}
+                  bottomDiameter={state.diameter.calculatedValue.value}
+                  height={state.height.calculatedValue.value}
+                />
+              </ShapeContainer>
+            </div>
           </CalcCard>
         </CalcBody>
       </PageContainer>

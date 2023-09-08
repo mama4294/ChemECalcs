@@ -8,6 +8,8 @@ import { IconHemisphere } from '../../icons/iconHemiphere'
 import { IconPyramid } from '../../icons/iconPyramid'
 import { IconSphere } from '../../icons/iconSphere'
 import { IconTank } from '../../icons/IconTank'
+import ShapeContainer from '../../components/3D shapes/DyanmicShapes'
+import { Box3D, Cone3D, Cylinder3D, Hemisphere3D, Sphere3D } from '../../components/3D shapes/StaticShapes'
 
 const Geometry = () => {
   return (
@@ -43,22 +45,42 @@ const Geometry = () => {
         {/* Calculator */}
         <div className="my-3 grid gap-9 py-3 text-center  md:grid-cols-3">
           <GridCard name="Cylinder" link="/geometry/cylinder">
-            <IconCylinder />
+            <div className="h-[100px] w-[100px]">
+              <ShapeContainer orbit={false}>
+                <Cylinder3D />
+              </ShapeContainer>
+            </div>
           </GridCard>
           <GridCard name="Box" link="/geometry/box">
-            <IconBox />
+            <div className="h-[100px] w-[100px]">
+              <ShapeContainer orbit={false}>
+                <Box3D />
+              </ShapeContainer>
+            </div>
           </GridCard>
           <GridCard name="Cone" link="/geometry/cone">
-            <IconCone />
+            <div className="h-[100px] w-[100px]">
+              <ShapeContainer orbit={false}>
+                <Cone3D />
+              </ShapeContainer>
+            </div>
           </GridCard>
           <GridCard name="Sphere" link="/geometry/sphere">
-            <IconSphere />
+            <div className="h-[100px] w-[100px]">
+              <ShapeContainer orbit={false}>
+                <Sphere3D />
+              </ShapeContainer>
+            </div>
           </GridCard>
-          <GridCard name="Pyramid" link="/geometry/pyramid">
+          {/* <GridCard name="Pyramid" link="/geometry/pyramid">
             <IconPyramid />
-          </GridCard>
+          </GridCard> */}
           <GridCard name="Hemisphere" link="/geometry/hemisphere">
-            <IconHemisphere />
+            <div className="h-[100px] w-[100px]">
+              <ShapeContainer orbit={false}>
+                <Hemisphere3D />
+              </ShapeContainer>
+            </div>
           </GridCard>
           <GridCard name="Tank" link="/geometry/tank" span={1}>
             <IconTank />

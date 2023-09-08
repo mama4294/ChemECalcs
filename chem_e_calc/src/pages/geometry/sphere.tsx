@@ -19,11 +19,13 @@ import {
   useGeomentryStateReducer,
 } from '../../logic/geometry'
 import { IconSphereUnits } from '../../icons/iconSphereUnits'
+import ShapeContainer from '../../components/3D shapes/DyanmicShapes'
+import { Sphere3D } from '../../components/3D shapes/StaticShapes'
 
 const Shape = () => {
   const paths = [
     { title: 'Geometry', href: '/geometry' },
-    { title: 'sphere', href: '/geometry/sphere' },
+    { title: 'Sphere', href: '/geometry/sphere' },
   ]
 
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
@@ -172,9 +174,11 @@ const Shape = () => {
             </>
           </CalcCard>
           <CalcCard title="Sphere">
-            <IconContainer>
-              <IconSphereUnits />
-            </IconContainer>
+            <div className="h-[500px]">
+              <ShapeContainer>
+                <Sphere3D />
+              </ShapeContainer>
+            </div>
           </CalcCard>
         </CalcBody>
       </PageContainer>

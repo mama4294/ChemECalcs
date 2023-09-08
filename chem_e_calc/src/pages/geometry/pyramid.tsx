@@ -19,6 +19,7 @@ import {
   useGeomentryStateReducer,
 } from '../../logic/geometry'
 import { IconPyramidUnits } from '../../icons/iconPyramidUnits'
+import ShapeContainer, { Pyramid3D } from '../../components/3D shapes/DyanmicShapes'
 
 const Pyramid = () => {
   const paths = [
@@ -255,9 +256,18 @@ const Pyramid = () => {
             </>
           </CalcCard>
           <CalcCard title="Pyramid">
-            <IconContainer>
+            <div className="h-[500px]">
+              <ShapeContainer>
+                <Pyramid3D
+                  width={state.width.calculatedValue.value}
+                  length={state.length.calculatedValue.value}
+                  height={state.height.calculatedValue.value}
+                />
+              </ShapeContainer>
+            </div>
+            {/* <IconContainer>
               <IconPyramidUnits />
-            </IconContainer>
+            </IconContainer> */}
           </CalcCard>
         </CalcBody>
       </PageContainer>
