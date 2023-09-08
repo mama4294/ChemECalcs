@@ -9,7 +9,7 @@ import { IconPyramid } from '../../icons/iconPyramid'
 import { IconSphere } from '../../icons/iconSphere'
 import { IconTank } from '../../icons/IconTank'
 import ShapeContainer from '../../components/3D shapes/DyanmicShapes'
-import { Box3D, Cone3D, Cylinder3D, Hemisphere3D, Sphere3D } from '../../components/3D shapes/StaticShapes'
+import { Box3D, Cone3D, Cylinder3D, Hemisphere3D, Sphere3D, Tank3D } from '../../components/3D shapes/StaticShapes'
 
 const Geometry = () => {
   return (
@@ -83,7 +83,12 @@ const Geometry = () => {
             </div>
           </GridCard>
           <GridCard name="Tank" link="/geometry/tank" span={1}>
-            <IconTank />
+            {/* <IconTank /> */}
+            <div className="h-[100px] w-[100px]">
+              <ShapeContainer orbit={false}>
+                <Tank3D />
+              </ShapeContainer>
+            </div>
           </GridCard>
         </div>
       </div>

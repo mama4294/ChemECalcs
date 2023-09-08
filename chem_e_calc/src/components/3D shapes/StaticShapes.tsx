@@ -1,3 +1,4 @@
+import { CapsuleGeometry } from 'three'
 import { COLOR3D } from '../../constants/colors'
 
 export const Box3D = () => {
@@ -46,6 +47,15 @@ export const Cone3D = () => {
   return (
     <mesh rotation={[0, Math.PI / 4, 0]}>
       <cylinderGeometry args={[0, 0.5, 1]} />
+      <meshStandardMaterial color={COLOR3D} />
+    </mesh>
+  )
+}
+
+export const Tank3D = () => {
+  return (
+    <mesh>
+      <capsuleGeometry args={[0.5, 1.5]} />
       <meshStandardMaterial color={COLOR3D} />
     </mesh>
   )
