@@ -8,13 +8,13 @@ const ShapeContainer = ({ orbit = true, children }: { orbit?: boolean; children:
   // console.table({ width, length, height })
 
   return (
-    <>
+    <div className={`h-full ${orbit ? 'cursor-grab' : ''}`}>
       <Canvas camera={{ position: [3, 1, 0], fov: 60 }}>
         {orbit && <OrbitControls enableZoom={false} />}
         <LightScene />
         {children}
       </Canvas>
-    </>
+    </div>
   )
 }
 
