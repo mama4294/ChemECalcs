@@ -350,6 +350,9 @@ const options: ChartOptions<'scatter'> = {
       ticks: {
         color: 'hsla(220, 13%, 69%, 1)',
       },
+      grid: {
+        display: false,
+      },
     },
     y: {
       type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
@@ -363,9 +366,13 @@ const options: ChartOptions<'scatter'> = {
       ticks: {
         color: 'hsla(220, 13%, 69%, 1)',
       },
+      grid: {
+        display: false,
+      },
     },
     y2: {
-      type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+      //Second axis for volum
+      type: 'linear',
       position: 'right',
 
       title: {
@@ -377,7 +384,7 @@ const options: ChartOptions<'scatter'> = {
         color: 'hsla(220, 13%, 69%, 1)',
       },
       grid: {
-        drawOnChartArea: false, // only want the grid lines for one axis to show up
+        display: false,
       },
     },
   },
