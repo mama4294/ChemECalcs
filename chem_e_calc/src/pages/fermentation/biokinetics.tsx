@@ -1,5 +1,5 @@
 import { NextPage } from 'next'
-import React, { useContext, useReducer } from 'react'
+import React, { useContext, useEffect, useReducer } from 'react'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
 import { CalcCard } from '../../components/calculators/calcCard'
@@ -10,13 +10,14 @@ import { convertUnits } from '../../utils/units'
 import { ShortInputType } from '../../types'
 import { InputFieldConstant, InputFieldWithUnit } from '../../components/inputs/inputField'
 import { updateCalculatedValue } from '../../logic/logic'
-import { Equation, VariableDefinition } from '../../components/Equation'
 import { Metadata } from '../../components/Layout/Metadata'
 import { Scatter } from 'react-chartjs-2'
 import { Chart, ChartData, Point, ChartOptions, LinearScale } from 'chart.js/auto'
+import { extractColorFromCSS, extractThemeColorsFromDOM } from '../../utils/colors'
 Chart.register(LinearScale)
 
 var odex = require('odex')
+const baseColor = extractColorFromCSS('--bc')
 
 type State = {
   umax: ShortInputType
@@ -345,10 +346,10 @@ const options: ChartOptions<'scatter'> = {
       title: {
         display: true,
         text: 'Time (hours)',
-        color: 'hsla(220, 13%, 69%, 1)',
+        color: baseColor,
       },
       ticks: {
-        color: 'hsla(220, 13%, 69%, 1)',
+        color: baseColor,
       },
       grid: {
         display: false,
@@ -361,10 +362,10 @@ const options: ChartOptions<'scatter'> = {
       title: {
         display: true,
         text: 'Concentration (g/L)',
-        color: 'hsla(220, 13%, 69%, 1)',
+        color: baseColor,
       },
       ticks: {
-        color: 'hsla(220, 13%, 69%, 1)',
+        color: baseColor,
       },
       grid: {
         display: false,
@@ -378,10 +379,10 @@ const options: ChartOptions<'scatter'> = {
       title: {
         display: true,
         text: 'Volume (L)',
-        color: 'hsla(220, 13%, 69%, 1)',
+        color: baseColor,
       },
       ticks: {
-        color: 'hsla(220, 13%, 69%, 1)',
+        color: baseColor,
       },
       grid: {
         display: false,
@@ -392,7 +393,7 @@ const options: ChartOptions<'scatter'> = {
     legend: {
       display: true,
       labels: {
-        color: 'hsla(220, 13%, 69%, 1)',
+        color: baseColor,
       },
     },
 
