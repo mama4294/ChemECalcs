@@ -291,7 +291,7 @@ const calculate = (state: State): ChartData<'scatter'> => {
 
   const start = 0
   const end = 30
-  const dt = 1
+  const dt = 0.5
   const y0: timepoint = [X0, S0, V0]
   const s = new odex.Solver(ode(umax, Ks, Yxs_abs, Sf), 3)
   const f = s.integrate(0, y0)
@@ -314,7 +314,7 @@ const calculate = (state: State): ChartData<'scatter'> => {
         pointRadius: 1,
         showLine: true,
         yAxisID: 'y',
-        // backgroundColor: 'rgb(255, 99, 132)',
+        pointHitRadius: 2,
       },
       {
         label: 'Substrate',
@@ -322,7 +322,7 @@ const calculate = (state: State): ChartData<'scatter'> => {
         pointRadius: 1,
         showLine: true,
         yAxisID: 'y',
-        // backgroundColor: 'rgb(255, 99, 132)',
+        pointHitRadius: 2,
       },
       {
         label: 'Volume',
@@ -330,6 +330,7 @@ const calculate = (state: State): ChartData<'scatter'> => {
         pointRadius: 1,
         showLine: true,
         yAxisID: 'y2',
+        pointHitRadius: 2,
       },
     ],
   }
@@ -408,12 +409,24 @@ const options: ChartOptions<'scatter'> = {
             label += ': '
           }
           if (context.parsed.y !== null) {
-            label += `${context.parsed.y.toLocaleString('en-US', { maximumSignificantDigits: 2 })} g/L `
+            switch (context.dataset.label) {
+              case 'Cells':
+                label += `${context.parsed.y.toLocaleString('en-US', { maximumSignificantDigits: 2 })} g/L `
+                break
+
+              case 'Substrate':
+                label += `${context.parsed.y.toLocaleString('en-US', { maximumSignificantDigits: 2 })} g/L `
+                break
+
+              case 'Volume':
+                label += `${context.parsed.y.toLocaleString('en-US', { maximumSignificantDigits: 2 })} L `
+                break
+            }
           }
           return label
         },
         title: function (context) {
-          return 'Hour ' + context[0]!.parsed.x.toLocaleString('en-US', { maximumSignificantDigits: 2 })
+          return 'Hour ' + context[0]!.parsed.x.toLocaleString('en-US', { maximumSignificantDigits: 3 })
         },
       },
     },
