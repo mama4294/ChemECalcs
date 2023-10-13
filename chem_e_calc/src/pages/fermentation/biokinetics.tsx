@@ -388,9 +388,26 @@ const options: ChartOptions<'scatter'> = {
         color: 'hsla(220, 13%, 69%, 1)',
       },
     },
+
     tooltip: {
       enabled: true,
       position: 'nearest',
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || ''
+
+          if (label) {
+            label += ': '
+          }
+          if (context.parsed.y !== null) {
+            label += `${context.parsed.y.toLocaleString('en-US', { maximumSignificantDigits: 2 })} g/L `
+          }
+          return label
+        },
+        title: function (context) {
+          return 'Hour ' + context[0]!.parsed.x.toLocaleString('en-US', { maximumSignificantDigits: 2 })
+        },
+      },
     },
   },
 }
