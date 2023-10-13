@@ -12,6 +12,11 @@ import { InputFieldConstant, InputFieldWithUnit } from '../../components/inputs/
 import { updateCalculatedValue } from '../../logic/logic'
 import { Equation, VariableDefinition } from '../../components/Equation'
 import { Metadata } from '../../components/Layout/Metadata'
+import { Scatter } from 'react-chartjs-2'
+import { Chart, ChartData, Point, ChartOptions, LinearScale } from 'chart.js/auto'
+Chart.register(LinearScale)
+
+var odex = require('odex')
 
 type State = {
   umax: ShortInputType
@@ -220,36 +225,9 @@ const AnswerCard = ({ state }: { state: State }) => {
     return (flow * pressure) / (R * (temp + 273.15))
   }
 
-  // const O2_in = objO2_in.calculatedValue.value / 100 // % vol/vol
-  // const O2_out = objO2_out.calculatedValue.value / 100 // % vol/vol
-  // const CO2_in = objCO2_in.calculatedValue.value / 100 // % vol/vol
-  // const CO2_out = objCO2_out.calculatedValue.value / 100 // % vol/vol
-  // const flow_in = Objflow_in.calculatedValue.value //nlph
-  const volume = ObjVolume.calculatedValue.value //L
-  // const flow_out = (flow_in * (1 - O2_in - CO2_in)) / (1 - O2_out - CO2_out) //Nitrogen balance assuming no nitrogen accumulation in the bioreactor
-  // const moles_in = flowToMoles({ flow: flow_in, temp: 0, pressure: 1 }) //mmoles/hr
-  // const moles_out = flowToMoles({ flow: flow_out, temp: 0, pressure: 1 }) //mmoles/hr
-  // const OUR = (moles_in * O2_in - moles_out * O2_out) / volume
-  // const CER = (moles_out / volume) * (CO2_out - CO2_in)
-  // const RQ = CER / OUR
+  const data = calculate(state)
 
-  return (
-    <CalcCard title="Answer">
-      <>
-        <InputFieldConstant
-          name="flow in"
-          label="Flow In"
-          placeholder="0"
-          selected={true}
-          displayValue={{ value: volume.toLocaleString(), unit: 'mmoles/hr' }}
-          error=""
-          unitType=""
-          focusText=""
-          onChangeValue={() => console.log()}
-        />
-      </>
-    </CalcCard>
-  )
+  return <CalcCard title="Chart">{<Scatter options={options} data={data} className="text-red-500" />}</CalcCard>
 }
 
 export default OURPage
@@ -261,7 +239,7 @@ enum Phase {
   feed,
 }
 
-const calculate = (state: State) => {
+const calculate = (state: State): ChartData<'scatter'> => {
   const V0 = state.volume.calculatedValue.value //l
   const OD0 = state.OD.calculatedValue.value //OD600
   const umax = state.umax.calculatedValue.value //1/hr
@@ -282,14 +260,6 @@ const calculate = (state: State) => {
 
   // Define and Solve System of Differential Equations ---------------------------------------------------------
 
-  const mu = (S: number) => {
-    //Specific Growth Rate
-    return (umax * S) / (S + Ks)
-  }
-  const rX = (X: number, S: number) => {
-    //Rate of Cell Growth
-    return mu(S) * X
-  }
   const F = (t: number, phase: Phase) => {
     // Volumetric Feed Flowrate
     if (phase == Phase.feed) return 0
@@ -303,11 +273,124 @@ const calculate = (state: State) => {
 
   type timepoint = [number, number, number]
 
-  const Batch = (y: timepoint, t: number): timepoint => {
-    const [X, S, V] = y
-    const dXdt = rX(X, S) - (X * F(t, Phase.feed)) / V
-    const dSdt = (F(t, Phase.feed) * (Sf - S)) / V - rX(X, S) / Yxs_abs
-    const dVdt = F(t, 0)
-    return [dXdt, dSdt, dVdt]
+  // X = y[0]
+  // S = y[1]
+  // V = y[2]
+  // x = t
+  // y = [X, S, V]
+
+  var ode = function (umax: number, Ks: number, Yxs_abs: number, Sf: number) {
+    return function (x: number, y: [number, number, number]) {
+      const dXdt = (y[0] * (umax * y[1])) / (y[1] + Ks) - (y[0] * F(x, Phase.feed)) / y[2] //X * (umax * S) / (S + Ks) - (X * F(x, Phase.feed)) / V
+      const dSdt = (F(x, Phase.feed) * (Sf - y[1])) / y[2] - (y[0] * (umax * y[1])) / (y[1] + Ks) / Yxs_abs //(F(x, Phase.feed) * (Sf - S)) / V - X * (umax * S) / (S + Ks) / Yxs_abs
+      const dVdt = F(x, 0) //F(x, 0)
+      return [dXdt, dSdt, dVdt]
+    }
   }
+
+  const start = 0
+  const end = 30
+  const dt = 1
+  const y0: timepoint = [X0, S0, V0]
+  const s = new odex.Solver(ode(umax, Ks, Yxs_abs, Sf), 3)
+  const f = s.integrate(0, y0)
+  const xData: Point[] = [] // [{x: time, y:value}]
+  const sData: Point[] = [] // [{x: time, y:value}]
+  const vData: Point[] = [] // [{x: time, y:value}]
+
+  for (let t = start; t <= end; t += dt) {
+    let y = f(t)
+    xData.push({ x: t, y: y[0] })
+    sData.push({ x: t, y: y[1] })
+    vData.push({ x: t, y: y[2] })
+  }
+
+  return {
+    datasets: [
+      {
+        label: 'Cells',
+        data: xData,
+        pointRadius: 1,
+        showLine: true,
+        yAxisID: 'y',
+        // backgroundColor: 'rgb(255, 99, 132)',
+      },
+      {
+        label: 'Substrate',
+        data: sData,
+        pointRadius: 1,
+        showLine: true,
+        yAxisID: 'y',
+        // backgroundColor: 'rgb(255, 99, 132)',
+      },
+      {
+        label: 'Volume',
+        data: vData,
+        pointRadius: 1,
+        showLine: true,
+        yAxisID: 'y2',
+      },
+    ],
+  }
+}
+
+const options: ChartOptions<'scatter'> = {
+  responsive: true,
+  interaction: {
+    intersect: false,
+    mode: 'x',
+  },
+  scales: {
+    x: {
+      title: {
+        display: true,
+        text: 'Time (hours)',
+        color: 'hsla(220, 13%, 69%, 1)',
+      },
+      ticks: {
+        color: 'hsla(220, 13%, 69%, 1)',
+      },
+    },
+    y: {
+      type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+      position: 'left',
+      min: 0,
+      title: {
+        display: true,
+        text: 'Concentration (g/L)',
+        color: 'hsla(220, 13%, 69%, 1)',
+      },
+      ticks: {
+        color: 'hsla(220, 13%, 69%, 1)',
+      },
+    },
+    y2: {
+      type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+      position: 'right',
+
+      title: {
+        display: true,
+        text: 'Volume (L)',
+        color: 'hsla(220, 13%, 69%, 1)',
+      },
+      ticks: {
+        color: 'hsla(220, 13%, 69%, 1)',
+      },
+      grid: {
+        drawOnChartArea: false, // only want the grid lines for one axis to show up
+      },
+    },
+  },
+  plugins: {
+    legend: {
+      display: true,
+      labels: {
+        color: 'hsla(220, 13%, 69%, 1)',
+      },
+    },
+    tooltip: {
+      enabled: true,
+      position: 'nearest',
+    },
+  },
 }
