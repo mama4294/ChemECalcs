@@ -1,5 +1,5 @@
 import { NextPage } from 'next'
-import React, { useContext, useEffect, useReducer } from 'react'
+import React, { useContext, useReducer } from 'react'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
 import { CalcCard } from '../../components/calculators/calcCard'
@@ -13,7 +13,7 @@ import { updateCalculatedValue } from '../../logic/logic'
 import { Metadata } from '../../components/Layout/Metadata'
 import { Scatter } from 'react-chartjs-2'
 import { Chart, ChartData, Point, ChartOptions, LinearScale } from 'chart.js/auto'
-import { extractColorFromCSS, extractThemeColorsFromDOM } from '../../utils/colors'
+import { extractColorFromCSS } from '../../utils/colors'
 Chart.register(LinearScale)
 
 var odex = require('odex')
@@ -22,8 +22,10 @@ const baseColor = extractColorFromCSS('--bc')
 type State = {
   umax: ShortInputType
   volume: ShortInputType
-  feedVolume: ShortInputType
+  substrateConc: ShortInputType
   OD: ShortInputType
+  feedVolume: ShortInputType
+  feedConc: ShortInputType
 }
 
 const OURPage: NextPage = () => {
@@ -39,8 +41,8 @@ const OURPage: NextPage = () => {
       label: 'Max Specific Growth Rate (umax)',
       placeholder: '0',
       unitType: 'length',
-      displayValue: { value: '0.2', unit: '1/hr' },
-      calculatedValue: { value: 0.2, unit: '1/hr' },
+      displayValue: { value: '0.25', unit: '1/hr' },
+      calculatedValue: { value: 0.25, unit: '1/hr' },
       selectiontext: '',
       focusText: 'The max growth rate of the organism',
       error: '',
@@ -62,10 +64,20 @@ const OURPage: NextPage = () => {
         }
       },
       selectiontext: '',
-      focusText: 'Enter the liquid volume',
+      focusText: 'The initial fermenter liquid volume',
       error: '',
     },
-
+    substrateConc: {
+      name: 'substrateConc',
+      label: 'Initial Substrate Concentration',
+      placeholder: '0',
+      unitType: 'volume',
+      displayValue: { value: '20', unit: 'g/L' },
+      calculatedValue: { value: 20, unit: 'g/L' },
+      selectiontext: '',
+      focusText: 'Initial substrate concentration in the media',
+      error: '',
+    },
     feedVolume: {
       name: 'feedVolume',
       label: 'Feed Volume',
@@ -83,7 +95,7 @@ const OURPage: NextPage = () => {
         }
       },
       selectiontext: '',
-      focusText: 'Enter the liquid volume',
+      focusText: 'Liquid volume of the feed to be added to the fermenter',
       error: '',
     },
     OD: {
@@ -95,6 +107,17 @@ const OURPage: NextPage = () => {
       calculatedValue: { value: 0.2, unit: 'OD600' },
       selectiontext: '',
       focusText: 'Optical Density at OD600 at the start of fermentation',
+      error: '',
+    },
+    feedConc: {
+      name: 'feedConc',
+      label: 'Feed Concentration',
+      placeholder: '0',
+      unitType: 'volume',
+      displayValue: { value: '500', unit: 'g/L' },
+      calculatedValue: { value: 500, unit: 'g/L' },
+      selectiontext: '',
+      focusText: 'Substrate concentration in the feed stream',
       error: '',
     },
   }
@@ -176,7 +199,7 @@ const OURPage: NextPage = () => {
     })
   }
 
-  const { umax, volume, OD, feedVolume } = state
+  const { umax, volume, OD, feedVolume, feedConc, substrateConc } = state
 
   return (
     <>
@@ -189,7 +212,7 @@ const OURPage: NextPage = () => {
         <Breadcrumbs paths={paths} />
         <CalcHeader title={'Biokinetics'} text={'Model fermentation growth rate and substrate consumption'} />
         <CalcBody>
-          <CalcCard title={'Calculator'}>
+          <CalcCard title={'Inputs'}>
             <>
               <div className="mb-0 flex flex-col">
                 <InputFieldWithUnit
@@ -204,6 +227,18 @@ const OURPage: NextPage = () => {
                   focusText={volume.focusText}
                   onChangeValue={handleChangeValue}
                   onChangeUnit={handleChangeUnit}
+                />
+                <InputFieldConstant
+                  key={substrateConc.name}
+                  name={substrateConc.name}
+                  label={substrateConc.label}
+                  placeholder={substrateConc.placeholder}
+                  selected={false}
+                  displayValue={substrateConc.displayValue}
+                  error={substrateConc.error}
+                  unitType={substrateConc.unitType}
+                  focusText={substrateConc.focusText}
+                  onChangeValue={handleChangeValueUnitless}
                 />
                 <InputFieldConstant
                   key={umax.name}
@@ -243,6 +278,18 @@ const OURPage: NextPage = () => {
                   onChangeValue={handleChangeValue}
                   onChangeUnit={handleChangeUnit}
                 />
+                <InputFieldConstant
+                  key={feedConc.name}
+                  name={feedConc.name}
+                  label={feedConc.label}
+                  placeholder={feedConc.placeholder}
+                  selected={false}
+                  displayValue={feedConc.displayValue}
+                  error={feedConc.error}
+                  unitType={feedConc.unitType}
+                  focusText={feedConc.focusText}
+                  onChangeValue={handleChangeValueUnitless}
+                />
               </div>
             </>
           </CalcCard>
@@ -254,8 +301,48 @@ const OURPage: NextPage = () => {
 }
 
 const AnswerCard = ({ state }: { state: State }) => {
-  const data = calculate(state)
-  return <CalcCard title="Chart">{<Scatter options={options} data={data} />}</CalcCard>
+  const { chart, details } = calculate(state)
+  return (
+    <CalcCard title="Solution">
+      <>
+        <Scatter options={options} data={chart} />
+
+        <InputFieldConstant
+          name="batchDuration"
+          label="Batch Duration"
+          placeholder="0"
+          selected={true}
+          displayValue={{ value: details.batchDuration.toLocaleString(), unit: 'hr' }}
+          error=""
+          unitType=""
+          focusText=""
+          onChangeValue={() => console.log()}
+        />
+        <InputFieldConstant
+          name="feedDuration"
+          label="Feed Duration"
+          placeholder="0"
+          selected={true}
+          displayValue={{ value: details.feedDuration.toLocaleString(), unit: 'hr' }}
+          error=""
+          unitType=""
+          focusText=""
+          onChangeValue={() => console.log()}
+        />
+        <InputFieldConstant
+          name="totalDuration"
+          label="Total Duration"
+          placeholder="0"
+          selected={true}
+          displayValue={{ value: (details.batchDuration + details.feedDuration).toLocaleString(), unit: 'hr' }}
+          error=""
+          unitType=""
+          focusText=""
+          onChangeValue={() => console.log()}
+        />
+      </>
+    </CalcCard>
+  )
 }
 
 export default OURPage
@@ -267,39 +354,40 @@ enum Phase {
   feed,
 }
 
-const calculate = (state: State): ChartData<'scatter'> => {
+type Calculate = {
+  chart: ChartData<'scatter'>
+  details: {
+    batchDuration: number
+    feedDuration: number
+  }
+}
+
+const calculate = (state: State): Calculate => {
+  //ChartData<'scatter'>
   const V0 = state.volume.calculatedValue.value //l
   const Vfeed = state.feedVolume.calculatedValue.value //l
   const OD0 = state.OD.calculatedValue.value //OD600
   const umax = state.umax.calculatedValue.value //1/hr
+  const S0 = state.substrateConc.calculatedValue.value //g/L glucose
+  const Sf = state.feedConc.calculatedValue.value //g/L glucose
   const Vfinal = V0 + Vfeed //l
 
   // Biokinetic Parameters
-  const usp = umax * 0.25 //Scaling factor
+  const z = 0.25 //Scaling factor for specific growth rate setpoint
+  const usp = umax * z //Scaled specific growth rate
   const ms = 0.0031 // g substrate/g dry cells/hr, Cell maintenance consumption rate
   const Ks = 0.1823 // g substrate/L, Monod constant
   const YDCW_OD = 0.41 // g dry cells/OD, Conversion between OD and dry cell weight
   const Yxs_max = 0.49 // g dry cells/g substrate, Max biomass/substrate yield
   const Yxs_abs = Yxs_max * (umax / (umax - Yxs_max * ms)) // Asymptotic biomass/substrate yield
-  const tspan = 300
+
+  // console.table({ usp, Yxs_abs, ms, V0, Sf })
 
   // Define Initial Conditions ---------------------------------------------------------------------------------
   const X0 = OD0 * YDCW_OD // g dry cells/L
-  const S0 = 20 // g glucose/L
-  const Sf = 500 // Feed concentration, g glucose/L
+  const S1_lim = 0.001 // Concentration of substrate to proceed to fed-batch phase
 
   // Define and Solve System of Differential Equations ---------------------------------------------------------
-
-  const F = (t: number, phase: Phase, x: number) => {
-    // Volumetric Feed Flowrate
-    if (phase == Phase.growup) return 0
-    if (phase == Phase.feed) {
-      const F0 = (usp / Yxs_abs + ms) * ((x * V0) / Sf)
-      console.log(F0 * Math.exp(usp * t))
-      return F0 * Math.exp(usp * t)
-    }
-    return 0
-  }
 
   type timepoint = [number, number, number]
 
@@ -315,6 +403,7 @@ const calculate = (state: State): ChartData<'scatter'> => {
     V0: number,
     usp: number,
     ms: number,
+    x1: number, //double check this. Not convinced it shouldn't be the current cell concentration, not the final batch conc.
     phase: Phase
   ) {
     return function (x: number, y: [number, number, number]) {
@@ -326,7 +415,7 @@ const calculate = (state: State): ChartData<'scatter'> => {
         // Volumetric Feed Flowrate
         if (phase == Phase.growup) return 0
         if (phase == Phase.feed) {
-          const F0 = (usp / Yxs_abs + ms) * ((y[0] * V0) / Sf)
+          const F0 = (usp / Yxs_abs + ms) * ((x1 * V0) / Sf)
           return F0 * Math.exp(usp * x)
         }
         return 0
@@ -341,14 +430,14 @@ const calculate = (state: State): ChartData<'scatter'> => {
 
   const start = 0
   const end = 100
-  const dt = 0.5
+  const dt = 0.1
   const xData: Point[] = [] // [{x: time, y:value}]
   const sData: Point[] = [] // [{x: time, y:value}]
   const vData: Point[] = [] // [{x: time, y:value}]
 
   //Batch phase ---------------------------------------------------------
   const y0: timepoint = [X0, S0, V0]
-  const batchODE = new odex.Solver(ode(umax, Ks, Yxs_abs, Sf, V0, usp, ms, Phase.growup), 3)
+  const batchODE = new odex.Solver(ode(umax, Ks, Yxs_abs, Sf, V0, usp, ms, 0, Phase.growup), 3)
   const f = batchODE.integrate(0, y0)
 
   let tf0 = 0 //hours until batch phase completion. Will be overwritten in for loop
@@ -359,16 +448,16 @@ const calculate = (state: State): ChartData<'scatter'> => {
     xData.push({ x: t, y: y[0] })
     sData.push({ x: t, y: y[1] })
     vData.push({ x: t, y: y[2] })
-    if (y[1] < 0.1) {
+    if (y[1] < S1_lim) {
       //Stop when substrate concentration runs out
       tf0 = t
-      yf0 = [y[0], 0, y[2]]
+      yf0 = [y[0], y[1], y[2]]
       break
     }
   }
 
   //Fed Batch phase ---------------------------------------------------------
-  const feedODE = new odex.Solver(ode(umax, Ks, Yxs_abs, Sf, V0, usp, ms, Phase.feed), 3)
+  const feedODE = new odex.Solver(ode(umax, Ks, Yxs_abs, Sf, V0, usp, ms, yf0[0], Phase.feed), 3)
   const ff = feedODE.integrate(0, yf0)
 
   let tf1 = 0 //hours until batch phase completion. Will be overwritten in for loop
@@ -403,35 +492,39 @@ const calculate = (state: State): ChartData<'scatter'> => {
     vData.push({ x: t, y: yf1[2] })
   }
 
-  console.log(vData)
-
   return {
-    datasets: [
-      {
-        label: 'Dry Cells',
-        data: xData,
-        pointRadius: 1,
-        showLine: true,
-        yAxisID: 'y',
-        pointHitRadius: 1,
-      },
-      {
-        label: 'Substrate',
-        data: sData,
-        pointRadius: 1,
-        showLine: true,
-        yAxisID: 'y',
-        pointHitRadius: 1,
-      },
-      {
-        label: 'Volume',
-        data: vData,
-        pointRadius: 1,
-        showLine: true,
-        yAxisID: 'y2',
-        pointHitRadius: 1,
-      },
-    ],
+    chart: {
+      datasets: [
+        {
+          label: 'Dry Cells',
+          data: xData,
+          pointRadius: 1,
+          showLine: true,
+          yAxisID: 'y',
+          pointHitRadius: 1,
+        },
+        {
+          label: 'Substrate',
+          data: sData,
+          pointRadius: 1,
+          showLine: true,
+          yAxisID: 'y',
+          pointHitRadius: 1,
+        },
+        {
+          label: 'Volume',
+          data: vData,
+          pointRadius: 1,
+          showLine: true,
+          yAxisID: 'y2',
+          pointHitRadius: 1,
+        },
+      ],
+    },
+    details: {
+      batchDuration: tf0,
+      feedDuration: tf1 - tf0,
+    },
   }
 }
 
