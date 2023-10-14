@@ -1,5 +1,5 @@
 import { NextPage } from 'next'
-import React, { useContext, useReducer } from 'react'
+import React, { useContext, useReducer, useState } from 'react'
 import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
 import { CalcCard } from '../../components/calculators/calcCard'
@@ -14,6 +14,7 @@ import { Metadata } from '../../components/Layout/Metadata'
 import { Scatter } from 'react-chartjs-2'
 import { Chart, ChartData, Point, ChartOptions, LinearScale } from 'chart.js/auto'
 import { extractColorFromCSS } from '../../utils/colors'
+import { Equation, VariableDefinition } from '../../components/Equation'
 Chart.register(LinearScale)
 
 var odex = require('odex')
@@ -294,6 +295,7 @@ const OURPage: NextPage = () => {
             </>
           </CalcCard>
           <AnswerCard state={state} />
+          <ExampleCard />
         </CalcBody>
       </PageContainer>
     </>
@@ -302,43 +304,83 @@ const OURPage: NextPage = () => {
 
 const AnswerCard = ({ state }: { state: State }) => {
   const { chart, details } = calculate(state)
+  const [units, setUnits] = useState({
+    batchDuration: 'h',
+    feedDuration: 'h',
+    totalDuration: 'h',
+  })
+
+  const handleChangeUnit = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUnits({ ...units, [e.target.name]: e.target.value })
+  }
+
+  const batchDuration = convertUnits({
+    value: details.batchDuration,
+    fromUnit: 'h',
+    toUnit: units.batchDuration,
+  })
+
+  const feedDuration = convertUnits({
+    value: details.feedDuration,
+    fromUnit: 'h',
+    toUnit: units.feedDuration,
+  })
+
+  const totalDuration = convertUnits({
+    value: details.batchDuration + details.feedDuration,
+    fromUnit: 'h',
+    toUnit: units.totalDuration,
+  })
+
   return (
     <CalcCard title="Solution">
       <>
         <Scatter options={options} data={chart} />
 
-        <InputFieldConstant
+        <InputFieldWithUnit
           name="batchDuration"
           label="Batch Duration"
           placeholder="0"
           selected={true}
-          displayValue={{ value: details.batchDuration.toLocaleString(), unit: 'hr' }}
+          displayValue={{
+            value: batchDuration.toLocaleString('en-US', { maximumSignificantDigits: 3 }),
+            unit: units.batchDuration,
+          }}
           error=""
-          unitType=""
+          unitType="time"
           focusText=""
           onChangeValue={() => console.log()}
+          onChangeUnit={handleChangeUnit}
         />
-        <InputFieldConstant
+        <InputFieldWithUnit
           name="feedDuration"
           label="Feed Duration"
           placeholder="0"
           selected={true}
-          displayValue={{ value: details.feedDuration.toLocaleString(), unit: 'hr' }}
+          displayValue={{
+            value: feedDuration.toLocaleString('en-US', { maximumSignificantDigits: 3 }),
+            unit: units.feedDuration,
+          }}
           error=""
-          unitType=""
+          unitType="time"
           focusText=""
           onChangeValue={() => console.log()}
+          onChangeUnit={handleChangeUnit}
         />
-        <InputFieldConstant
+        <InputFieldWithUnit
           name="totalDuration"
           label="Total Duration"
           placeholder="0"
           selected={true}
-          displayValue={{ value: (details.batchDuration + details.feedDuration).toLocaleString(), unit: 'hr' }}
+          displayValue={{
+            value: totalDuration.toLocaleString('en-US', { maximumSignificantDigits: 3 }),
+            unit: units.totalDuration,
+          }}
           error=""
-          unitType=""
+          unitType="time"
           focusText=""
           onChangeValue={() => console.log()}
+          onChangeUnit={handleChangeUnit}
         />
       </>
     </CalcCard>
@@ -475,14 +517,14 @@ const calculate = (state: State): Calculate => {
       break
     }
   }
-  console.log('Cell Data')
-  // console.table(xData)
-  console.log('Substrate Data')
-  // console.table(sData)
-  console.log('Volume Data')
-  // console.table(vData)
-  console.log('Final conc', yf0)
-  console.log('tf0', tf0)
+  // console.log('Cell Data')
+  // // console.table(xData)
+  // console.log('Substrate Data')
+  // // console.table(sData)
+  // console.log('Volume Data')
+  // // console.table(vData)
+  // console.log('Final conc', yf0)
+  // console.log('tf0', tf0)
 
   //Statonary Phase ---------------------------------------------------------
   //Adds extra to graph
@@ -623,4 +665,45 @@ const options: ChartOptions<'scatter'> = {
       },
     },
   },
+}
+
+const ExampleCard = () => {
+  return (
+    <CalcCard title="Calculation">
+      <>
+        <p className="mb-6">
+          The relationship between cell mass, substrate, and fermentation volume is determined through differential
+          equations. The rate of change for each component depends on the fermentation phase:
+        </p>
+
+        <p>
+          <span className="font-bold">Batch Phase</span> The initial growup of the cells at constant volume.
+        </p>
+        <div className="mb-6">
+          <Equation equation={`$$\\frac{dX}{dt} = r⋅X = \\frac{\\mu_{max} ⋅ S}{K_{s}+S} ⋅ X$$`} />
+          <Equation equation={`$$\\frac{dS}{dt} = -r⋅X = -\\frac{\\mu_{max} ⋅ S}{K_{s}+S} ⋅ X$$$$`} />
+          <Equation equation={`$$\\frac{dV}{dt} = 0$$`} />
+        </div>
+
+        <p>
+          <span className="font-bold">Feed Batch</span> Cell growth at increasing volume.
+        </p>
+
+        <div className="mb-6">
+          <Equation
+            equation={`$$\\frac{dX}{dt} = r⋅X - \\frac{F}{V}⋅X = \\frac{\\mu_{max} ⋅ S}{K_{s}+S} ⋅ X - \\frac{F}{V}⋅X$$ `}
+          />
+          <Equation equation={`$$\\frac{dS}{dt} = -rX = -\\frac{\\mu_{max} ⋅ S}{K_{s}+S} ⋅ X$$$$`} />
+          <Equation equation={`$$\\frac{dV}{dt} = 0$$`} />
+        </div>
+
+        <p className="mb-2 text-lg font-medium">Definitions</p>
+        <VariableDefinition equation={`$$X = $$`} definition="Dry cell concentartion" />
+        <VariableDefinition equation={`$$S = $$`} definition="Substrate concentration" />
+        <VariableDefinition equation={`$$V = $$`} definition="Cummulative fermentation volume" />
+        <VariableDefinition equation={`$$\\mu_{max}  = $$`} definition="Maximum specific growth rate" />
+        <VariableDefinition equation={`$$K_{s} = $$`} definition="Monod constant" />
+      </>
+    </CalcCard>
+  )
 }
