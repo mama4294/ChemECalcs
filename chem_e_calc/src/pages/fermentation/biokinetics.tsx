@@ -686,23 +686,36 @@ const ExampleCard = () => {
         </div>
 
         <p>
-          <span className="font-bold">Feed Batch</span> Cell growth at increasing volume.
+          <span className="font-bold">Fed Batch</span> Cell growth at increasing volume.
         </p>
 
         <div className="mb-6">
           <Equation
             equation={`$$\\frac{dX}{dt} = r⋅X - \\frac{F}{V}⋅X = \\frac{\\mu_{max} ⋅ S}{K_{s}+S} ⋅ X - \\frac{F}{V}⋅X$$ `}
           />
-          <Equation equation={`$$\\frac{dS}{dt} = -rX = -\\frac{\\mu_{max} ⋅ S}{K_{s}+S} ⋅ X$$$$`} />
-          <Equation equation={`$$\\frac{dV}{dt} = 0$$`} />
+          <Equation
+            equation={`$$\\frac{dS}{dt} = \\frac{F(t)*(S_f - S)}{V}-rX = \\frac{F(t)*(S_f - S)}{V}-\\frac{\\mu_{max} ⋅ S}{K_{s}+S} ⋅ X$$$$`}
+          />
+          <Equation equation={`$$\\frac{dV}{dt} = F(t)$$`} />
         </div>
+        <p className="mb-6">Where</p>
+        <Equation equation={`$$Y_{xs} = \\frac{Y_{xs max}⋅\\mu_{max}}{\\mu_{max}-Y_{xs max}⋅ms} $$`} />
+        <Equation equation={`$$F_{0} = \\frac{V_{0}⋅X{b}}{S_{f}} ⋅ \\frac{\\mu_{max}⋅z}{Y_{xs max}}+ms  $$`} />
+        <Equation equation={`$$F(t) = F_{0} e^{\\mu_{max}⋅z⋅t}$$`} />
 
         <p className="mb-2 text-lg font-medium">Definitions</p>
         <VariableDefinition equation={`$$X = $$`} definition="Dry cell concentartion" />
         <VariableDefinition equation={`$$S = $$`} definition="Substrate concentration" />
         <VariableDefinition equation={`$$V = $$`} definition="Cummulative fermentation volume" />
+        <VariableDefinition equation={`$$V_{0} = $$`} definition="Intial fermentation volume" />
         <VariableDefinition equation={`$$\\mu_{max}  = $$`} definition="Maximum specific growth rate" />
         <VariableDefinition equation={`$$K_{s} = $$`} definition="Monod constant" />
+        <VariableDefinition equation={`$$S_{f} = $$`} definition="Feed substrate concentration" />
+        <VariableDefinition equation={`$$X_{b} = $$`} definition="Cell concentration at the end of the batch phase" />
+        <VariableDefinition equation={`$$ms = $$`} definition="Cell maintenance consumption rate" />
+        <VariableDefinition equation={`$$z = $$`} definition="Specific growth rate scaling factor" />
+        <VariableDefinition equation={`$$Y_{xs max} = $$`} definition="Max biomass/substrate yield" />
+        <VariableDefinition equation={`$$F(t) = $$`} definition="Feed rate" />
       </>
     </CalcCard>
   )
