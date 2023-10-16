@@ -28,6 +28,11 @@ type State = {
   OD: ShortInputType
   feedVolume: ShortInputType
   feedConc: ShortInputType
+  z: ShortInputType
+  ms: ShortInputType
+  ks: ShortInputType
+  YDCW_OD: ShortInputType
+  Yxs_max: ShortInputType
 }
 
 type ShortInputState = Omit<State, 'isFeeding'>
@@ -49,7 +54,7 @@ const OURPage: NextPage = () => {
       displayValue: { value: '0.25', unit: '1/hr' },
       calculatedValue: { value: 0.25, unit: '1/hr' },
       selectiontext: '',
-      focusText: 'The max growth rate of the organism',
+      focusText: 'The emprically found max growth rate of the organism',
       error: '',
     },
     volume: {
@@ -123,6 +128,61 @@ const OURPage: NextPage = () => {
       calculatedValue: { value: 500, unit: 'g/L' },
       selectiontext: '',
       focusText: 'Substrate concentration in the feed stream',
+      error: '',
+    },
+    z: {
+      name: 'z',
+      label: 'Growth Rate Factor',
+      placeholder: '0',
+      unitType: 'volume',
+      displayValue: { value: '25', unit: '%' },
+      calculatedValue: { value: 25, unit: '%' },
+      selectiontext: '',
+      focusText: 'The specific growth rate as a percentage of umax',
+      error: '',
+    },
+    ms: {
+      name: 'ms',
+      label: 'Cell Maintenance Consumption Rate',
+      placeholder: '0',
+      unitType: 'volume',
+      displayValue: { value: '0.0031', unit: '1/hr' },
+      calculatedValue: { value: 0.0031, unit: '1/hr' },
+      selectiontext: '',
+      focusText: 'The cell maintenance substrate consumption in units of g substrate/g dry cells/hr',
+      error: '',
+    },
+    ks: {
+      name: 'ks',
+      label: 'Half-Velocity Constant',
+      placeholder: '0',
+      unitType: 'volume',
+      displayValue: { value: '0.1823', unit: '1/hr' },
+      calculatedValue: { value: 0.1823, unit: '1/hr' },
+      selectiontext: '',
+      focusText: 'An emperically found constant indicating the substrate concentration at 50% of umax',
+      error: '',
+    },
+    YDCW_OD: {
+      name: 'YDCW_OD',
+      label: 'Cells per OD',
+      placeholder: '0',
+      unitType: 'volume',
+      displayValue: { value: '0.41', unit: 'g/OD' },
+      calculatedValue: { value: 0.41, unit: 'g/OD' },
+      selectiontext: '',
+      focusText: 'Conversion between OD and dry cell weight in units of grams dry cells per OD',
+      error: '',
+    },
+    Yxs_max: {
+      name: 'Yxs_max',
+      label: 'Max Yield',
+      placeholder: '0',
+      unitType: 'volume',
+      displayValue: { value: '0.49', unit: 'w/w' },
+      calculatedValue: { value: 0.49, unit: 'w/w' },
+      selectiontext: '',
+      focusText: 'The max cells produced per substrate in units of mass per mass ',
       error: '',
     },
   }
@@ -213,7 +273,9 @@ const OURPage: NextPage = () => {
     })
   }
 
-  const { umax, volume, OD, feedVolume, feedConc, substrateConc, isFeeding } = state
+  const { umax, volume, OD, feedVolume, feedConc, substrateConc, isFeeding, z, ms, ks, YDCW_OD, Yxs_max } = state
+
+  const [showAdvanced, setShowAdvanced] = useState(false)
 
   return (
     <>
@@ -278,7 +340,8 @@ const OURPage: NextPage = () => {
                   focusText={OD.focusText}
                   onChangeValue={handleChangeValueUnitless}
                 />
-                <label className="text-md label cursor-pointer border-0 border-b-2 pl-0">
+
+                <label className="text-md label cursor-pointer pl-0">
                   <span className="label">Fed Batch</span>
                   <input type="checkbox" className="toggle" checked={isFeeding} onChange={toggleFeeding} />
                 </label>
@@ -311,13 +374,87 @@ const OURPage: NextPage = () => {
                     onChangeValue={handleChangeValueUnitless}
                   />
                 )}
-                {/* <div className="collapse bg-accent">
-                  <input type="checkbox" />
-                  <div className="collapse-title">Advanced</div>
-                  <div className="collapse-content">
-                    <p>hello</p>
-                  </div>
-                </div> */}
+
+                <label className="text-md label cursor-pointer pl-0">
+                  <span className="label">Advanced</span>
+                  <input
+                    type="checkbox"
+                    className="toggle"
+                    checked={showAdvanced}
+                    onChange={() => setShowAdvanced(!showAdvanced)}
+                  />
+                </label>
+
+                {showAdvanced && (
+                  <InputFieldConstant
+                    key={z.name}
+                    name={z.name}
+                    label={z.label}
+                    placeholder={z.placeholder}
+                    selected={false}
+                    displayValue={z.displayValue}
+                    error={z.error}
+                    unitType={z.unitType}
+                    focusText={z.focusText}
+                    onChangeValue={handleChangeValueUnitless}
+                  />
+                )}
+                {showAdvanced && (
+                  <InputFieldConstant
+                    key={ms.name}
+                    name={ms.name}
+                    label={ms.label}
+                    placeholder={ms.placeholder}
+                    selected={false}
+                    displayValue={ms.displayValue}
+                    error={ms.error}
+                    unitType={ms.unitType}
+                    focusText={ms.focusText}
+                    onChangeValue={handleChangeValueUnitless}
+                  />
+                )}
+                {showAdvanced && (
+                  <InputFieldConstant
+                    key={ks.name}
+                    name={ks.name}
+                    label={ks.label}
+                    placeholder={ks.placeholder}
+                    selected={false}
+                    displayValue={ks.displayValue}
+                    error={ks.error}
+                    unitType={ks.unitType}
+                    focusText={ks.focusText}
+                    onChangeValue={handleChangeValueUnitless}
+                  />
+                )}
+                {showAdvanced && (
+                  <InputFieldConstant
+                    key={YDCW_OD.name}
+                    name={YDCW_OD.name}
+                    label={YDCW_OD.label}
+                    placeholder={YDCW_OD.placeholder}
+                    selected={false}
+                    displayValue={YDCW_OD.displayValue}
+                    error={YDCW_OD.error}
+                    unitType={YDCW_OD.unitType}
+                    focusText={YDCW_OD.focusText}
+                    onChangeValue={handleChangeValueUnitless}
+                  />
+                )}
+                {showAdvanced && (
+                  <InputFieldConstant
+                    key={Yxs_max.name}
+                    name={Yxs_max.name}
+                    label={Yxs_max.label}
+                    placeholder={Yxs_max.placeholder}
+                    selected={false}
+                    displayValue={Yxs_max.displayValue}
+                    error={Yxs_max.error}
+                    unitType={Yxs_max.unitType}
+                    focusText={Yxs_max.focusText}
+                    onChangeValue={handleChangeValueUnitless}
+                  />
+                )}
               </div>
             </>
           </CalcCard>
@@ -328,8 +465,16 @@ const OURPage: NextPage = () => {
     </>
   )
 }
+// const z = 25 //Scaling factor for specific growth rate setpoint
+// const usp = (umax * z) / 100 //Scaled specific growth rate
+// const ms = 0.0031 // g substrate/g dry cells/hr, Cell maintenance consumption rate
+// const Ks = 0.1823 // g substrate/L, Monod constant
+// const YDCW_OD = 0.41 // g dry cells/OD, Conversion between OD and dry cell weight
+// const Yxs_max = 0.49 // g dry cells/g substrate, Max biomass/substrate yield
+// const Yxs_abs = Yxs_max * (umax / (umax - Yxs_max * ms)) // Asymptotic biomass/substrate yield
 
 const AnswerCard = ({ state }: { state: State }) => {
+  const isFeeding = state.isFeeding
   const { chart, details } = calculate(state)
   const [units, setUnits] = useState({
     batchDuration: 'h',
@@ -364,6 +509,21 @@ const AnswerCard = ({ state }: { state: State }) => {
       <>
         <Scatter options={options} data={chart} />
 
+        <InputFieldConstant
+          name="finalConc"
+          label="Final Cell Concentration"
+          placeholder="0"
+          selected={true}
+          displayValue={{
+            value: details.cellConc.toLocaleString('en-US', { maximumSignificantDigits: 3 }),
+            unit: 'g/L',
+          }}
+          error=""
+          unitType=""
+          focusText=""
+          onChangeValue={() => console.log()}
+        />
+
         <InputFieldWithUnit
           name="batchDuration"
           label="Batch Duration"
@@ -379,36 +539,40 @@ const AnswerCard = ({ state }: { state: State }) => {
           onChangeValue={() => console.log()}
           onChangeUnit={handleChangeUnit}
         />
-        <InputFieldWithUnit
-          name="feedDuration"
-          label="Feed Duration"
-          placeholder="0"
-          selected={true}
-          displayValue={{
-            value: feedDuration.toLocaleString('en-US', { maximumSignificantDigits: 3 }),
-            unit: units.feedDuration,
-          }}
-          error=""
-          unitType="time"
-          focusText=""
-          onChangeValue={() => console.log()}
-          onChangeUnit={handleChangeUnit}
-        />
-        <InputFieldWithUnit
-          name="totalDuration"
-          label="Total Duration"
-          placeholder="0"
-          selected={true}
-          displayValue={{
-            value: totalDuration.toLocaleString('en-US', { maximumSignificantDigits: 3 }),
-            unit: units.totalDuration,
-          }}
-          error=""
-          unitType="time"
-          focusText=""
-          onChangeValue={() => console.log()}
-          onChangeUnit={handleChangeUnit}
-        />
+        {isFeeding && (
+          <InputFieldWithUnit
+            name="feedDuration"
+            label="Feed Duration"
+            placeholder="0"
+            selected={true}
+            displayValue={{
+              value: feedDuration.toLocaleString('en-US', { maximumSignificantDigits: 3 }),
+              unit: units.feedDuration,
+            }}
+            error=""
+            unitType="time"
+            focusText=""
+            onChangeValue={() => console.log()}
+            onChangeUnit={handleChangeUnit}
+          />
+        )}
+        {isFeeding && (
+          <InputFieldWithUnit
+            name="totalDuration"
+            label="Total Duration"
+            placeholder="0"
+            selected={true}
+            displayValue={{
+              value: totalDuration.toLocaleString('en-US', { maximumSignificantDigits: 3 }),
+              unit: units.totalDuration,
+            }}
+            error=""
+            unitType="time"
+            focusText=""
+            onChangeValue={() => console.log()}
+            onChangeUnit={handleChangeUnit}
+          />
+        )}
       </>
     </CalcCard>
   )
@@ -428,6 +592,7 @@ type Calculate = {
   details: {
     batchDuration: number
     feedDuration: number
+    cellConc: number
   }
 }
 
@@ -440,21 +605,34 @@ const calculate = (state: State): Calculate => {
   const S0 = state.substrateConc.calculatedValue.value //g/L glucose
   const Sf = state.feedConc.calculatedValue.value //g/L glucose
   const Vfinal = V0 + Vfeed //l
+  const isFeeding = state.isFeeding //boolean
+
+  //Advnanced Constants
 
   // Biokinetic Parameters
-  const z = 0.25 //Scaling factor for specific growth rate setpoint
-  const usp = umax * z //Scaled specific growth rate
-  const ms = 0.0031 // g substrate/g dry cells/hr, Cell maintenance consumption rate
-  const Ks = 0.1823 // g substrate/L, Monod constant
-  const YDCW_OD = 0.41 // g dry cells/OD, Conversion between OD and dry cell weight
-  const Yxs_max = 0.49 // g dry cells/g substrate, Max biomass/substrate yield
+
+  const z = state.z.calculatedValue.value //Scaling factor for specific growth rate setpoint
+  const usp = (umax * z) / 100 //Scaled specific growth rate
+  const ms = state.ms.calculatedValue.value // g substrate/g dry cells/hr, Cell maintenance consumption rate
+  const Ks = state.ks.calculatedValue.value // g substrate/L, Half velocity constant
+  const YDCW_OD = state.YDCW_OD.calculatedValue.value // g dry cells/OD, Conversion between OD and dry cell weight
+  const Yxs_max = state.Yxs_max.calculatedValue.value // g dry cells/g substrate, Max biomass/substrate yield
   const Yxs_abs = Yxs_max * (umax / (umax - Yxs_max * ms)) // Asymptotic biomass/substrate yield
+
+  // const z = 25 //Scaling factor for specific growth rate setpoint
+  // const usp = (umax * z) / 100 //Scaled specific growth rate
+  // const ms = 0.0031 // g substrate/g dry cells/hr, Cell maintenance consumption rate
+  // const Ks = 0.1823 // g substrate/L, Monod constant
+  // const YDCW_OD = 0.41 // g dry cells/OD, Conversion between OD and dry cell weight
+  // const Yxs_max = 0.49 // g dry cells/g substrate, Max biomass/substrate yield
+  // const Yxs_abs = Yxs_max * (umax / (umax - Yxs_max * ms)) // Asymptotic biomass/substrate yield
 
   // console.table({ usp, Yxs_abs, ms, V0, Sf })
 
   // Define Initial Conditions ---------------------------------------------------------------------------------
   const X0 = OD0 * YDCW_OD // g dry cells/L
   const S1_lim = 0.001 // Concentration of substrate to proceed to fed-batch phase
+  let cellConc = 0 //final concentation to be updated
 
   // Define and Solve System of Differential Equations ---------------------------------------------------------
 
@@ -472,7 +650,7 @@ const calculate = (state: State): Calculate => {
     V0: number,
     usp: number,
     ms: number,
-    x1: number, //double check this. Not convinced it shouldn't be the current cell concentration, not the final batch conc.
+    x1: number,
     phase: Phase
   ) {
     return function (x: number, y: [number, number, number]) {
@@ -499,7 +677,7 @@ const calculate = (state: State): Calculate => {
 
   const start = 0
   const end = 100
-  const dt = 0.1
+  const dt = 0.5
   const xData: Point[] = [] // [{x: time, y:value}]
   const sData: Point[] = [] // [{x: time, y:value}]
   const vData: Point[] = [] // [{x: time, y:value}]
@@ -516,11 +694,12 @@ const calculate = (state: State): Calculate => {
     let y = f(t)
     xData.push({ x: t, y: y[0] })
     sData.push({ x: t, y: y[1] })
-    vData.push({ x: t, y: y[2] })
+    isFeeding && vData.push({ x: t, y: y[2] })
     if (y[1] < S1_lim) {
       //Stop when substrate concentration runs out
       tf0 = t
       yf0 = [y[0], y[1], y[2]]
+      cellConc = y[0]
       break
     }
   }
@@ -538,11 +717,12 @@ const calculate = (state: State): Calculate => {
       let y = ff(t)
       xData.push({ x: t + tf0 + dt, y: y[0] })
       sData.push({ x: t + tf0 + dt, y: y[1] })
-      vData.push({ x: t + tf0 + dt, y: y[2] })
+      isFeeding && vData.push({ x: t + tf0 + dt, y: y[2] })
       if (y[2] > Vfinal) {
         //Stop when volume reaches final volume
         tf1 = t + tf0 + dt
         yf1 = [y[0], 0, y[2]]
+        cellConc = y[0]
         break
       }
     }
@@ -553,7 +733,7 @@ const calculate = (state: State): Calculate => {
   for (let t = tf1 + dt; t <= tf1 + tf0 / 2; t += dt) {
     xData.push({ x: t, y: yf1[0] })
     sData.push({ x: t, y: yf1[1] })
-    vData.push({ x: t, y: yf1[2] })
+    isFeeding && vData.push({ x: t, y: yf1[2] })
   }
 
   return {
@@ -588,6 +768,7 @@ const calculate = (state: State): Calculate => {
     details: {
       batchDuration: tf0,
       feedDuration: tf1 - tf0,
+      cellConc: cellConc,
     },
   }
 }
@@ -629,7 +810,7 @@ const options: ChartOptions<'scatter'> = {
       },
     },
     y2: {
-      //Second axis for volum
+      //Second axis for volume
       type: 'linear',
       position: 'right',
 
@@ -703,7 +884,7 @@ const ExampleCard = () => {
         </p>
         <div className="mb-6">
           <Equation equation={`$$\\frac{dX}{dt} = r⋅X = \\frac{\\mu_{max} ⋅ S}{K_{s}+S} ⋅ X$$`} />
-          <Equation equation={`$$\\frac{dS}{dt} = -r⋅X = -\\frac{\\mu_{max} ⋅ S}{K_{s}+S} ⋅ X$$$$`} />
+          <Equation equation={`$$\\frac{dS}{dt} = -r⋅X/Y_{a} = -\\frac{\\mu_{max} ⋅ S}{K_{s}+S}/Y_{a} ⋅ X$$$$`} />
           <Equation equation={`$$\\frac{dV}{dt} = 0$$`} />
         </div>
 
@@ -716,7 +897,7 @@ const ExampleCard = () => {
             equation={`$$\\frac{dX}{dt} = r⋅X - \\frac{F}{V}⋅X = \\frac{\\mu_{max} ⋅ S}{K_{s}+S} ⋅ X - \\frac{F}{V}⋅X$$ `}
           />
           <Equation
-            equation={`$$\\frac{dS}{dt} = \\frac{F(t)*(S_f - S)}{V}-rX = \\frac{F(t)*(S_f - S)}{V}-\\frac{\\mu_{max} ⋅ S}{K_{s}+S} ⋅ X$$$$`}
+            equation={`$$\\frac{dS}{dt} = \\frac{F(t)*(S_f - S)}{V}-rX/Y_{a} = \\frac{F(t)*(S_f - S)}{V}-\\frac{\\mu_{max} ⋅ S}{K_{s}+S}/Y_{a} ⋅ X$$$$`}
           />
           <Equation equation={`$$\\frac{dV}{dt} = F(t)$$`} />
         </div>
@@ -724,6 +905,7 @@ const ExampleCard = () => {
         <Equation equation={`$$Y_{xs} = \\frac{Y_{xs max}⋅\\mu_{max}}{\\mu_{max}-Y_{xs max}⋅ms} $$`} />
         <Equation equation={`$$F_{0} = \\frac{V_{0}⋅X{b}}{S_{f}} ⋅ \\frac{\\mu_{max}⋅z}{Y_{xs max}}+ms  $$`} />
         <Equation equation={`$$F(t) = F_{0} e^{\\mu_{max}⋅z⋅t}$$`} />
+        <Equation equation={`$$Y_{a} = \\frac{\\mu_{max}⋅Y_{xs max}}{\\mu_{max}-Y_{xs max}⋅ms}$$`} />
 
         <p className="mb-2 text-lg font-medium">Definitions</p>
         <VariableDefinition equation={`$$X = $$`} definition="Dry cell concentartion" />
@@ -731,7 +913,7 @@ const ExampleCard = () => {
         <VariableDefinition equation={`$$V = $$`} definition="Cummulative fermentation volume" />
         <VariableDefinition equation={`$$V_{0} = $$`} definition="Intial fermentation volume" />
         <VariableDefinition equation={`$$\\mu_{max}  = $$`} definition="Maximum specific growth rate" />
-        <VariableDefinition equation={`$$K_{s} = $$`} definition="Monod constant" />
+        <VariableDefinition equation={`$$K_{s} = $$`} definition="Half-velocity constant" />
         <VariableDefinition equation={`$$S_{f} = $$`} definition="Feed substrate concentration" />
         <VariableDefinition equation={`$$X_{b} = $$`} definition="Cell concentration at the end of the batch phase" />
         <VariableDefinition equation={`$$ms = $$`} definition="Cell maintenance consumption rate" />
