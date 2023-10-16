@@ -216,7 +216,7 @@ const OURPage: NextPage = () => {
         let unit = state[name as keyof ShortInputState].displayValue.unit
         let payload = { ...state[name as keyof ShortInputState], displayValue: { value: numericValue, unit } }
         let payloadWithCalculatedValue = updateCalculatedValue(payload)
-        return { ...state, [name]: payloadWithCalculatedValue }
+        return validateState({ ...state, [name]: payloadWithCalculatedValue })
 
       case ActionKind.CHANGE_VALUE_WITHOUT_UNIT:
         name = action.payload.name
@@ -227,7 +227,7 @@ const OURPage: NextPage = () => {
           displayValue: { value: numericValue, unit },
           calculatedValue: { value: Number(numericValue), unit },
         }
-        return { ...state, [name]: payload }
+        return validateState({ ...state, [name]: payload })
 
       case ActionKind.CHANGE_UNIT:
         name = action.payload.name
@@ -237,7 +237,7 @@ const OURPage: NextPage = () => {
           displayValue: { value: existingValue, unit: action.payload.value },
         }
         payloadWithCalculatedValue = updateCalculatedValue(payload)
-        return { ...state, [name]: payloadWithCalculatedValue }
+        return validateState({ ...state, [name]: payloadWithCalculatedValue })
       default:
         alert('Error: State reducer action not recognized')
         return state
@@ -580,6 +580,81 @@ const AnswerCard = ({ state }: { state: State }) => {
 
 export default OURPage
 
+const resetErrorMessages = (state: State): State => {
+  return {
+    ...state,
+    umax: { ...state.umax, error: '' },
+    volume: { ...state.volume, error: '' },
+    substrateConc: { ...state.substrateConc, error: '' },
+    OD: { ...state.OD, error: '' },
+    feedVolume: { ...state.feedVolume, error: '' },
+    feedConc: { ...state.feedConc, error: '' },
+    z: { ...state.z, error: '' },
+    ms: { ...state.ms, error: '' },
+    ks: { ...state.ks, error: '' },
+    YDCW_OD: { ...state.YDCW_OD, error: '' },
+    Yxs_max: { ...state.Yxs_max, error: '' },
+  }
+}
+
+const validateState = (state: State) => {
+  const validatedState = resetErrorMessages(state)
+
+  const volume = state.volume.calculatedValue.value
+  const feedVolume = state.feedVolume.calculatedValue.value
+  const umax = state.umax.calculatedValue.value
+  const od = state.OD.calculatedValue.value
+  const feedConc = state.feedConc.calculatedValue.value
+  const z = state.z.calculatedValue.value
+  const ms = state.ms.calculatedValue.value
+  const ks = state.ks.calculatedValue.value
+  const YDCW_OD = state.YDCW_OD.calculatedValue.value
+  const Yxs_max = state.Yxs_max.calculatedValue.value
+
+  if (volume <= 0) {
+    validatedState.volume.error = 'Volume must be positive'
+  }
+  if (volume > 10000000) {
+    validatedState.volume.error = 'Volume must be less than 10,000,000 L'
+  }
+  if (feedVolume <= 0) {
+    validatedState.feedVolume.error = 'Feed must be positive'
+  }
+  if (feedVolume > 1000000) {
+    validatedState.feedVolume.error = 'Feed must be less than 1,000,000 L'
+    validatedState.feedVolume.calculatedValue.value = 1000000
+  }
+  if (umax <= 0) {
+    validatedState.umax.error = 'Must be positive'
+  }
+  if (od <= 0) {
+    validatedState.OD.error = 'Must be positive'
+  }
+  if (feedConc <= 0) {
+    validatedState.feedConc.error = 'Must be positive'
+  }
+  if (z <= 0) {
+    validatedState.z.error = 'Must be positive'
+  }
+  if (z > 100) {
+    validatedState.z.error = 'Must be less than 100%'
+  }
+  if (ms <= 0) {
+    validatedState.ms.error = 'Must be positive'
+  }
+  if (ks <= 0) {
+    validatedState.ks.error = 'Must be positive'
+  }
+  if (YDCW_OD <= 0) {
+    validatedState.YDCW_OD.error = 'Must be positive'
+  }
+  if (Yxs_max <= 0) {
+    validatedState.Yxs_max.error = 'Must be positive'
+  }
+
+  return validatedState
+}
+
 //Calculations:
 
 enum Phase {
@@ -676,8 +751,11 @@ const calculate = (state: State): Calculate => {
   }
 
   const start = 0
-  const end = 100
+  const end = 1000
   const dt = 0.5
+  let step = 0
+  const maxStps = 9000
+  console.log(dt)
   const xData: Point[] = [] // [{x: time, y:value}]
   const sData: Point[] = [] // [{x: time, y:value}]
   const vData: Point[] = [] // [{x: time, y:value}]
@@ -692,10 +770,11 @@ const calculate = (state: State): Calculate => {
 
   for (let t = start; t <= end; t += dt) {
     let y = f(t)
+    step++
     xData.push({ x: t, y: y[0] })
     sData.push({ x: t, y: y[1] })
     isFeeding && vData.push({ x: t, y: y[2] })
-    if (y[1] < S1_lim) {
+    if (y[1] < S1_lim || step >= maxStps) {
       //Stop when substrate concentration runs out
       tf0 = t
       yf0 = [y[0], y[1], y[2]]
@@ -715,10 +794,11 @@ const calculate = (state: State): Calculate => {
 
     for (let t = 0; t <= end; t += dt) {
       let y = ff(t)
+      step++
       xData.push({ x: t + tf0 + dt, y: y[0] })
       sData.push({ x: t + tf0 + dt, y: y[1] })
       isFeeding && vData.push({ x: t + tf0 + dt, y: y[2] })
-      if (y[2] > Vfinal) {
+      if (y[2] > Vfinal || step >= maxStps) {
         //Stop when volume reaches final volume
         tf1 = t + tf0 + dt
         yf1 = [y[0], 0, y[2]]
