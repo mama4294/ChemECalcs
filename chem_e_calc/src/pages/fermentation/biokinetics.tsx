@@ -21,6 +21,7 @@ var odex = require('odex')
 const baseColor = extractColorFromCSS('--bc')
 
 type State = {
+  isFeeding: boolean
   umax: ShortInputType
   volume: ShortInputType
   substrateConc: ShortInputType
@@ -28,6 +29,8 @@ type State = {
   feedVolume: ShortInputType
   feedConc: ShortInputType
 }
+
+type ShortInputState = Omit<State, 'isFeeding'>
 
 const OURPage: NextPage = () => {
   const paths = [
@@ -37,6 +40,7 @@ const OURPage: NextPage = () => {
   const { defaultUnits } = useContext(DefaultUnitContext) as DefaultUnitContextType
 
   const initialState: State = {
+    isFeeding: false,
     umax: {
       name: 'umax',
       label: 'Max Specific Growth Rate (umax)',
@@ -128,6 +132,7 @@ const OURPage: NextPage = () => {
     CHANGE_VALUE_WITHOUT_UNIT = 'CHANGE_VALUE_WITHOUT_UNIT',
     CHANGE_UNIT = 'CHANGE_UNIT',
     REFRESH = 'REFRESH',
+    TOGGLE_FEEDING = 'TOGGLE_FEEDING',
   }
 
   type Action =
@@ -136,27 +141,29 @@ const OURPage: NextPage = () => {
         payload: { name: string; value: string }
       }
     | {
-        type: ActionKind.REFRESH
+        type: ActionKind.REFRESH | ActionKind.TOGGLE_FEEDING
       }
 
   const stateReducer = (state: State, action: Action) => {
     switch (action.type) {
       case ActionKind.REFRESH:
         return { ...state }
+      case ActionKind.TOGGLE_FEEDING:
+        return { ...state, isFeeding: !state.isFeeding }
       case ActionKind.CHANGE_VALUE_WITH_UNIT:
         let name = action.payload.name
         let numericValue = action.payload.value.replace(/[^\d.-]/g, '')
-        let unit = state[name as keyof State].displayValue.unit
-        let payload = { ...state[name as keyof State], displayValue: { value: numericValue, unit } }
+        let unit = state[name as keyof ShortInputState].displayValue.unit
+        let payload = { ...state[name as keyof ShortInputState], displayValue: { value: numericValue, unit } }
         let payloadWithCalculatedValue = updateCalculatedValue(payload)
         return { ...state, [name]: payloadWithCalculatedValue }
 
       case ActionKind.CHANGE_VALUE_WITHOUT_UNIT:
         name = action.payload.name
         numericValue = action.payload.value.replace(/[^\d.-]/g, '')
-        unit = state[name as keyof State].displayValue.unit
+        unit = state[name as keyof ShortInputState].displayValue.unit
         payload = {
-          ...state[name as keyof State],
+          ...state[name as keyof ShortInputState],
           displayValue: { value: numericValue, unit },
           calculatedValue: { value: Number(numericValue), unit },
         }
@@ -164,9 +171,9 @@ const OURPage: NextPage = () => {
 
       case ActionKind.CHANGE_UNIT:
         name = action.payload.name
-        const existingValue = state[name as keyof State].displayValue.value
+        const existingValue = state[name as keyof ShortInputState].displayValue.value
         payload = {
-          ...state[name as keyof State],
+          ...state[name as keyof ShortInputState],
           displayValue: { value: existingValue, unit: action.payload.value },
         }
         payloadWithCalculatedValue = updateCalculatedValue(payload)
@@ -200,7 +207,13 @@ const OURPage: NextPage = () => {
     })
   }
 
-  const { umax, volume, OD, feedVolume, feedConc, substrateConc } = state
+  const toggleFeeding = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({
+      type: ActionKind.TOGGLE_FEEDING,
+    })
+  }
+
+  const { umax, volume, OD, feedVolume, feedConc, substrateConc, isFeeding } = state
 
   return (
     <>
@@ -265,32 +278,46 @@ const OURPage: NextPage = () => {
                   focusText={OD.focusText}
                   onChangeValue={handleChangeValueUnitless}
                 />
-                <div className="divider">Fed Batch</div>
-                <InputFieldWithUnit
-                  key={feedVolume.name}
-                  name={feedVolume.name}
-                  label={feedVolume.label}
-                  placeholder={feedVolume.placeholder}
-                  selected={false}
-                  displayValue={feedVolume.displayValue}
-                  error={feedVolume.error}
-                  unitType={feedVolume.unitType}
-                  focusText={feedVolume.focusText}
-                  onChangeValue={handleChangeValue}
-                  onChangeUnit={handleChangeUnit}
-                />
-                <InputFieldConstant
-                  key={feedConc.name}
-                  name={feedConc.name}
-                  label={feedConc.label}
-                  placeholder={feedConc.placeholder}
-                  selected={false}
-                  displayValue={feedConc.displayValue}
-                  error={feedConc.error}
-                  unitType={feedConc.unitType}
-                  focusText={feedConc.focusText}
-                  onChangeValue={handleChangeValueUnitless}
-                />
+                <label className="text-md label cursor-pointer border-0 border-b-2 pl-0">
+                  <span className="label">Fed Batch</span>
+                  <input type="checkbox" className="toggle" checked={isFeeding} onChange={toggleFeeding} />
+                </label>
+                {isFeeding && (
+                  <InputFieldWithUnit
+                    key={feedVolume.name}
+                    name={feedVolume.name}
+                    label={feedVolume.label}
+                    placeholder={feedVolume.placeholder}
+                    selected={false}
+                    displayValue={feedVolume.displayValue}
+                    error={feedVolume.error}
+                    unitType={feedVolume.unitType}
+                    focusText={feedVolume.focusText}
+                    onChangeValue={handleChangeValue}
+                    onChangeUnit={handleChangeUnit}
+                  />
+                )}
+                {isFeeding && (
+                  <InputFieldConstant
+                    key={feedConc.name}
+                    name={feedConc.name}
+                    label={feedConc.label}
+                    placeholder={feedConc.placeholder}
+                    selected={false}
+                    displayValue={feedConc.displayValue}
+                    error={feedConc.error}
+                    unitType={feedConc.unitType}
+                    focusText={feedConc.focusText}
+                    onChangeValue={handleChangeValueUnitless}
+                  />
+                )}
+                {/* <div className="collapse bg-accent">
+                  <input type="checkbox" />
+                  <div className="collapse-title">Advanced</div>
+                  <div className="collapse-content">
+                    <p>hello</p>
+                  </div>
+                </div> */}
               </div>
             </>
           </CalcCard>
@@ -499,36 +526,31 @@ const calculate = (state: State): Calculate => {
   }
 
   //Fed Batch phase ---------------------------------------------------------
-  const feedODE = new odex.Solver(ode(umax, Ks, Yxs_abs, Sf, V0, usp, ms, yf0[0], Phase.feed), 3)
-  const ff = feedODE.integrate(0, yf0)
 
-  let tf1 = 0 //hours until batch phase completion. Will be overwritten in for loop
-  let yf1: timepoint = [0, 0, 0] //Final concentration of cells, substrate, and volume. Will be overwritten in for loop.
+  let tf1 = tf0 //hours until batch phase completion. Will be overwritten in for loop
+  let yf1 = yf0 //Final concentration of cells, substrate, and volume. Will be overwritten in for loop.
 
-  for (let t = 0; t <= end; t += dt) {
-    let y = ff(t)
-    xData.push({ x: t + tf0 + dt, y: y[0] })
-    sData.push({ x: t + tf0 + dt, y: y[1] })
-    vData.push({ x: t + tf0 + dt, y: y[2] })
-    if (y[2] > Vfinal) {
-      //Stop when volume reaches final volume
-      tf1 = t + tf0 + dt
-      yf1 = [y[0], 0, y[2]]
-      break
+  if (state.isFeeding) {
+    const feedODE = new odex.Solver(ode(umax, Ks, Yxs_abs, Sf, V0, usp, ms, yf0[0], Phase.feed), 3)
+    const ff = feedODE.integrate(0, yf0)
+
+    for (let t = 0; t <= end; t += dt) {
+      let y = ff(t)
+      xData.push({ x: t + tf0 + dt, y: y[0] })
+      sData.push({ x: t + tf0 + dt, y: y[1] })
+      vData.push({ x: t + tf0 + dt, y: y[2] })
+      if (y[2] > Vfinal) {
+        //Stop when volume reaches final volume
+        tf1 = t + tf0 + dt
+        yf1 = [y[0], 0, y[2]]
+        break
+      }
     }
   }
-  // console.log('Cell Data')
-  // // console.table(xData)
-  // console.log('Substrate Data')
-  // // console.table(sData)
-  // console.log('Volume Data')
-  // // console.table(vData)
-  // console.log('Final conc', yf0)
-  // console.log('tf0', tf0)
 
   //Statonary Phase ---------------------------------------------------------
   //Adds extra to graph
-  for (let t = tf1 + dt; t <= tf1 + tf0; t += dt) {
+  for (let t = tf1 + dt; t <= tf1 + tf0 / 2; t += dt) {
     xData.push({ x: t, y: yf1[0] })
     sData.push({ x: t, y: yf1[1] })
     vData.push({ x: t, y: yf1[2] })
