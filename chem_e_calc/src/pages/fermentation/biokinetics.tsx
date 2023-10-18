@@ -475,7 +475,7 @@ const OURPage: NextPage = () => {
 
 const AnswerCard = ({ state }: { state: State }) => {
   const isFeeding = state.isFeeding
-  const { chart, details } = calculate(state)
+  const { chart, details, error } = calculate(state)
   const [units, setUnits] = useState({
     batchDuration: 'h',
     feedDuration: 'h',
@@ -503,6 +503,30 @@ const AnswerCard = ({ state }: { state: State }) => {
     fromUnit: 'h',
     toUnit: units.totalDuration,
   })
+
+  if (error) {
+    return (
+      <CalcCard title="Solution">
+        <div className="alert alert-error">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            className="h-6 w-6 shrink-0 stroke-info"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+
+          <span>Error! {error}</span>
+        </div>
+      </CalcCard>
+    )
+  }
 
   return (
     <CalcCard title="Solution">
@@ -658,8 +682,8 @@ const validateState = (state: State) => {
 //Calculations:
 
 enum Phase {
-  growup,
-  feed,
+  GROWUP,
+  FEED,
 }
 
 type Calculate = {
@@ -669,9 +693,15 @@ type Calculate = {
     feedDuration: number
     cellConc: number
   }
+  error: string
 }
 
 const calculate = (state: State): Calculate => {
+  const xData: Point[] = [] // [{x: time, y:value}]
+  const sData: Point[] = [] // [{x: time, y:value}]
+  const vData: Point[] = [] // [{x: time, y:value}]
+  let error = ''
+
   //ChartData<'scatter'>
   const V0 = state.volume.calculatedValue.value //l
   const Vfeed = state.feedVolume.calculatedValue.value //l
@@ -712,108 +742,110 @@ const calculate = (state: State): Calculate => {
   // Define and Solve System of Differential Equations ---------------------------------------------------------
 
   type timepoint = [number, number, number]
+  let tf0 = 0 //hours until batch phase completion. Will be overwritten in for loop
+  let yf0: timepoint = [0, 0, 0] //Final concentration of cells, substrate, and volume. Will be overwritten in for loop.
+  let tf1 = tf0 //hours until batch phase completion. Will be overwritten in for loop
+  let yf1 = yf0 //Final concentration of cells, substrate, and volume. Will be overwritten in for loop.
 
   // X = y[0]
   // S = y[1]
   // V = y[2]
 
-  var ode = function (
-    umax: number,
-    Ks: number,
-    Yxs_abs: number,
-    Sf: number,
-    V0: number,
-    usp: number,
-    ms: number,
-    x1: number,
-    phase: Phase
-  ) {
-    return function (x: number, y: [number, number, number]) {
-      // x = t
-      // y = [X, S, V]
-      const mu = (umax * y[1]) / (y[1] + Ks) //Specific Growth Rate
-      const rX = mu * y[0]
-      const F = () => {
-        // Volumetric Feed Flowrate
-        if (phase == Phase.growup) return 0
-        if (phase == Phase.feed) {
-          const F0 = (usp / Yxs_abs + ms) * ((x1 * V0) / Sf)
-          return F0 * Math.exp(usp * x)
+  try {
+    var ode = function (
+      umax: number,
+      Ks: number,
+      Yxs_abs: number,
+      Sf: number,
+      V0: number,
+      usp: number,
+      ms: number,
+      x1: number,
+      phase: Phase
+    ) {
+      return function (x: number, y: [number, number, number]) {
+        // x = t
+        // y = [X, S, V]
+        const mu = (umax * y[1]) / (y[1] + Ks) //Specific Growth Rate
+        const rX = mu * y[0]
+        const F = () => {
+          // Volumetric Feed Flowrate
+          if (phase == Phase.GROWUP) return 0
+          if (phase == Phase.FEED) {
+            const F0 = (usp / Yxs_abs + ms) * ((x1 * V0) / Sf)
+            return F0 * Math.exp(usp * x)
+          }
+          return 0
         }
-        return 0
+
+        const dXdt = rX - (y[0] * F()) / y[2] //X * (umax * S) / (S + Ks) - (X * F(x, Phase)) / V
+        const dSdt = (F() * (Sf - y[1])) / y[2] - rX / Yxs_abs //(F(x, Phase) * (Sf - S)) / V - X * (umax * S) / (S + Ks) / Yxs_abs
+        const dVdt = F() //F(x, 0)
+        return [dXdt, dSdt, dVdt]
       }
-
-      const dXdt = rX - (y[0] * F()) / y[2] //X * (umax * S) / (S + Ks) - (X * F(x, Phase)) / V
-      const dSdt = (F() * (Sf - y[1])) / y[2] - rX / Yxs_abs //(F(x, Phase) * (Sf - S)) / V - X * (umax * S) / (S + Ks) / Yxs_abs
-      const dVdt = F() //F(x, 0)
-      return [dXdt, dSdt, dVdt]
     }
-  }
 
-  const start = 0
-  const end = 1000
-  const dt = 0.5
-  let step = 0
-  const maxStps = 9000
-  console.log(dt)
-  const xData: Point[] = [] // [{x: time, y:value}]
-  const sData: Point[] = [] // [{x: time, y:value}]
-  const vData: Point[] = [] // [{x: time, y:value}]
+    const start = 0
+    const end = 1000
+    const dt = 0.1
+    let step = 0
+    let tEnd = 0
 
-  //Batch phase ---------------------------------------------------------
-  const y0: timepoint = [X0, S0, V0]
-  const batchODE = new odex.Solver(ode(umax, Ks, Yxs_abs, Sf, V0, usp, ms, 0, Phase.growup), 3)
-  const f = batchODE.integrate(0, y0)
+    //Batch phase ---------------------------------------------------------
+    const y0: timepoint = [X0, S0, V0]
+    const batchODE = new odex.Solver(ode(umax, Ks, Yxs_abs, Sf, V0, usp, ms, 0, Phase.GROWUP), 3)
+    const f = batchODE.integrate(0, y0)
 
-  let tf0 = 0 //hours until batch phase completion. Will be overwritten in for loop
-  let yf0: timepoint = [0, 0, 0] //Final concentration of cells, substrate, and volume. Will be overwritten in for loop.
-
-  for (let t = start; t <= end; t += dt) {
-    let y = f(t)
-    step++
-    xData.push({ x: t, y: y[0] })
-    sData.push({ x: t, y: y[1] })
-    isFeeding && vData.push({ x: t, y: y[2] })
-    if (y[1] < S1_lim || step >= maxStps) {
-      //Stop when substrate concentration runs out
-      tf0 = t
-      yf0 = [y[0], y[1], y[2]]
-      cellConc = y[0]
-      break
-    }
-  }
-
-  //Fed Batch phase ---------------------------------------------------------
-
-  let tf1 = tf0 //hours until batch phase completion. Will be overwritten in for loop
-  let yf1 = yf0 //Final concentration of cells, substrate, and volume. Will be overwritten in for loop.
-
-  if (state.isFeeding) {
-    const feedODE = new odex.Solver(ode(umax, Ks, Yxs_abs, Sf, V0, usp, ms, yf0[0], Phase.feed), 3)
-    const ff = feedODE.integrate(0, yf0)
-
-    for (let t = 0; t <= end; t += dt) {
-      let y = ff(t)
+    for (let t = start; t <= end; t += dt) {
+      let y = f(t)
       step++
-      xData.push({ x: t + tf0 + dt, y: y[0] })
-      sData.push({ x: t + tf0 + dt, y: y[1] })
-      isFeeding && vData.push({ x: t + tf0 + dt, y: y[2] })
-      if (y[2] > Vfinal || step >= maxStps) {
-        //Stop when volume reaches final volume
-        tf1 = t + tf0 + dt
-        yf1 = [y[0], 0, y[2]]
+      xData.push({ x: t, y: y[0] })
+      sData.push({ x: t, y: y[1] })
+      isFeeding && vData.push({ x: t, y: y[2] })
+      if (y[1] < S1_lim) {
+        //Stop when substrate concentration runs out
+        tEnd = t
+        tf0 = t
+        yf0 = [y[0], y[1], y[2]]
         cellConc = y[0]
         break
       }
     }
-  }
 
-  //Statonary Phase ---------------------------------------------------------
-  //Adds extra to graph
-  for (let t = tf1 + dt; t <= tf1 + tf0 / 2; t += dt) {
-    xData.push({ x: t, y: yf1[0] })
-    sData.push({ x: t, y: yf1[1] })
-    isFeeding && vData.push({ x: t, y: yf1[2] })
+    //Fed Batch phase ---------------------------------------------------------
+
+    if (state.isFeeding && Vfeed > 0) {
+      const feedODE = new odex.Solver(ode(umax, Ks, Yxs_abs, Sf, V0, usp, ms, yf0[0], Phase.FEED), 3)
+      const ff = feedODE.integrate(0, yf0)
+
+      for (let t = 0; t <= end; t += dt) {
+        let y = ff(t)
+        step++
+        xData.push({ x: t + tf0 + dt, y: y[0] })
+        sData.push({ x: t + tf0 + dt, y: y[1] })
+        isFeeding && vData.push({ x: t + tf0 + dt, y: y[2] })
+        if (y[2] > Vfinal) {
+          //Stop when volume reaches final volume
+          tf1 = t + tf0 + dt
+          tEnd = tf1
+          yf1 = [y[0], 0, y[2]]
+          cellConc = y[0]
+          break
+        }
+      }
+    }
+
+    //Statonary Phase ---------------------------------------------------------
+    //Adds extra to graph
+    console.log('t: ', tEnd + dt, 'end: ', tf1 + tf0 / 2)
+    for (let t = tEnd + dt; t <= tEnd + tf0 / 2; t += dt) {
+      xData.push({ x: t, y: cellConc })
+      sData.push({ x: t, y: 0 })
+      isFeeding && vData.push({ x: t, y: Vfinal })
+    }
+  } catch (e: any) {
+    error = e.message
+    console.log(e)
   }
 
   return {
@@ -850,6 +882,7 @@ const calculate = (state: State): Calculate => {
       feedDuration: tf1 - tf0,
       cellConc: cellConc,
     },
+    error: error,
   }
 }
 
