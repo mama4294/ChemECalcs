@@ -5,7 +5,7 @@ import { CalcHeader } from '../../components/calculators/header'
 import { GridCard } from '../../components/GridCard'
 import { Metadata } from '../../components/Layout/Metadata'
 
-const Agitation = () => {
+const Page = () => {
   const paths = [{ title: 'Fermentation', href: '/fermentation' }]
 
   return (
@@ -22,10 +22,15 @@ const Agitation = () => {
           <GridCard name="Tip Speed" description="Calculate impeller tip speed" link="/fermentation/tipspeed" />
           <GridCard name="Agitation Scale Up" description="Scaleup to a larger vessel" link="/fermentation/scaleup" />
           <GridCard name="Respiration" description="Calculate OUR, CER, and RQ" link="/fermentation/our" />
+          <GridCard
+            name="Biokinetics"
+            description="Model fermentation growth rate and substrate consumption"
+            link="/fermentation/biokinetics"
+          />
         </CalcBody>
       </PageContainer>
     </>
   )
 }
 
-export default Agitation
+export default Page

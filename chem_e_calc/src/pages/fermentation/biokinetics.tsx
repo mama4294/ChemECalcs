@@ -15,9 +15,12 @@ import { Scatter } from 'react-chartjs-2'
 import { Chart, ChartData, Point, ChartOptions, LinearScale } from 'chart.js/auto'
 import { extractColorFromCSS } from '../../utils/colors'
 import { Equation, VariableDefinition } from '../../components/Equation'
+// import {Solver} from 'odex'
+import * as odex from 'odex'
+
 Chart.register(LinearScale)
 
-var odex = require('odex')
+// const odex = require('odex')
 const baseColor = extractColorFromCSS('--bc')
 
 type State = {
@@ -267,7 +270,7 @@ const OURPage: NextPage = () => {
     })
   }
 
-  const toggleFeeding = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const toggleFeeding = () => {
     dispatch({
       type: ActionKind.TOGGLE_FEEDING,
     })
@@ -529,7 +532,7 @@ const AnswerCard = ({ state }: { state: State }) => {
   }
 
   return (
-    <CalcCard title="Solution">
+    <CalcCard title="Model">
       <>
         <Scatter options={options} data={chart} />
 
@@ -741,18 +744,17 @@ const calculate = (state: State): Calculate => {
 
   // Define and Solve System of Differential Equations ---------------------------------------------------------
 
-  type timepoint = [number, number, number]
+  type timepoint = number[]
   let tf0 = 0 //hours until batch phase completion. Will be overwritten in for loop
   let yf0: timepoint = [0, 0, 0] //Final concentration of cells, substrate, and volume. Will be overwritten in for loop.
   let tf1 = tf0 //hours until batch phase completion. Will be overwritten in for loop
-  let yf1 = yf0 //Final concentration of cells, substrate, and volume. Will be overwritten in for loop.
 
   // X = y[0]
   // S = y[1]
   // V = y[2]
 
   try {
-    var ode = function (
+    const ode = function (
       umax: number,
       Ks: number,
       Yxs_abs: number,
@@ -763,9 +765,13 @@ const calculate = (state: State): Calculate => {
       x1: number,
       phase: Phase
     ) {
-      return function (x: number, y: [number, number, number]) {
+      return function (x: number, y: number[]) {
         // x = t
         // y = [X, S, V]
+        if (y[0] == undefined || y[1] == undefined || y[2] == undefined) {
+          throw new Error('y[0], y[1], or y[2] is undefined')
+        }
+
         const mu = (umax * y[1]) / (y[1] + Ks) //Specific Growth Rate
         const rX = mu * y[0]
         const F = () => {
@@ -788,7 +794,6 @@ const calculate = (state: State): Calculate => {
     const start = 0
     const end = 1000
     const dt = 0.1
-    let step = 0
     let tEnd = 0
 
     //Batch phase ---------------------------------------------------------
@@ -797,8 +802,10 @@ const calculate = (state: State): Calculate => {
     const f = batchODE.integrate(0, y0)
 
     for (let t = start; t <= end; t += dt) {
-      let y = f(t)
-      step++
+      const y = f(t)
+      if (y[0] == undefined || y[1] == undefined || y[2] == undefined) {
+        throw new Error('y[0], y[1], or y[2] is undefined for the batch phase integration')
+      }
       xData.push({ x: t, y: y[0] })
       sData.push({ x: t, y: y[1] })
       isFeeding && vData.push({ x: t, y: y[2] })
@@ -815,12 +822,17 @@ const calculate = (state: State): Calculate => {
     //Fed Batch phase ---------------------------------------------------------
 
     if (state.isFeeding && Vfeed > 0) {
+      if (yf0[0] == undefined) {
+        throw new Error('yf0[0] is undefined for the fed batch phase integration')
+      }
       const feedODE = new odex.Solver(ode(umax, Ks, Yxs_abs, Sf, V0, usp, ms, yf0[0], Phase.FEED), 3)
       const ff = feedODE.integrate(0, yf0)
 
       for (let t = 0; t <= end; t += dt) {
-        let y = ff(t)
-        step++
+        const y = ff(t)
+        if (y[0] == undefined || y[1] == undefined || y[2] == undefined) {
+          throw new Error('y[0], y[1], or y[2] is undefined for the batch phase integration')
+        }
         xData.push({ x: t + tf0 + dt, y: y[0] })
         sData.push({ x: t + tf0 + dt, y: y[1] })
         isFeeding && vData.push({ x: t + tf0 + dt, y: y[2] })
@@ -828,7 +840,6 @@ const calculate = (state: State): Calculate => {
           //Stop when volume reaches final volume
           tf1 = t + tf0 + dt
           tEnd = tf1
-          yf1 = [y[0], 0, y[2]]
           cellConc = y[0]
           break
         }
@@ -837,7 +848,6 @@ const calculate = (state: State): Calculate => {
 
     //Statonary Phase ---------------------------------------------------------
     //Adds extra to graph
-    console.log('t: ', tEnd + dt, 'end: ', tf1 + tf0 / 2)
     for (let t = tEnd + dt; t <= tEnd + tf0 / 2; t += dt) {
       xData.push({ x: t, y: cellConc })
       sData.push({ x: t, y: 0 })
@@ -1028,11 +1038,12 @@ const ExampleCard = () => {
         <VariableDefinition equation={`$$\\mu_{max}  = $$`} definition="Maximum specific growth rate" />
         <VariableDefinition equation={`$$K_{s} = $$`} definition="Half-velocity constant" />
         <VariableDefinition equation={`$$S_{f} = $$`} definition="Feed substrate concentration" />
-        <VariableDefinition equation={`$$X_{b} = $$`} definition="Cell concentration at the end of the batch phase" />
+        <VariableDefinition equation={`$$X_{b} = $$`} definition="Batch phase final cell concentration " />
         <VariableDefinition equation={`$$ms = $$`} definition="Cell maintenance consumption rate" />
         <VariableDefinition equation={`$$z = $$`} definition="Specific growth rate scaling factor" />
         <VariableDefinition equation={`$$Y_{xs max} = $$`} definition="Max biomass/substrate yield" />
         <VariableDefinition equation={`$$F(t) = $$`} definition="Feed rate" />
+        <p className="italic">Created with help from Phil Vo</p>
       </>
     </CalcCard>
   )

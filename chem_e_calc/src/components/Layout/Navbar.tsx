@@ -100,6 +100,11 @@ const DesktopMenu = () => {
                 <a className="hover:bg-neutral-focus">Respiration</a>
               </Link>
             </li>
+            <li>
+              <Link href={'/fermentation/biokinetics'}>
+                <a className="hover:bg-neutral-focus">Biokinetics</a>
+              </Link>
+            </li>
           </ul>
         </li>
         <li tabIndex={0}>
@@ -261,6 +266,11 @@ const MobileMenu = () => {
               <li>
                 <Link href={'/fermentation/our'}>
                   <a className="hover:bg-neutral-focus">Respiration</a>
+                </Link>
+              </li>
+              <li>
+                <Link href={'/fermentation/biokinetics'}>
+                  <a className="hover:bg-neutral-focus">Biokinetics</a>
                 </Link>
               </li>
             </ul>
