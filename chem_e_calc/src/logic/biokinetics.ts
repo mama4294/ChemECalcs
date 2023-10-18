@@ -185,7 +185,7 @@ export const calculate = (state: State): Calculate => {
         {
           label: 'Dry Cells',
           data: xData,
-          pointRadius: 1,
+          pointRadius: 0,
           showLine: true,
           yAxisID: 'y',
           pointHitRadius: 1,
@@ -221,7 +221,7 @@ export const chartOptions: ChartOptions<'scatter'> = {
   responsive: true,
   interaction: {
     intersect: false,
-    mode: 'x',
+    mode: 'index',
   },
   scales: {
     x: {
