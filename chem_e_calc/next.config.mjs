@@ -20,12 +20,9 @@ export default defineNextConfig({
     locales: ['en'],
     defaultLocale: 'en',
   },
-})
-
-module.exports = {
   eslint: {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
-}
+})
