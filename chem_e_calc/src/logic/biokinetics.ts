@@ -1,17 +1,22 @@
-import { ChartData, Point, ChartOptions } from 'chart.js/auto'
+import { Chart, ChartData, Point, ChartOptions } from 'chart.js/auto'
 import { State } from '../pages/fermentation/biokinetics'
 import * as odex from 'odex'
 import { extractColorFromCSS } from '../utils/colors'
+import annotationPlugin from 'chartjs-plugin-annotation'
+Chart.register(annotationPlugin)
 
 const baseColor = extractColorFromCSS('--bc')
 
+export type Details = {
+  batchDuration: number
+  feedDuration: number
+  totalDuration: number
+  cellConc: number
+}
+
 export type Calculate = {
   chart: ChartData<'scatter'>
-  details: {
-    batchDuration: number
-    feedDuration: number
-    cellConc: number
-  }
+  details: Details
   error: string
 }
 
@@ -211,105 +216,133 @@ export const calculate = (state: State): Calculate => {
     details: {
       batchDuration: tf0,
       feedDuration: tf1 - tf0,
+      totalDuration: tf1,
       cellConc: cellConc,
     },
     error: error,
   }
 }
 
-export const chartOptions: ChartOptions<'scatter'> = {
-  responsive: true,
-  interaction: {
-    intersect: false,
-    mode: 'index',
-  },
-  scales: {
-    x: {
-      title: {
+export const createChartOptions = (details: Details) => {
+  const chartOptions: ChartOptions<'scatter'> = {
+    responsive: true,
+    interaction: {
+      intersect: false,
+      mode: 'index',
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Time (hours)',
+          color: baseColor,
+        },
+        ticks: {
+          color: baseColor,
+        },
+        grid: {
+          display: false,
+        },
+      },
+      y: {
+        type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+        position: 'left',
+        min: 0,
+        title: {
+          display: true,
+          text: 'Concentration (g/L)',
+          color: baseColor,
+        },
+        ticks: {
+          color: baseColor,
+        },
+        grid: {
+          display: false,
+        },
+      },
+      y2: {
+        //Second axis for volume
+        type: 'linear',
+        position: 'right',
+
+        title: {
+          display: true,
+          text: 'Volume (L)',
+          color: baseColor,
+        },
+        ticks: {
+          color: baseColor,
+        },
+        grid: {
+          display: false,
+        },
+      },
+    },
+    plugins: {
+      legend: {
         display: true,
-        text: 'Time (hours)',
-        color: baseColor,
+        labels: {
+          color: baseColor,
+        },
       },
-      ticks: {
-        color: baseColor,
+      annotation: {
+        annotations: {
+          line1: {
+            type: 'line',
+            xMin: details.batchDuration,
+            xMax: details.batchDuration,
+            borderColor: baseColor,
+            borderWidth: 1,
+            borderDash: [10],
+          },
+          ...(details.totalDuration > 0
+            ? {
+                line2: {
+                  type: 'line',
+                  xMin: details.totalDuration,
+                  xMax: details.totalDuration,
+                  borderColor: baseColor,
+                  borderWidth: 1,
+                  borderDash: [10],
+                },
+              }
+            : {}),
+        },
       },
-      grid: {
-        display: false,
-      },
-    },
-    y: {
-      type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
-      position: 'left',
-      min: 0,
-      title: {
-        display: true,
-        text: 'Concentration (g/L)',
-        color: baseColor,
-      },
-      ticks: {
-        color: baseColor,
-      },
-      grid: {
-        display: false,
-      },
-    },
-    y2: {
-      //Second axis for volume
-      type: 'linear',
-      position: 'right',
 
-      title: {
-        display: true,
-        text: 'Volume (L)',
-        color: baseColor,
-      },
-      ticks: {
-        color: baseColor,
-      },
-      grid: {
-        display: false,
-      },
-    },
-  },
-  plugins: {
-    legend: {
-      display: true,
-      labels: {
-        color: baseColor,
-      },
-    },
+      tooltip: {
+        enabled: true,
+        position: 'nearest',
+        callbacks: {
+          label: function (context) {
+            let label = context.dataset.label || ''
 
-    tooltip: {
-      enabled: true,
-      position: 'nearest',
-      callbacks: {
-        label: function (context) {
-          let label = context.dataset.label || ''
-
-          if (label) {
-            label += ': '
-          }
-          if (context.parsed.y !== null) {
-            switch (context.dataset.label) {
-              case 'Dry Cells':
-                label += `${context.parsed.y.toLocaleString('en-US', { maximumSignificantDigits: 2 })} g/L `
-                break
-
-              case 'Substrate':
-                label += `${context.parsed.y.toLocaleString('en-US', { maximumSignificantDigits: 2 })} g/L `
-                break
-
-              case 'Volume':
-                label += `${context.parsed.y.toLocaleString('en-US', { maximumSignificantDigits: 5 })} L `
-                break
+            if (label) {
+              label += ': '
             }
-          }
-          return label
-        },
-        title: function (context) {
-          return 'Hour ' + context[0]!.parsed.x.toLocaleString('en-US', { maximumSignificantDigits: 3 })
+            if (context.parsed.y !== null) {
+              switch (context.dataset.label) {
+                case 'Dry Cells':
+                  label += `${context.parsed.y.toLocaleString('en-US', { maximumSignificantDigits: 2 })} g/L `
+                  break
+
+                case 'Substrate':
+                  label += `${context.parsed.y.toLocaleString('en-US', { maximumSignificantDigits: 2 })} g/L `
+                  break
+
+                case 'Volume':
+                  label += `${context.parsed.y.toLocaleString('en-US', { maximumSignificantDigits: 5 })} L `
+                  break
+              }
+            }
+            return label
+          },
+          title: function (context) {
+            return 'Hour ' + context[0]!.parsed.x.toLocaleString('en-US', { maximumSignificantDigits: 3 })
+          },
         },
       },
     },
-  },
+  }
+  return chartOptions
 }

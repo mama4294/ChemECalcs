@@ -14,7 +14,7 @@ import { Metadata } from '../../components/Layout/Metadata'
 import { Scatter } from 'react-chartjs-2'
 import { Chart, LinearScale } from 'chart.js/auto'
 import { Equation, VariableDefinition } from '../../components/Equation'
-import { calculate, chartOptions } from '../../logic/biokinetics'
+import { calculate, createChartOptions } from '../../logic/biokinetics'
 Chart.register(LinearScale)
 
 export type State = {
@@ -473,6 +473,7 @@ const OURPage: NextPage = () => {
 const AnswerCard = ({ state }: { state: State }) => {
   const isFeeding = state.isFeeding
   const { chart, details, error } = calculate(state)
+  const chartOptions = createChartOptions(details)
   const [units, setUnits] = useState({
     batchDuration: 'h',
     feedDuration: 'h',
@@ -496,7 +497,7 @@ const AnswerCard = ({ state }: { state: State }) => {
   })
 
   const totalDuration = convertUnits({
-    value: details.batchDuration + details.feedDuration,
+    value: details.totalDuration,
     fromUnit: 'h',
     toUnit: units.totalDuration,
   })
