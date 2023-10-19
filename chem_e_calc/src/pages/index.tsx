@@ -13,9 +13,9 @@ const Home: NextPage = () => {
       />
 
       <div className="flex min-h-screen flex-col items-center justify-center p-4">
-        <div className="relative w-full max-w-lg">
+        <div className="relative w-full max-w-2xl">
           <Blob />
-          <h1 className="text-5xl font-extrabold leading-normal text-neutral-focus md:text-[5rem]">
+          <h1 className="text-5xl font-extrabold leading-normal md:text-[4.5rem]">
             Chem<span className="text-accent">E</span> Calculator
           </h1>
 
