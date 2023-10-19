@@ -12,6 +12,7 @@ export type Details = {
   feedDuration: number
   totalDuration: number
   cellConc: number
+  isFeeding: boolean
 }
 
 export type Calculate = {
@@ -203,14 +204,18 @@ export const calculate = (state: State): Calculate => {
           yAxisID: 'y',
           pointHitRadius: 1,
         },
-        {
-          label: 'Volume',
-          data: vData,
-          pointRadius: 1,
-          showLine: true,
-          yAxisID: 'y2',
-          pointHitRadius: 1,
-        },
+        ...(isFeeding
+          ? [
+              {
+                label: 'Volume',
+                data: vData,
+                pointRadius: 1,
+                showLine: true,
+                yAxisID: 'y2',
+                pointHitRadius: 1,
+              },
+            ]
+          : []),
       ],
     },
     details: {
@@ -218,6 +223,7 @@ export const calculate = (state: State): Calculate => {
       feedDuration: tf1 - tf0,
       totalDuration: tf1,
       cellConc: cellConc,
+      isFeeding: isFeeding,
     },
     error: error,
   }
@@ -260,24 +266,46 @@ export const createChartOptions = (details: Details) => {
           display: false,
         },
       },
-      y2: {
-        //Second axis for volume
-        type: 'linear',
-        position: 'right',
+      ...(details.isFeeding
+        ? {
+            y2: {
+              //Second axis for volume
+              type: 'linear',
+              position: 'right',
 
-        title: {
-          display: true,
-          text: 'Volume (L)',
-          color: baseColor,
-        },
-        ticks: {
-          color: baseColor,
-        },
-        grid: {
-          display: false,
-        },
-      },
+              title: {
+                display: true,
+                text: 'Volume (L)',
+                color: baseColor,
+              },
+              ticks: {
+                color: baseColor,
+              },
+              grid: {
+                display: false,
+              },
+            },
+          }
+        : {}),
     },
+    //   y2: {
+    //     //Second axis for volume
+    //     type: 'linear',
+    //     position: 'right',
+
+    //     title: {
+    //       display: true,
+    //       text: 'Volume (L)',
+    //       color: baseColor,
+    //     },
+    //     ticks: {
+    //       color: baseColor,
+    //     },
+    //     grid: {
+    //       display: false,
+    //     },
+    //   },
+
     plugins: {
       legend: {
         display: true,
