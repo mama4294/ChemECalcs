@@ -288,23 +288,6 @@ export const createChartOptions = (details: Details) => {
           }
         : {}),
     },
-    //   y2: {
-    //     //Second axis for volume
-    //     type: 'linear',
-    //     position: 'right',
-
-    //     title: {
-    //       display: true,
-    //       text: 'Volume (L)',
-    //       color: baseColor,
-    //     },
-    //     ticks: {
-    //       color: baseColor,
-    //     },
-    //     grid: {
-    //       display: false,
-    //     },
-    //   },
 
     plugins: {
       legend: {
