@@ -510,7 +510,7 @@ const AnswerCard = ({ state }: { state: State }) => {
 
     const xData = chart.datasets[0].data as Point[] // Use optional chaining to handle possible null values
     const sData = chart.datasets[1].data as Point[] // Use optional chaining to handle possible null values
-    let table = []
+    const table = []
 
     if (xData && sData) {
       // Check if both xData and sData are not null
@@ -534,7 +534,7 @@ const AnswerCard = ({ state }: { state: State }) => {
     const xData = chart.datasets[0].data as Point[] // Use optional chaining to handle possible null values
     const sData = chart.datasets[1].data as Point[] // Use optional chaining to handle possible null values
     const vData = chart.datasets[2].data as Point[] // Use optional chaining to handle possible null values
-    let table = []
+    const table = []
 
     if (xData && sData && vData) {
       for (let index = 0; index < xData.length; index++) {
