@@ -12,9 +12,10 @@ import { InputFieldConstant, InputFieldWithUnit } from '../../components/inputs/
 import { updateCalculatedValue } from '../../logic/logic'
 import { Metadata } from '../../components/Layout/Metadata'
 import { Scatter } from 'react-chartjs-2'
-import { Chart, LinearScale } from 'chart.js/auto'
+import { Chart, LinearScale, Point } from 'chart.js/auto'
 import { Equation, VariableDefinition } from '../../components/Equation'
 import { calculate, createChartOptions } from '../../logic/biokinetics'
+import { CSVDownload, CSVLink } from 'react-csv'
 Chart.register(LinearScale)
 
 export type State = {
@@ -502,6 +503,51 @@ const AnswerCard = ({ state }: { state: State }) => {
     toUnit: units.totalDuration,
   })
 
+  const dataToArray = () => {
+    if (!chart) return [{ error: 'No chart' }]
+    if (!chart.datasets[0]) return [{ error: 'No dataset[0]' }]
+    if (!chart.datasets[1]) return [{ error: 'No dataset[1]' }]
+
+    const xData = chart.datasets[0].data as Point[] // Use optional chaining to handle possible null values
+    const sData = chart.datasets[1].data as Point[] // Use optional chaining to handle possible null values
+    let table = []
+
+    if (xData && sData) {
+      // Check if both xData and sData are not null
+      for (let index = 0; index < xData.length; index++) {
+        if (xData[index] != undefined && sData[index] != undefined) {
+          table.push({ t: xData[index]!.x.toFixed(2), x: xData[index]!.y, s: sData[index]!.y })
+        }
+      }
+    } else {
+      console.log('xData or sData is null') // Handle the case where data is null
+    }
+    return table
+  }
+
+  const fedDataToArray = () => {
+    if (!chart) return [{ error: 'No chart' }]
+    if (!chart.datasets[0]) return [{ error: 'No dataset[0]' }]
+    if (!chart.datasets[1]) return [{ error: 'No dataset[1]' }]
+    if (!chart.datasets[2]) return [{ error: 'No dataset[2]' }]
+
+    const xData = chart.datasets[0].data as Point[] // Use optional chaining to handle possible null values
+    const sData = chart.datasets[1].data as Point[] // Use optional chaining to handle possible null values
+    const vData = chart.datasets[2].data as Point[] // Use optional chaining to handle possible null values
+    let table = []
+
+    if (xData && sData && vData) {
+      for (let index = 0; index < xData.length; index++) {
+        if (xData[index] != undefined && sData[index] != undefined) {
+          table.push({ t: xData[index]!.x.toFixed(2), x: xData[index]!.y, s: sData[index]!.y, v: vData[index]!.y })
+        }
+      }
+    } else {
+      console.log('xData, sData, or vdata is null') // Handle the case where data is null
+    }
+    return table
+  }
+
   if (error) {
     return (
       <CalcCard title="Solution">
@@ -526,11 +572,46 @@ const AnswerCard = ({ state }: { state: State }) => {
     )
   }
 
+  const standardCSVHeaders = [
+    { label: 'Time (hr)', key: 't' },
+    { label: 'Cell Concentration (g/L)', key: 'x' },
+    { label: 'Substrate Concentration (g/L)', key: 's' },
+  ]
+
+  const fedCSVHeaders = [
+    { label: 'Time (hr)', key: 't' },
+    { label: 'Cell Concentration (g/L)', key: 'x' },
+    { label: 'Substrate Concentration (g/L)', key: 's' },
+    { label: 'Volume', key: 'v' },
+  ]
+
   return (
     <CalcCard title="Model">
       <>
         <Scatter options={chartOptions} data={chart} />
-
+        <div className="mb-2 flex justify-end">
+          <CSVLink
+            className="btn btn-outline btn-sm"
+            data={isFeeding ? fedDataToArray() : dataToArray()}
+            headers={isFeeding ? fedCSVHeaders : standardCSVHeaders}
+            target="_blank"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              className="h-4 w-4"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+              />
+            </svg>
+          </CSVLink>
+        </div>
         <InputFieldConstant
           name="finalConc"
           label="Final Cell Concentration"
@@ -545,7 +626,6 @@ const AnswerCard = ({ state }: { state: State }) => {
           focusText=""
           onChangeValue={() => console.log()}
         />
-
         <InputFieldWithUnit
           name="batchDuration"
           label="Batch Duration"
