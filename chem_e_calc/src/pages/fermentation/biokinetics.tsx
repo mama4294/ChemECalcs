@@ -612,8 +612,34 @@ const AnswerCard = ({ state }: { state: State }) => {
               />
             </svg>
           </CSVLink>
+          {/* Add data modal Button*/}
+          <label htmlFor="add_data_modal" className="btn btn-outline btn-sm">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="h-4 w-4"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+          </label>
+          {/* Add Data Moda; */}
+          <input type="checkbox" id="add_data_modal" className="modal-toggle" />
+          <div className="modal">
+            <div className="max-h-5xl modal-box h-auto w-11/12 max-w-5xl">
+              <label htmlFor="add_data_modal" className="btn btn-ghost btn-circle btn-sm absolute right-2 top-2">
+                ✕
+              </label>
+              <div className="flex h-full items-center justify-center">
+                <InputTable />
+              </div>
+            </div>
+          </div>
+
           {/* The button to open modal */}
-          <label htmlFor="my_modal_6" className="btn btn-outline btn-sm">
+          <label htmlFor="expand_modal" className="btn btn-outline btn-sm">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -631,10 +657,10 @@ const AnswerCard = ({ state }: { state: State }) => {
           </label>
 
           {/* Put this part before </body> tag */}
-          <input type="checkbox" id="my_modal_6" className="modal-toggle" />
+          <input type="checkbox" id="expand_modal" className="modal-toggle" />
           <div className="modal">
             <div className="max-h-5xl modal-box h-auto w-11/12 max-w-5xl">
-              <label htmlFor="my_modal_6" className="btn btn-ghost btn-circle btn-sm absolute right-2 top-2">
+              <label htmlFor="expand_modal" className="btn btn-ghost btn-circle btn-sm absolute right-2 top-2">
                 ✕
               </label>
               <div className="flex h-full items-center justify-center">
@@ -712,6 +738,107 @@ const AnswerCard = ({ state }: { state: State }) => {
 }
 
 export default OURPage
+
+const InputTable = () => {
+  type Timepoint = {
+    t: number | null
+    x: number | null
+    s: number | null
+  }
+  const initialData: Timepoint[] = [{ t: null, x: null, s: null }]
+
+  const [actualData, setData] = useState(initialData)
+
+  const addRow = () => {
+    setData([...actualData, { t: 0, x: 0, s: 0 }])
+  }
+
+  const onChange = (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    const newData = actualData.map((timepoint, idx) => {
+      if (idx === index) {
+        return {
+          ...timepoint,
+          [name]: value,
+        }
+      }
+      return timepoint
+    })
+    setData(newData)
+  }
+
+  console.log(actualData)
+
+  return (
+    <div className="overflow-x-auto">
+      <table className=" mb-4 table">
+        {/* head */}
+        <thead>
+          <tr>
+            <th className="text-right">Hour</th>
+            <th className="text-right">Substrate</th>
+            <th className="text-right">Cells</th>
+          </tr>
+        </thead>
+        <tbody>
+          {actualData.map((timepoint: Timepoint, index: number) => {
+            return (
+              <tr key={index}>
+                <td className="p-1">
+                  <input
+                    type="text"
+                    placeholder="Null"
+                    name="t"
+                    className="input input-sm w-full max-w-xs text-right"
+                    value={timepoint.t ? timepoint.t : ''}
+                    onChange={onChange(index)}
+                  />
+                </td>
+                <td className="p-1">
+                  <input
+                    type="text"
+                    placeholder="Null"
+                    name="x"
+                    className="input input-sm w-full max-w-xs pr-1	text-right"
+                    value={timepoint.x ? timepoint.x : ''}
+                    onChange={onChange(index)}
+                  />
+                  {/* <span className="opacity-50">g/L</span> */}
+                </td>
+                <td className="p-1">
+                  <input
+                    type="text"
+                    placeholder="Null"
+                    name="s"
+                    className="input input-sm w-full max-w-xs pr-1	text-right"
+                    value={timepoint.s ? timepoint.s : ''}
+                    onChange={onChange(index)}
+                  />
+                  {/* <span className="opacity-50">g/L</span> */}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+      <div className="flex justify-center">
+        <button className="btn btn-ghost btn-sm" onClick={addRow}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="h-6 w-6"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <span>Add Row</span>
+        </button>
+      </div>
+    </div>
+  )
+}
 
 const resetErrorMessages = (state: State): State => {
   return {
