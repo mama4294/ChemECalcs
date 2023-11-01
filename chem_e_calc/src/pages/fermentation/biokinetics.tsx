@@ -14,7 +14,7 @@ import { Metadata } from '../../components/Layout/Metadata'
 import { Scatter } from 'react-chartjs-2'
 import { Chart, LinearScale, Point } from 'chart.js/auto'
 import { Equation, VariableDefinition } from '../../components/Equation'
-import { calculate, createChartOptions } from '../../logic/biokinetics'
+import { calculate, createChart, createChartOptions, timepointsToArray } from '../../logic/biokinetics'
 import { CSVDownload, CSVLink } from 'react-csv'
 Chart.register(LinearScale)
 
@@ -473,7 +473,11 @@ const OURPage: NextPage = () => {
 
 const AnswerCard = ({ state }: { state: State }) => {
   const isFeeding = state.isFeeding
-  const { chart, details, error } = calculate(state)
+  const { data, details, error } = calculate(state)
+  const initalUserData: Timepoint[] = [{ t: 0, x: 0, s: 0 }]
+  const [userTimepoints, setTimepoints] = useState(initalUserData)
+  const userData = timepointsToArray(userTimepoints)
+  const chart = createChart(data, userData, isFeeding)
   const chartOptions = createChartOptions(details)
   const [units, setUnits] = useState({
     batchDuration: 'h',
@@ -590,41 +594,45 @@ const AnswerCard = ({ state }: { state: State }) => {
       <>
         <Scatter options={chartOptions} data={chart} />
         <div className="mb-2 flex justify-end gap-2">
-          <CSVLink
-            className="btn btn-outline btn-sm"
-            data={isFeeding ? fedDataToArray() : dataToArray()}
-            headers={isFeeding ? fedCSVHeaders : standardCSVHeaders}
-            target="_blank"
-          >
-            {' '}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              className="h-4 w-4"
+          <div className="tooltip" data-tip="Download">
+            <CSVLink
+              className="btn btn-outline btn-sm"
+              data={isFeeding ? fedDataToArray() : dataToArray()}
+              headers={isFeeding ? fedCSVHeaders : standardCSVHeaders}
+              target="_blank"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
-              />
-            </svg>
-          </CSVLink>
+              {' '}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                className="h-4 w-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                />
+              </svg>
+            </CSVLink>
+          </div>
           {/* Add data modal Button*/}
-          <label htmlFor="add_data_modal" className="btn btn-outline btn-sm">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="h-4 w-4"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-          </label>
+          <div className="tooltip" data-tip="Add data">
+            <label htmlFor="add_data_modal" className="btn btn-outline btn-sm">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="h-4 w-4"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </label>
+          </div>
           {/* Add Data Moda; */}
           <input type="checkbox" id="add_data_modal" className="modal-toggle" />
           <div className="modal">
@@ -633,28 +641,30 @@ const AnswerCard = ({ state }: { state: State }) => {
                 ✕
               </label>
               <div className="flex h-full items-center justify-center">
-                <InputTable />
+                <UserData userData={userTimepoints} setData={setTimepoints} initialData={initalUserData} />
               </div>
             </div>
           </div>
 
           {/* The button to open modal */}
-          <label htmlFor="expand_modal" className="btn btn-outline btn-sm">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="h-4 w-4"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"
-              />
-            </svg>
-          </label>
+          <div className="tooltip" data-tip="Expand">
+            <label htmlFor="expand_modal" className="btn btn-outline btn-sm">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="h-4 w-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"
+                />
+              </svg>
+            </label>
+          </div>
 
           {/* Put this part before </body> tag */}
           <input type="checkbox" id="expand_modal" className="modal-toggle" />
@@ -737,29 +747,42 @@ const AnswerCard = ({ state }: { state: State }) => {
   )
 }
 
+export type Timepoint = {
+  t: number | null
+  x: number | null
+  s: number | null
+}
+
 export default OURPage
 
-const InputTable = () => {
-  type Timepoint = {
-    t: number | null
-    x: number | null
-    s: number | null
-  }
-  const initialData: Timepoint[] = [{ t: null, x: null, s: null }]
-
-  const [actualData, setData] = useState(initialData)
-
+const UserData = ({
+  userData,
+  setData,
+  initialData,
+}: {
+  userData: Timepoint[]
+  setData: React.Dispatch<React.SetStateAction<Timepoint[]>>
+  initialData: Timepoint[]
+}) => {
   const addRow = () => {
-    setData([...actualData, { t: 0, x: 0, s: 0 }])
+    setData([...userData, { t: 0, x: 0, s: 0 }])
+  }
+  const clearData = () => {
+    setData(initialData)
+  }
+
+  const deleteRow = (index: number) => () => {
+    const newData = userData.filter((_, idx) => idx !== index)
+    setData(newData)
   }
 
   const onChange = (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    const newData = actualData.map((timepoint, idx) => {
+    const newData = userData.map((timepoint, idx) => {
       if (idx === index) {
         return {
           ...timepoint,
-          [name]: value,
+          [name]: +value,
         }
       }
       return timepoint
@@ -767,30 +790,76 @@ const InputTable = () => {
     setData(newData)
   }
 
-  console.log(actualData)
-
   return (
     <div className="overflow-x-auto">
+      <div className="mb-2 flex gap-2">
+        <button className="btn btn-ghost btn-sm" onClick={addRow}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="h-4 w-4"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <span>Add Row</span>
+        </button>
+        <button className="btn btn-ghost btn-sm" onClick={clearData}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="h-4 w-4"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+
+          <span>Clear</span>
+        </button>
+      </div>
       <table className=" mb-4 table">
         {/* head */}
         <thead>
           <tr>
-            <th className="text-right">Hour</th>
-            <th className="text-right">Substrate</th>
-            <th className="text-right">Cells</th>
+            <th className=""></th>
+            <th className="">Hour</th>
+            <th className="">Cells</th>
+            <th className="">Substrate</th>
           </tr>
         </thead>
         <tbody>
-          {actualData.map((timepoint: Timepoint, index: number) => {
+          {userData.map((timepoint: Timepoint, index: number) => {
             return (
-              <tr key={index}>
+              <tr key={index} className="">
+                <td className="p-1 opacity-50 hover:opacity-100 peer-hover:bg-red-400">
+                  <button className="btn btn-ghost btn-sm" onClick={deleteRow(index)}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="h-4 w-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                      />
+                    </svg>
+                  </button>
+                </td>
                 <td className="p-1">
                   <input
                     type="text"
                     placeholder="Null"
                     name="t"
-                    className="input input-sm w-full max-w-xs text-right"
-                    value={timepoint.t ? timepoint.t : ''}
+                    className="input input-sm w-full max-w-xs "
+                    value={timepoint.t || timepoint.t == 0 ? timepoint.t : ''}
                     onChange={onChange(index)}
                   />
                 </td>
@@ -799,7 +868,7 @@ const InputTable = () => {
                     type="text"
                     placeholder="Null"
                     name="x"
-                    className="input input-sm w-full max-w-xs pr-1	text-right"
+                    className="input input-sm w-full max-w-xs pr-1	"
                     value={timepoint.x ? timepoint.x : ''}
                     onChange={onChange(index)}
                   />
@@ -810,32 +879,35 @@ const InputTable = () => {
                     type="text"
                     placeholder="Null"
                     name="s"
-                    className="input input-sm w-full max-w-xs pr-1	text-right"
+                    className="input input-sm w-full max-w-xs pr-1	"
                     value={timepoint.s ? timepoint.s : ''}
                     onChange={onChange(index)}
                   />
                   {/* <span className="opacity-50">g/L</span> */}
                 </td>
+                {/* <td className="p-1 opacity-50 hover:opacity-100 peer-hover:bg-red-400">
+                  <button className="btn btn-ghost btn-sm" onClick={deleteRow(index)}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="h-4 w-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                      />
+                    </svg>
+                  </button>
+                </td> */}
               </tr>
             )
           })}
         </tbody>
       </table>
-      <div className="flex justify-center">
-        <button className="btn btn-ghost btn-sm" onClick={addRow}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="h-6 w-6"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          <span>Add Row</span>
-        </button>
-      </div>
     </div>
   )
 }

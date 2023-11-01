@@ -1,5 +1,5 @@
 import { Chart, ChartData, Point, ChartOptions } from 'chart.js/auto'
-import { State } from '../pages/fermentation/biokinetics'
+import { State, Timepoint } from '../pages/fermentation/biokinetics'
 import * as odex from 'odex'
 import { extractColorFromCSS } from '../utils/colors'
 import annotationPlugin from 'chartjs-plugin-annotation'
@@ -15,8 +15,15 @@ export type Details = {
   isFeeding: boolean
 }
 
+type Data = {
+  xData: Point[]
+  sData: Point[]
+  vData: Point[]
+}
+
 export type Calculate = {
-  chart: ChartData<'scatter'>
+  // chart: ChartData<'scatter'>
+  data: Data
   details: Details
   error: string
 }
@@ -186,37 +193,10 @@ export const calculate = (state: State): Calculate => {
   }
 
   return {
-    chart: {
-      datasets: [
-        {
-          label: 'Dry Cells',
-          data: xData,
-          pointRadius: 0,
-          showLine: true,
-          yAxisID: 'y',
-          pointHitRadius: 1,
-        },
-        {
-          label: 'Substrate',
-          data: sData,
-          pointRadius: 1,
-          showLine: true,
-          yAxisID: 'y',
-          pointHitRadius: 1,
-        },
-        ...(isFeeding
-          ? [
-              {
-                label: 'Volume',
-                data: vData,
-                pointRadius: 1,
-                showLine: true,
-                yAxisID: 'y2',
-                pointHitRadius: 1,
-              },
-            ]
-          : []),
-      ],
+    data: {
+      xData: xData,
+      sData: sData,
+      vData: vData,
     },
     details: {
       batchDuration: tf0,
@@ -356,4 +336,97 @@ export const createChartOptions = (details: Details) => {
     },
   }
   return chartOptions
+}
+
+type ArrayPoint = number | Point | null
+type ScatterData = ArrayPoint[]
+type ModelData = {
+  xData: ScatterData
+  sData: ScatterData
+  vData: ScatterData
+}
+
+type UserData = {
+  xData: ScatterData
+  sData: ScatterData
+}
+
+export const createChart = (modelData: ModelData, userData: UserData, isFeeding: boolean): ChartData<'scatter'> => {
+  const { xData, sData, vData } = modelData
+  const { xData: userXData, sData: userSData } = userData
+
+  const hasNonNullTimepointsX = userXData.some(dataPoint => dataPoint !== null)
+  const hasNonNullTimepointsS = userSData.some(dataPoint => dataPoint !== null)
+
+  return {
+    datasets: [
+      {
+        label: 'Dry Cells',
+        data: xData,
+        pointRadius: 0,
+        showLine: true,
+        yAxisID: 'y',
+        pointHitRadius: 1,
+      },
+      ...(hasNonNullTimepointsX
+        ? [
+            {
+              label: 'Actual Dry Cells',
+              data: userXData,
+              yAxisID: 'y',
+              pointHitRadius: 1,
+            },
+          ]
+        : []),
+      {
+        label: 'Substrate',
+        data: sData,
+        pointRadius: 1,
+        showLine: true,
+        yAxisID: 'y',
+        pointHitRadius: 1,
+      },
+      ...(hasNonNullTimepointsS
+        ? [
+            {
+              label: 'Actual Substrate',
+              data: userSData,
+              yAxisID: 'y',
+              pointHitRadius: 1,
+            },
+          ]
+        : []),
+      ...(isFeeding
+        ? [
+            {
+              label: 'Volume',
+              data: vData,
+              pointRadius: 1,
+              showLine: true,
+              yAxisID: 'y2',
+              pointHitRadius: 1,
+            },
+          ]
+        : []),
+    ],
+  }
+}
+
+export const timepointsToArray = (timepoints: Timepoint[]) => {
+  const xData: Point[] = [] // [{x: time, y:value}]
+  const sData: Point[] = [] // [{x: time, y:value}]
+
+  timepoints.map(timepoint => {
+    if (timepoint.t && timepoint.x) {
+      xData.push({ x: timepoint.t, y: timepoint.x })
+    }
+    if (timepoint.t && timepoint.s) {
+      sData.push({ x: timepoint.t, y: timepoint.s })
+    }
+  })
+
+  return {
+    xData,
+    sData,
+  }
 }
