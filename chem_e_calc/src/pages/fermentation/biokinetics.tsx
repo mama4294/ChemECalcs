@@ -15,8 +15,11 @@ import { Scatter } from 'react-chartjs-2'
 import { Chart, LinearScale, Point } from 'chart.js/auto'
 import { Equation, VariableDefinition } from '../../components/Equation'
 import { calculate, createChart, createChartOptions, timepointsToArray } from '../../logic/biokinetics'
-import { CSVDownload, CSVLink } from 'react-csv'
+import { CSVLink } from 'react-csv'
 Chart.register(LinearScale)
+
+//TODO: Fix text input
+//TODO: Add local storage to user data
 
 export type State = {
   isFeeding: boolean
@@ -790,6 +793,32 @@ const UserData = ({
     setData(newData)
   }
 
+  const TableCell = ({
+    value,
+    onChange,
+    unit,
+    name,
+  }: {
+    value: string | number
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+    unit: string
+    name: string
+  }) => (
+    <td className="relative border p-1">
+      <input
+        type="text"
+        placeholder="Null"
+        name={name}
+        className="input input-sm w-full max-w-xs rounded-none"
+        value={value}
+        onChange={onChange}
+      />
+      <span className="pointer-events-none absolute inset-y-0 right-0 m-2 hidden items-center whitespace-nowrap rounded-lg bg-base-200 px-2 text-xs opacity-75 sm:flex ">
+        {unit}
+      </span>
+    </td>
+  )
+
   return (
     <div className="overflow-x-auto">
       <div className="mb-2 flex gap-2">
@@ -835,7 +864,7 @@ const UserData = ({
           {userData.map((timepoint: Timepoint, index: number) => {
             return (
               <tr key={index} className="">
-                <td className="p-1 opacity-50 hover:opacity-100 peer-hover:bg-red-400">
+                <td className="border p-1 opacity-50">
                   <button className="btn btn-ghost btn-sm" onClick={deleteRow(index)}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -853,56 +882,14 @@ const UserData = ({
                     </svg>
                   </button>
                 </td>
-                <td className="p-1">
-                  <input
-                    type="text"
-                    placeholder="Null"
-                    name="t"
-                    className="input input-sm w-full max-w-xs "
-                    value={timepoint.t || timepoint.t == 0 ? timepoint.t : ''}
-                    onChange={onChange(index)}
-                  />
-                </td>
-                <td className="p-1">
-                  <input
-                    type="text"
-                    placeholder="Null"
-                    name="x"
-                    className="input input-sm w-full max-w-xs pr-1	"
-                    value={timepoint.x ? timepoint.x : ''}
-                    onChange={onChange(index)}
-                  />
-                  {/* <span className="opacity-50">g/L</span> */}
-                </td>
-                <td className="p-1">
-                  <input
-                    type="text"
-                    placeholder="Null"
-                    name="s"
-                    className="input input-sm w-full max-w-xs pr-1	"
-                    value={timepoint.s ? timepoint.s : ''}
-                    onChange={onChange(index)}
-                  />
-                  {/* <span className="opacity-50">g/L</span> */}
-                </td>
-                {/* <td className="p-1 opacity-50 hover:opacity-100 peer-hover:bg-red-400">
-                  <button className="btn btn-ghost btn-sm" onClick={deleteRow(index)}>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="h-4 w-4"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                      />
-                    </svg>
-                  </button>
-                </td> */}
+                <TableCell
+                  value={timepoint.t || timepoint.t == 0 ? timepoint.t : ''}
+                  onChange={onChange(index)}
+                  unit="h"
+                  name="t"
+                />
+                <TableCell value={timepoint.x ? timepoint.x : ''} onChange={onChange(index)} unit="g/L" name="x" />
+                <TableCell value={timepoint.s ? timepoint.s : ''} onChange={onChange(index)} unit="g/L" name="s" />
               </tr>
             )
           })}
