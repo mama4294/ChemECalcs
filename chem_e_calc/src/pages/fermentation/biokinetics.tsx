@@ -750,14 +750,13 @@ const AnswerCard = ({ state }: { state: State }) => {
   )
 }
 
+export default OURPage
+
 export type Timepoint = {
   t: number | null
   x: number | null
   s: number | null
 }
-
-export default OURPage
-
 const UserData = ({
   userData,
   setData,
@@ -781,43 +780,18 @@ const UserData = ({
 
   const onChange = (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
+    const numericValue = value.replace(/[^\d.-]/g, '')
     const newData = userData.map((timepoint, idx) => {
       if (idx === index) {
         return {
           ...timepoint,
-          [name]: +value,
+          [name]: numericValue,
         }
       }
       return timepoint
     })
     setData(newData)
   }
-
-  const TableCell = ({
-    value,
-    onChange,
-    unit,
-    name,
-  }: {
-    value: string | number
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-    unit: string
-    name: string
-  }) => (
-    <td className="relative border p-1">
-      <input
-        type="text"
-        placeholder="Null"
-        name={name}
-        className="input input-sm w-full max-w-xs rounded-none"
-        value={value}
-        onChange={onChange}
-      />
-      <span className="pointer-events-none absolute inset-y-0 right-0 m-2 hidden items-center whitespace-nowrap rounded-lg bg-base-200 px-2 text-xs opacity-75 sm:flex ">
-        {unit}
-      </span>
-    </td>
-  )
 
   return (
     <div className="overflow-x-auto">
@@ -882,14 +856,45 @@ const UserData = ({
                     </svg>
                   </button>
                 </td>
-                <TableCell
-                  value={timepoint.t || timepoint.t == 0 ? timepoint.t : ''}
-                  onChange={onChange(index)}
-                  unit="h"
-                  name="t"
-                />
-                <TableCell value={timepoint.x ? timepoint.x : ''} onChange={onChange(index)} unit="g/L" name="x" />
-                <TableCell value={timepoint.s ? timepoint.s : ''} onChange={onChange(index)} unit="g/L" name="s" />
+                <td className="relative border p-1">
+                  <input
+                    type="text"
+                    placeholder="Null"
+                    name="t"
+                    className="input input-sm w-full max-w-xs rounded-none"
+                    value={timepoint.t || timepoint.t == 0 ? timepoint.t : ''}
+                    onChange={onChange(index)}
+                  />
+                  <span className="pointer-events-none absolute inset-y-0 right-0 m-2 hidden items-center whitespace-nowrap rounded-lg bg-base-200 px-2 text-xs opacity-75 sm:flex ">
+                    h
+                  </span>
+                </td>
+                <td className="relative border p-1">
+                  <input
+                    type="text"
+                    placeholder="Null"
+                    name="x"
+                    className="input input-sm w-full max-w-xs rounded-none"
+                    value={timepoint.x ? timepoint.x : ''}
+                    onChange={onChange(index)}
+                  />
+                  <span className="pointer-events-none absolute inset-y-0 right-0 m-2 hidden items-center whitespace-nowrap rounded-lg bg-base-200 px-2 text-xs opacity-75 sm:flex ">
+                    g/L
+                  </span>
+                </td>
+                <td className="relative border p-1">
+                  <input
+                    type="text"
+                    placeholder="Null"
+                    name="s"
+                    className="input input-sm w-full max-w-xs rounded-none"
+                    value={timepoint.s ? timepoint.s : ''}
+                    onChange={onChange(index)}
+                  />
+                  <span className="pointer-events-none absolute inset-y-0 right-0 m-2 hidden items-center whitespace-nowrap rounded-lg bg-base-200 px-2 text-xs opacity-75 sm:flex ">
+                    g/L
+                  </span>
+                </td>
               </tr>
             )
           })}
