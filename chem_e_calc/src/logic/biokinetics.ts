@@ -313,10 +313,12 @@ export const createChartOptions = (details: Details) => {
             }
             if (context.parsed.y !== null) {
               switch (context.dataset.label) {
+                case 'Actual Dry Cells':
                 case 'Dry Cells':
                   label += `${context.parsed.y.toLocaleString('en-US', { maximumSignificantDigits: 2 })} g/L `
                   break
 
+                case 'Actual Substrate':
                 case 'Substrate':
                   label += `${context.parsed.y.toLocaleString('en-US', { maximumSignificantDigits: 2 })} g/L `
                   break
@@ -377,8 +379,8 @@ export const createChart = (modelData: ModelData, userData: UserData, isFeeding:
               data: userXData,
               yAxisID: 'y',
               pointHitRadius: 3,
-              borderColor: '#36a2eb', //blue
-              backgroundColor: '#36a2eb', //blue
+              borderColor: '#1275b8', //dark blue
+              backgroundColor: '#1275b8', //dark blue
             },
           ]
         : []),
@@ -399,8 +401,8 @@ export const createChart = (modelData: ModelData, userData: UserData, isFeeding:
               data: userSData,
               yAxisID: 'y',
               pointHitRadius: 3,
-              borderColor: '#ff6484', //red
-              backgroundColor: '#ff6484', //red
+              borderColor: '#f80033', //dark red
+              backgroundColor: '#f80033', //dark red
             },
           ]
         : []),

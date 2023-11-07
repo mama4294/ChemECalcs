@@ -18,7 +18,7 @@ import { calculate, createChart, createChartOptions, timepointsToArray } from '.
 import { CSVLink } from 'react-csv'
 Chart.register(LinearScale)
 
-//TODO: Fix text input
+//TODO: Fix chart tooltip with userData
 //TODO: Add local storage to user data
 
 export type State = {
