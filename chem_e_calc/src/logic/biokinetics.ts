@@ -367,6 +367,8 @@ export const createChart = (modelData: ModelData, userData: UserData, isFeeding:
         showLine: true,
         yAxisID: 'y',
         pointHitRadius: 1,
+        borderColor: '#36a2eb', //blue
+        backgroundColor: '#36a2eb', //blue
       },
       ...(hasNonNullTimepointsX
         ? [
@@ -375,6 +377,8 @@ export const createChart = (modelData: ModelData, userData: UserData, isFeeding:
               data: userXData,
               yAxisID: 'y',
               pointHitRadius: 1,
+              borderColor: '#36a2eb', //blue
+              backgroundColor: '#36a2eb', //blue
             },
           ]
         : []),
@@ -385,6 +389,8 @@ export const createChart = (modelData: ModelData, userData: UserData, isFeeding:
         showLine: true,
         yAxisID: 'y',
         pointHitRadius: 1,
+        borderColor: '#ff6484', //red
+        backgroundColor: '#ff6484', //red
       },
       ...(hasNonNullTimepointsS
         ? [
@@ -393,6 +399,8 @@ export const createChart = (modelData: ModelData, userData: UserData, isFeeding:
               data: userSData,
               yAxisID: 'y',
               pointHitRadius: 1,
+              borderColor: '#ff6484', //red
+              backgroundColor: '#ff6484', //red
             },
           ]
         : []),
@@ -405,6 +413,8 @@ export const createChart = (modelData: ModelData, userData: UserData, isFeeding:
               showLine: true,
               yAxisID: 'y2',
               pointHitRadius: 1,
+              borderColor: '#4bc0c0', //green
+              backgroundColor: '#4bc0c0', //green
             },
           ]
         : []),
