@@ -793,6 +793,35 @@ const UserData = ({
     setData(newData)
   }
 
+  const stringToArray = (str: string) => {
+    const rows = str.split('\n') // Split the string by new lines to get individual rows
+    const trimmedRow = rows.map(row => row.replace('\r', '')) //remove '\r'
+    const dataArray = trimmedRow.map(row => row.split('\t')) // Use '\t' for tab separation or ' ' for space separation
+    return dataArray
+  }
+
+  const onPaste = (index: number, field: keyof Timepoint) => (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    const pastedData = e.clipboardData.getData('text')
+    const dataArray = stringToArray(pastedData)
+    console.log(pastedData)
+    console.log(dataArray)
+
+    // const parsedValue = parseFloat(pastedData)
+    // if (!isNaN(parsedValue)) {
+    //   const newData = userData.map((timepoint, idx) => {
+    //     if (idx === index) {
+    //       return {
+    //         ...timepoint,
+    //         [field]: parsedValue,
+    //       }
+    //     }
+    //     return timepoint
+    //   })
+    //   setData(newData)
+    // }
+  }
+
   return (
     <div className="overflow-x-auto">
       <div className="mb-2 flex gap-2">
@@ -864,6 +893,7 @@ const UserData = ({
                     className="input input-sm w-full max-w-xs rounded-none"
                     value={timepoint.t || timepoint.t == 0 ? timepoint.t : ''}
                     onChange={onChange(index)}
+                    onPaste={onPaste(index, 't')}
                   />
                   <span className="pointer-events-none absolute inset-y-0 right-0 m-2 hidden items-center whitespace-nowrap rounded-lg bg-base-200 px-2 text-xs opacity-75 sm:flex ">
                     h
