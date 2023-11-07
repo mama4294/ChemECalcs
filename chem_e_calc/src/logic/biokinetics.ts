@@ -376,7 +376,7 @@ export const createChart = (modelData: ModelData, userData: UserData, isFeeding:
               label: 'Actual Dry Cells',
               data: userXData,
               yAxisID: 'y',
-              pointHitRadius: 1,
+              pointHitRadius: 3,
               borderColor: '#36a2eb', //blue
               backgroundColor: '#36a2eb', //blue
             },
@@ -398,7 +398,7 @@ export const createChart = (modelData: ModelData, userData: UserData, isFeeding:
               label: 'Actual Substrate',
               data: userSData,
               yAxisID: 'y',
-              pointHitRadius: 1,
+              pointHitRadius: 3,
               borderColor: '#ff6484', //red
               backgroundColor: '#ff6484', //red
             },
