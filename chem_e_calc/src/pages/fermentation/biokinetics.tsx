@@ -838,7 +838,7 @@ const UserData = ({
           {userData.map((timepoint: Timepoint, index: number) => {
             return (
               <tr key={index} className="">
-                <td className="border p-1 opacity-50">
+                <td className="border border-base-300 p-1 opacity-50">
                   <button className="btn btn-ghost btn-sm" onClick={deleteRow(index)}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -856,7 +856,7 @@ const UserData = ({
                     </svg>
                   </button>
                 </td>
-                <td className="relative border p-1">
+                <td className="relative border border-base-300 p-1">
                   <input
                     type="text"
                     placeholder="Null"
@@ -869,7 +869,7 @@ const UserData = ({
                     h
                   </span>
                 </td>
-                <td className="relative border p-1">
+                <td className="relative border border-base-300 p-1">
                   <input
                     type="text"
                     placeholder="Null"
@@ -882,7 +882,7 @@ const UserData = ({
                     g/L
                   </span>
                 </td>
-                <td className="relative border p-1">
+                <td className="relative border border-base-300 p-1">
                   <input
                     type="text"
                     placeholder="Null"
