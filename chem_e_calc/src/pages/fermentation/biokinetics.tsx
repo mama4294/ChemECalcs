@@ -800,26 +800,46 @@ const UserData = ({
     return dataArray
   }
 
-  const onPaste = (index: number, field: keyof Timepoint) => (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault()
+  const getField = (index: number) => {
+    switch (index) {
+      case 0:
+        return 't'
+      case 1:
+        return 'x'
+      case 2:
+        return 's'
+      default:
+        return null
+    }
+  }
+
+  const onPaste = (index: number, column: number) => (e: React.ClipboardEvent<HTMLInputElement>) => {
     const pastedData = e.clipboardData.getData('text')
     const dataArray = stringToArray(pastedData)
-    console.log(pastedData)
-    console.log(dataArray)
+    const newData = userData
 
-    // const parsedValue = parseFloat(pastedData)
-    // if (!isNaN(parsedValue)) {
-    //   const newData = userData.map((timepoint, idx) => {
-    //     if (idx === index) {
-    //       return {
-    //         ...timepoint,
-    //         [field]: parsedValue,
-    //       }
-    //     }
-    //     return timepoint
-    //   })
-    //   setData(newData)
-    // }
+    setTimeout(() => {
+      //The setTimeout function with a delay of 0 milliseconds allows the default paste action to occur before changing the input value, preventing the entire pasted string from replacing the input value.
+      dataArray.map((row, rowIndex) => {
+        row.map((input, columnIndex) => {
+          const field = getField(columnIndex + column)
+          if (field) {
+            const value = +input
+            const rowIdxInQuetion = rowIndex + index
+
+            userData.map((timepoint, idx) => {
+              if (idx === rowIdxInQuetion) {
+                newData[idx] = { ...timepoint, [field]: value }
+              }
+              if (rowIdxInQuetion > userData.length - 1) {
+                newData.push({ ...{ t: 0, x: 0, s: 0 }, [field]: value })
+              }
+            })
+          }
+        })
+      })
+      setData(newData)
+    }, 0)
   }
 
   return (
@@ -893,7 +913,7 @@ const UserData = ({
                     className="input input-sm w-full max-w-xs rounded-none"
                     value={timepoint.t || timepoint.t == 0 ? timepoint.t : ''}
                     onChange={onChange(index)}
-                    onPaste={onPaste(index, 't')}
+                    onPaste={onPaste(index, 0)}
                   />
                   <span className="pointer-events-none absolute inset-y-0 right-0 m-2 hidden items-center whitespace-nowrap rounded-lg bg-base-200 px-2 text-xs opacity-75 sm:flex ">
                     h
@@ -907,6 +927,7 @@ const UserData = ({
                     className="input input-sm w-full max-w-xs rounded-none"
                     value={timepoint.x ? timepoint.x : ''}
                     onChange={onChange(index)}
+                    onPaste={onPaste(index, 1)}
                   />
                   <span className="pointer-events-none absolute inset-y-0 right-0 m-2 hidden items-center whitespace-nowrap rounded-lg bg-base-200 px-2 text-xs opacity-75 sm:flex ">
                     g/L
@@ -920,6 +941,7 @@ const UserData = ({
                     className="input input-sm w-full max-w-xs rounded-none"
                     value={timepoint.s ? timepoint.s : ''}
                     onChange={onChange(index)}
+                    onPaste={onPaste(index, 2)}
                   />
                   <span className="pointer-events-none absolute inset-y-0 right-0 m-2 hidden items-center whitespace-nowrap rounded-lg bg-base-200 px-2 text-xs opacity-75 sm:flex ">
                     g/L
@@ -930,6 +952,9 @@ const UserData = ({
           })}
         </tbody>
       </table>
+      <div>
+        <kbd className="kbd">ctrl</kbd>+<kbd className="kbd">v</kbd> to paste data
+      </div>
     </div>
   )
 }
