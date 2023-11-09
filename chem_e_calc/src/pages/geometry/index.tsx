@@ -1,13 +1,6 @@
 import Link from 'next/link'
 import { GridCard } from '../../components/GridCard'
 import { Metadata } from '../../components/Layout/Metadata'
-import { IconBox } from '../../icons/IconBox'
-import { IconCone } from '../../icons/iconCone'
-import { IconCylinder } from '../../icons/iconCylinder'
-import { IconHemisphere } from '../../icons/iconHemiphere'
-import { IconPyramid } from '../../icons/iconPyramid'
-import { IconSphere } from '../../icons/iconSphere'
-import { IconTank } from '../../icons/IconTank'
 import ShapeContainer from '../../components/3D shapes/DyanmicShapes'
 import { Box3D, Cone3D, Cylinder3D, Hemisphere3D, Sphere3D, Tank3D } from '../../components/3D shapes/StaticShapes'
 

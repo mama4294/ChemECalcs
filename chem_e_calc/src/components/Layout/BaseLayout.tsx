@@ -8,14 +8,11 @@ type Props = {
 
 const BaseLayout: React.FC<Props> = ({ children }) => {
   return (
-    <>
-      {/* <div data-theme="garden" className="min-h-screen flex flex-col"> */}
-      <div className="flex min-h-screen flex-col">
-        <Navbar />
-        <main className="flex-grow">{children}</main>
-        <Footer />
-      </div>
-    </>
+    <div className="flex min-h-screen flex-col">
+      <Navbar />
+      <main className="flex max-w-full flex-grow">{children}</main>
+      <Footer />
+    </div>
   )
 }
 

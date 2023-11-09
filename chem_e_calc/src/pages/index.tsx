@@ -13,7 +13,7 @@ const Home: NextPage = () => {
         keywords="chemical, engineering, home, calculator, unit, conversion, geometry, fluid, dynamics, tank, volume, agitation, scaleup, efficiency, accuracy, process, engineers"
       />
 
-      <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="flex flex-grow flex-col items-center justify-center bg-gradient-to-r from-slate-300 to-slate-500 p-4">
         <div className="relative w-full max-w-2xl">
           <div className="flex justify-center fill-base-content">
             <ChemECalcsLogo height={150} width={400} />

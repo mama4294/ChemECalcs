@@ -1,4 +1,3 @@
-import { CapsuleGeometry } from 'three'
 import { COLOR3D } from '../../constants/colors'
 
 export const Box3D = () => {
