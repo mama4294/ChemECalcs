@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { DefaultUnitsForm } from './DefaultUnitsForm'
 import Search from './Search'
+import { ChemECalcsLogo } from './Logo'
 
 const Navbar = () => {
   return (
@@ -22,11 +23,6 @@ const DesktopMenu = () => {
   return (
     <div className="navbar-center hidden text-neutral-content lg:flex">
       <ul className="menu menu-horizontal p-0 ">
-        {/* <li>
-          <Link href={'/conversion'}>
-            <a className="hover:bg-neutral-focus">Unit Conversion</a>
-          </Link>
-        </li> */}
         <li tabIndex={0}>
           <a className="hover:bg-neutral-focus">
             Basics
@@ -340,7 +336,9 @@ const MobileMenu = () => {
         </ul>
       </div>
       <Link href={'/'}>
-        <a className="btn text-xl normal-case">ChemE Calcs</a>
+        <div className="btn fill-neutral-content">
+          <ChemECalcsLogo lightMode={true} height={36} width={96} />
+        </div>
       </Link>
     </div>
   )
