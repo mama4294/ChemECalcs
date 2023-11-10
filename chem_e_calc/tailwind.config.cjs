@@ -9,17 +9,17 @@ module.exports = {
     themes: [
       {
         light: {
-          primary: '#05bcc7',
-          'primary-focus': '#0096a1',
-          'primary-content': '#fefefe',
+          primary: '#0141ff',
+          'primary-focus': '#4506cb',
+          'primary-content': '#ffffff',
 
-          secondary: '#00899f',
-          'secondary-focus': '#0021ff',
-          'secondary-content': '#fefefe',
+          secondary: '#f000b8',
+          'secondary-focus': '#bd0091',
+          'secondary-content': '#ffffff',
 
-          accent: '#05bcc7',
-          'accent-focus': '#0096a1',
-          'accent-content': '#fefefe',
+          accent: '#37cdbe',
+          'accent-focus': '#2ba69a',
+          'accent-content': '#ffffff',
 
           neutral: '#3b424e',
           'neutral-focus': '#2a2e37',

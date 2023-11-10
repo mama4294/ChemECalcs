@@ -29,11 +29,11 @@ export const GridCard = ({ name, children, description, link, span }: GridCardPr
   return (
     <Link href={link}>
       <div
-        className={`group grid cursor-pointer rounded-xl border border-accent-content bg-base-100/50 p-6 text-left text-base-content duration-500 hover:border-[#00899e] hover:bg-base-100/70 ${spanClass}`} //motion-safe:hover:scale-105
+        className={`group grid cursor-pointer rounded-xl border border-primary-content bg-base-100/50 p-6 text-left text-base-content duration-500 hover:border-primary hover:bg-base-100/70 ${spanClass}`} //motion-safe:hover:scale-105
       >
         <h3 className="mb-3 flex items-center text-2xl font-semibold tracking-tight">
           {name}
-          <span className="ml-1 inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
+          <span className="ml-1 inline-block transition-transform group-hover:translate-x-1 group-hover:text-primary motion-reduce:transform-none">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
