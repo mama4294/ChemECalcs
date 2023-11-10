@@ -29,7 +29,7 @@ export const GridCard = ({ name, children, description, link, span }: GridCardPr
   return (
     <Link href={link}>
       <div
-        className={`Card group grid cursor-pointer rounded-xl bg-base-100/50 p-6 text-left text-base-content duration-500 hover:bg-base-100/70 ${spanClass}`} //motion-safe:hover:scale-105
+        className={`group grid cursor-pointer rounded-xl border border-accent-content bg-base-100/50 p-6 text-left text-base-content duration-500 hover:border-[#00899e] hover:bg-base-100/70 ${spanClass}`} //motion-safe:hover:scale-105
       >
         <h3 className="mb-3 flex items-center text-2xl font-semibold tracking-tight">
           {name}

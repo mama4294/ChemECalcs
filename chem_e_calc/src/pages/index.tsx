@@ -27,7 +27,7 @@ const Home: NextPage = () => {
             <GridCard name="Units" description="Convert between units" link="/conversion" />
             <GridCard name="Geometry" description="Volume of a cylinder, cone, box, etc" link="/geometry" />
             <GridCard name="Fluids" description="Pressure drop, Reynolds number, etc" link="/fluids" />
-            <GridCard name="Tank Volume" description="Tank volume visualization" link="/geometry/tank" />
+            <GridCard name="Tanks" description="Tank volume visualization" link="/geometry/tank" />
             <GridCard name="Controls" description="Controls and instrumentation" link="/controls" />
             <GridCard name="Fermentation" description="Fermenters and bioreactors" link="/fermentation" />
           </div>
