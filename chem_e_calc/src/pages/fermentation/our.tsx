@@ -439,7 +439,7 @@ const ExampleCard = () => {
             equation={`$$\\dot{n}_{out} = \\dot{n} ⋅ \\frac{1 - C_{in O_{2}}- C_{in CO_{2}}}{1 - C_{out O_{2}}- C_{out CO_{2}}}$$`}
           />
           <Equation
-            equation={`$$OUR = \\frac{\\dot{n}}{V_l} (C_{in O_{2}} - \\frac{1 - C_{in O_{2}}- C_{in CO_{2}}}{1 - C_{out O_{2}}- C_{out CO_{2}}} ⋅ C_{out CO_{2}})$$`}
+            equation={`$$OUR = \\frac{\\dot{n}}{V_l} (C_{in O_{2}} - \\frac{1 - C_{in O_{2}}- C_{in CO_{2}}}{1 - C_{out O_{2}}- C_{out CO_{2}}} ⋅ C_{out O_{2}})$$`}
           />
           <Equation
             equation={`$$OUR = \\frac{2,677 mmol/hr}{1 L} (21\\% - \\frac{1 - 0\\% - 21\\%}{1 - 18\\% - 2\\%} ⋅ 18\\% )$$`}
@@ -490,7 +490,7 @@ const ExampleCard = () => {
 
 const OURHint = () => (
   <span className="label-text-alt">
-    <div className="dropdown-end dropdown">
+    <div className="dropdown dropdown-end">
       <label tabIndex={0} className="btn btn-ghost btn-circle btn-xs text-info">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-4 w-4 stroke-current">
           <path
