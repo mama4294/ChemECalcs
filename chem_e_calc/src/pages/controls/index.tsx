@@ -9,7 +9,7 @@ const Page = () => {
   const paths = [{ title: 'Controls', href: '/controls/' }]
 
   return (
-    <>
+    <div className="flex-grow bg-gradient-to-b from-transparent to-neutral">
       <Metadata
         title="Controls Engineering"
         description="Chemical engineering calculations for process and plant engineers"
@@ -23,7 +23,7 @@ const Page = () => {
           <GridCard name="Analog Signals" description="Calculations for 4-20mA analog signals" link="/controls/mA" />
         </CalcBody>
       </PageContainer>
-    </>
+    </div>
   )
 }
 

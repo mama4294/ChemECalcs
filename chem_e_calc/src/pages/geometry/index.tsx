@@ -6,7 +6,7 @@ import { Box3D, Cone3D, Cylinder3D, Hemisphere3D, Sphere3D, Tank3D } from '../..
 
 const Geometry = () => {
   return (
-    <>
+    <div className="flex-grow bg-gradient-to-b from-transparent to-neutral">
       <Metadata
         title="Geometry Calculators"
         description="Chemical engineering calculations for process and plant engineers"
@@ -85,7 +85,7 @@ const Geometry = () => {
           </GridCard>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

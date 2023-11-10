@@ -9,7 +9,7 @@ const Fluids = () => {
   const paths = [{ title: 'Fluid Dynamics', href: '/fluids/' }]
 
   return (
-    <>
+    <div className="flex-grow bg-gradient-to-b from-transparent to-neutral">
       <Metadata
         title="Fluid Dynamics"
         description="Chemical engineering calculations for process and plant engineers"
@@ -47,7 +47,7 @@ const Fluids = () => {
           />
         </CalcBody>
       </PageContainer>
-    </>
+    </div>
   )
 }
 

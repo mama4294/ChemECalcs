@@ -9,7 +9,7 @@ const Page = () => {
   const paths = [{ title: 'Fermentation', href: '/fermentation' }]
 
   return (
-    <>
+    <div className="flex-grow bg-gradient-to-b from-transparent to-neutral">
       <Metadata
         title="Fermentation"
         description="Chemical engineering calculations for process and plant engineers"
@@ -29,7 +29,7 @@ const Page = () => {
           />
         </CalcBody>
       </PageContainer>
-    </>
+    </div>
   )
 }
 

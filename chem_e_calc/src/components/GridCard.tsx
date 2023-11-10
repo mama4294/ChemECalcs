@@ -28,15 +28,27 @@ export const GridCard = ({ name, children, description, link, span }: GridCardPr
   console.log(spanClass)
   return (
     <Link href={link}>
-      <section
-        className={`gridCard shadow-nuetral card flex cursor-pointer flex-row items-center bg-base-100 text-base-content shadow-2xl duration-500 motion-safe:hover:scale-105 ${spanClass}`}
+      <div
+        className={`Card group grid cursor-pointer rounded-xl bg-base-100/50 p-6 text-left text-base-content duration-500 hover:bg-base-100/70 ${spanClass}`} //motion-safe:hover:scale-105
       >
-        <div className="card-body">
-          <h2 className="card-title justify-center ">{name}</h2>
-          <p>{description}</p>
-          {children && <div className="flex justify-center">{children}</div>}
-        </div>
-      </section>
+        <h3 className="mb-3 flex items-center text-2xl font-semibold tracking-tight">
+          {name}
+          <span className="ml-1 inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="h-6 w-6"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </span>
+        </h3>
+        <p className="text-sm opacity-75">{description}</p>
+        {children && <div className="flex justify-center">{children}</div>}
+      </div>
     </Link>
   )
 }
