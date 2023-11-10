@@ -10,7 +10,7 @@ import { DefaultUnitContext, DefaultUnitContextType, DefaultUnits } from '../../
 import { convertUnits } from '../../utils/units'
 import { ShortInputType } from '../../types'
 import { updateCalculatedValue } from '../../logic/logic'
-import { Equation, VariableDefinition } from '../../components/Equation'
+import { Equation, VariableDefinition } from '../../components/Layout/Equation'
 import { Metadata } from '../../components/Layout/Metadata'
 
 type State = {

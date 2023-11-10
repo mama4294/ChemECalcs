@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { GridCard } from '../../components/GridCard'
+import { GridCard } from '../../components/Layout/GridCard'
 import { Metadata } from '../../components/Layout/Metadata'
 import ShapeContainer from '../../components/3D shapes/DyanmicShapes'
 import { Box3D, Cone3D, Cylinder3D, Hemisphere3D, Sphere3D, Tank3D } from '../../components/3D shapes/StaticShapes'

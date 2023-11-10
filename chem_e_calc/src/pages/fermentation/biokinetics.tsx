@@ -13,7 +13,7 @@ import { updateCalculatedValue } from '../../logic/logic'
 import { Metadata } from '../../components/Layout/Metadata'
 import { Scatter } from 'react-chartjs-2'
 import { Chart, LinearScale, Point } from 'chart.js/auto'
-import { Equation, VariableDefinition } from '../../components/Equation'
+import { Equation, VariableDefinition } from '../../components/Layout/Equation'
 import { calculate, createChart, createChartOptions, timepointsToArray } from '../../logic/biokinetics'
 import { CSVLink } from 'react-csv'
 Chart.register(LinearScale)

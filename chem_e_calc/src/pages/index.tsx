@@ -1,5 +1,5 @@
 import type { NextPage } from 'next'
-import { GridCard } from '../components/GridCard'
+import { GridCard } from '../components/Layout/GridCard'
 import { Metadata } from '../components/Layout/Metadata'
 import { ChemECalcsLogo } from '../components/Layout/Logo'
 

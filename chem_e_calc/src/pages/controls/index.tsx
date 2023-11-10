@@ -2,7 +2,7 @@ import { Breadcrumbs } from '../../components/calculators/breadcrumbs'
 import { CalcBody } from '../../components/calculators/calcBody'
 import { PageContainer } from '../../components/calculators/container'
 import { CalcHeader } from '../../components/calculators/header'
-import { GridCard } from '../../components/GridCard'
+import { GridCard } from '../../components/Layout/GridCard'
 import { Metadata } from '../../components/Layout/Metadata'
 
 const Page = () => {
