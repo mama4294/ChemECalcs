@@ -9,12 +9,12 @@ module.exports = {
     themes: [
       {
         light: {
-          primary: '#0141ff',
+          primary: '#570df8',
           'primary-focus': '#4506cb',
           'primary-content': '#ffffff',
 
-          secondary: '#f000b8',
-          'secondary-focus': '#bd0091',
+          secondary: '#8ecae6',
+          'secondary-focus': '##237ba6',
           'secondary-content': '#ffffff',
 
           accent: '#37cdbe',
@@ -67,10 +67,6 @@ module.exports = {
   },
   theme: {
     extend: {
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-      },
       animation: {
         blob: 'blob 6s infinite',
       },

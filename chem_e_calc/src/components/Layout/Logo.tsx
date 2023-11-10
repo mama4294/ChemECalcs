@@ -1,6 +1,6 @@
 export const ChemECalcsLogo = ({ height, width }: { height: number; width: number }) => {
-  const accentColor = 'hsl(var(--p))'
-  const logoColor = 'hsl(var(--p))'
+  const accentColor = 'hsl(var(--s))'
+  const logoColor = 'hsl(var(--s))'
 
   return (
     <svg

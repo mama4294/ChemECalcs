@@ -337,7 +337,7 @@ const MobileMenu = () => {
       </div>
       <Link href={'/'}>
         <div className="btn fill-neutral-content">
-          <ChemECalcsLogo lightMode={true} height={36} width={96} />
+          <ChemECalcsLogo height={36} width={96} />
         </div>
       </Link>
     </div>
