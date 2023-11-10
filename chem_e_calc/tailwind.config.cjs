@@ -6,7 +6,64 @@ module.exports = {
   theme: {},
   plugins: [require('daisyui')],
   daisyui: {
-    themes: ['light', 'dark'],
+    themes: [
+      {
+        light: {
+          primary: '#05bcc7',
+          'primary-focus': '#0096a1',
+          'primary-content': '#fefefe',
+
+          secondary: '#00899f',
+          'secondary-focus': '#0021ff',
+          'secondary-content': '#fefefe',
+
+          accent: '#05bcc7',
+          'accent-focus': '#0096a1',
+          'accent-content': '#fefefe',
+
+          neutral: '#3b424e',
+          'neutral-focus': '#2a2e37',
+          'neutral-content': '#ffffff',
+
+          'base-100': '#ffffff',
+          'base-200': '#f9fafb',
+          'base-300': '#ced3d9',
+          'base-content': '#1e2734',
+
+          info: '#1c92f2',
+          success: '#009485',
+          warning: '#ff9900',
+          error: '#ff5724',
+        },
+        dark: {
+          primary: '#05bcc7',
+          'primary-focus': '#0096a1',
+          'primary-content': '#fefefe',
+
+          secondary: '#00899f',
+          'secondary-focus': '#0021ff',
+          'secondary-content': '#fefefe',
+
+          accent: '#05bcc7',
+          'accent-focus': '#0096a1',
+          'accent-content': '#fefefe',
+
+          neutral: '#2a2e37',
+          'neutral-focus': '#16181d',
+          'neutral-content': '#ffffff',
+
+          'base-100': '#3b424e',
+          'base-200': '#2a2e37',
+          'base-300': '#16181d',
+          'base-content': '#ebecf0',
+
+          info: '#66c7ff',
+          success: '#87cf3a',
+          warning: '#e1d460',
+          error: '#ff6b6b',
+        },
+      },
+    ],
   },
   theme: {
     extend: {
