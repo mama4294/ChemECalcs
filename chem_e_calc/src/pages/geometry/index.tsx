@@ -37,45 +37,42 @@ const Geometry = () => {
 
         {/* Calculator */}
         <div className="my-3 grid gap-9 py-3 text-center  md:grid-cols-3">
-          <GridCard name="Cylinder" link="/geometry/cylinder">
+          <GridCard name="Cylinder" link="/geometry/cylinder" animated={false}>
             <div className="h-[100px] w-[100px]">
               <ShapeContainer orbit={false}>
                 <Cylinder3D />
               </ShapeContainer>
             </div>
           </GridCard>
-          <GridCard name="Box" link="/geometry/box">
+          <GridCard name="Box" link="/geometry/box" animated={false}>
             <div className="h-[100px] w-[100px]">
               <ShapeContainer orbit={false}>
                 <Box3D />
               </ShapeContainer>
             </div>
           </GridCard>
-          <GridCard name="Cone" link="/geometry/cone">
+          <GridCard name="Cone" link="/geometry/cone" animated={false}>
             <div className="h-[100px] w-[100px]">
               <ShapeContainer orbit={false}>
                 <Cone3D />
               </ShapeContainer>
             </div>
           </GridCard>
-          <GridCard name="Sphere" link="/geometry/sphere">
+          <GridCard name="Sphere" link="/geometry/sphere" animated={false}>
             <div className="h-[100px] w-[100px]">
               <ShapeContainer orbit={false}>
                 <Sphere3D />
               </ShapeContainer>
             </div>
           </GridCard>
-          {/* <GridCard name="Pyramid" link="/geometry/pyramid">
-            <IconPyramid />
-          </GridCard> */}
-          <GridCard name="Hemisphere" link="/geometry/hemisphere">
+          <GridCard name="Hemisphere" link="/geometry/hemisphere" animated={false}>
             <div className="h-[100px] w-[100px]">
               <ShapeContainer orbit={false}>
                 <Hemisphere3D />
               </ShapeContainer>
             </div>
           </GridCard>
-          <GridCard name="Tank" link="/geometry/tank" span={1}>
+          <GridCard name="Tank" link="/geometry/tank" span={1} animated={false}>
             {/* <IconTank /> */}
             <div className="h-[100px] w-[100px]">
               <ShapeContainer orbit={false}>

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 
 type GridCardProps = {
   name: string
@@ -6,9 +7,10 @@ type GridCardProps = {
   description?: string
   link: string
   span?: number
+  animated?: boolean
 }
 
-export const GridCard = ({ name, children, description, link, span }: GridCardProps) => {
+export const GridCard = ({ name, children, description, link, span, animated = true }: GridCardProps) => {
   const getClassName = (span: number | undefined) => {
     if (!span) return ''
     switch (span) {
@@ -25,22 +27,24 @@ export const GridCard = ({ name, children, description, link, span }: GridCardPr
 
   const spanClass = getClassName(span)
 
-  console.log(spanClass)
   return (
     <Link href={link}>
-      <div
-        className={`relative group grid cursor-pointer duration-500 hover:scale-105    ${spanClass}`} //motion-safe:hover:scale-105
+      <motion.div
+        className={`group relative grid cursor-pointer hover:scale-105 ${spanClass}`} //motion-safe:hover:scale-105
+        layout
+        initial={{ scale: animated ? 0 : 1 }}
+        whileInView={{ scale: 1 }}
+        whileHover={{ scale: 1.05 }}
+        transition={{ type: 'spring', duration: 0.5, bounce: 0.3, delay: 0 }}
+        viewport={{ once: true }}
       >
-        <div className='absolute -inset-0.5 bg-secondary blur rounded-xl opacity-75 group-hover:opacity-100 group-hover:-inset-1 duration-500'></div>
-        <div className='relative text-left bg-neutral text-neutral-content p-6 rounded-xl'>
-          <h3 className="mb-3 flex items-center text-2xl font-semibold tracking-tight">
-            {name}
-          </h3>
-        <p className="text-sm opacity-75">{description}</p>
-        {children && <div className="flex justify-center">{children}</div>}
-      </div>
-      </div>
-
+        <div className="absolute -inset-0.5 rounded-xl bg-secondary opacity-75 blur duration-500 group-hover:-inset-1 group-hover:opacity-100"></div>
+        <div className="relative rounded-xl bg-neutral p-6 text-left text-neutral-content">
+          <h3 className="mb-3 flex items-center text-2xl font-semibold tracking-tight">{name}</h3>
+          <p className="text-sm opacity-75">{description}</p>
+          {children && <div className="flex justify-center">{children}</div>}
+        </div>
+      </motion.div>
     </Link>
   )
 }
