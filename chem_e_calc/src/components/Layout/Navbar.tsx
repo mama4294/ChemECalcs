@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { DefaultUnitsForm } from './DefaultUnitsForm'
 import Search from './Search'
-import { ChemECalcsLogo } from './Logo'
+import { ChemECalcsLogo } from './LogoFull'
 
 const Navbar = () => {
   return (

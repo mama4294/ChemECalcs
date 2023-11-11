@@ -1,7 +1,8 @@
 import type { NextPage } from 'next'
 import { GridCard } from '../components/Layout/GridCard'
 import { Metadata } from '../components/Layout/Metadata'
-import { ChemECalcsLogo } from '../components/Layout/Logo'
+import { LogoIcon } from '../components/Layout/LogoIcon'
+import { LogoText } from '../components/Layout/LogoText'
 
 const Home: NextPage = () => {
   return (
@@ -15,7 +16,8 @@ const Home: NextPage = () => {
       <div className="flex max-w-full flex-grow flex-col items-center justify-center bg-gradient-to-t from-transparent to-neutral p-4">
         <div className="relative w-full max-w-3xl">
           <div className="flex justify-center fill-neutral-content">
-            <ChemECalcsLogo height={150} width={400} />
+            <LogoIcon height={150} width={150} />
+            <LogoText height={150} width={275} />
             <div className="absolute -z-20 flex h-[150px] w-[480px] rounded-full bg-gradient-to-br from-sky-900 to-[#0141ff] opacity-40 blur-2xl"></div>
           </div>
           <div className="flex justify-center text-neutral-content">
