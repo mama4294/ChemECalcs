@@ -32,7 +32,7 @@ export const GridCard = ({ name, children, description, link, span, animated = t
       <motion.div
         className={`group relative grid cursor-pointer hover:scale-105 ${spanClass}`} //motion-safe:hover:scale-105
         layout
-        initial={{ scale: animated ? 0 : 1 }}
+        initial={{ scale: animated ? 0.8 : 1 }}
         whileInView={{ scale: 1 }}
         whileHover={{ scale: 1.05 }}
         transition={{ type: 'spring', duration: 0.5, bounce: 0.3, delay: 0 }}
