@@ -18,7 +18,7 @@ const Home: NextPage = () => {
           <div className="flex justify-center fill-neutral-content">
             <LogoIcon height={150} width={150} />
             <LogoText height={150} width={275} />
-            <div className="absolute -z-20 flex h-[150px] w-[480px] rounded-full bg-gradient-to-br from-sky-900 to-[#0141ff] opacity-40 blur-2xl"></div>
+            <div className="max-w-full absolute -z-20 flex h-[150px] w-[480px] rounded-full bg-gradient-to-br from-sky-900 to-[#0141ff] opacity-40 blur-2xl"></div>
           </div>
           <div className="flex justify-center text-neutral-content">
             <h2 className="mb-8 text-xl font-medium">Online calculators for chemical, process, and plant engineers.</h2>
