@@ -37,6 +37,11 @@ const DesktopMenu = () => {
               </Link>
             </li>
             <li>
+            <Link href={'/linearinterpolation'}>
+              <a className="hover:bg-neutral-focus">Linear Interpolation</a>
+            </Link>
+          </li>
+            <li>
               <Link href={'/geometry/cylinder'}>
                 <a className="hover:bg-neutral-focus">Cylinder</a>
               </Link>
@@ -182,6 +187,11 @@ const MobileMenu = () => {
           <li>
             <Link href={'/conversion'}>
               <a className="hover:bg-neutral-focus">Unit Conversion</a>
+            </Link>
+          </li>
+          <li>
+            <Link href={'/linearinterpolation'}>
+              <a className="hover:bg-neutral-focus">Linear Interpolation</a>
             </Link>
           </li>
           <li tabIndex={0}>
