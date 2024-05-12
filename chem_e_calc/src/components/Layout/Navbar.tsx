@@ -37,10 +37,10 @@ const DesktopMenu = () => {
               </Link>
             </li>
             <li>
-            <Link href={'/linearinterpolation'}>
-              <a className="hover:bg-neutral-focus">Linear Interpolation</a>
-            </Link>
-          </li>
+              <Link href={'/linearinterpolation'}>
+                <a className="hover:bg-neutral-focus">Linear Interpolation</a>
+              </Link>
+            </li>
             <li>
               <Link href={'/geometry/cylinder'}>
                 <a className="hover:bg-neutral-focus">Cylinder</a>
@@ -104,6 +104,11 @@ const DesktopMenu = () => {
             <li>
               <Link href={'/fermentation/biokinetics'}>
                 <a className="hover:bg-neutral-focus">Biokinetics</a>
+              </Link>
+            </li>
+            <li>
+              <Link href={'/fermentation/logreduction'}>
+                <a className="hover:bg-neutral-focus">Log Reduction</a>
               </Link>
             </li>
           </ul>
@@ -277,6 +282,11 @@ const MobileMenu = () => {
               <li>
                 <Link href={'/fermentation/biokinetics'}>
                   <a className="hover:bg-neutral-focus">Biokinetics</a>
+                </Link>
+              </li>
+              <li>
+                <Link href={'/fermentation/logreduction'}>
+                  <a className="hover:bg-neutral-focus">Log Reduction</a>
                 </Link>
               </li>
             </ul>
