@@ -283,3 +283,90 @@ export const InputSlider = ({
     </div>
   )
 }
+
+type InputFieldDynamicProps = {
+  name: string
+  label: string
+  value: string
+  unit: string
+  placeholder?: string
+  disabled?: boolean
+  error?: string
+  unitOptions?: UnitOption[]
+  focusText?: string
+  onChangeValue: any
+  onChangeUnit: any
+  topRight?: React.ReactNode
+}
+
+export const InputFieldDynamic = ({
+  name,
+  label,
+  value,
+  unit,
+  placeholder = '',
+  disabled = false,
+  error = '',
+  unitOptions,
+  focusText = '',
+  onChangeValue,
+  onChangeUnit,
+  topRight,
+}: InputFieldDynamicProps) => {
+  return (
+    <div className="mb-2">
+      <label htmlFor={label} className="label ">
+        {label}
+        {topRight}
+      </label>
+      <div
+        className={`peer input relative h-full w-full px-0 ${error ? 'input-error text-error' : ' text-base-content'}`}
+      >
+        <input
+          type="text"
+          name={name}
+          value={value}
+          id={label}
+          disabled={disabled}
+          onChange={onChangeValue}
+          className="disabled:border-1 input input-bordered block w-full pr-16 disabled:cursor-text "
+          placeholder={disabled ? 'N/A' : placeholder}
+        />
+        <div className="h-{46} absolute inset-y-0 right-0 flex items-center">
+          <label htmlFor="unit" className="sr-only">
+            Unit
+          </label>
+          {!unitOptions && <div className="h-{46} absolute inset-y-0 right-0 mr-4 flex items-center">{unit}</div>}
+          {unitOptions && (
+            <select
+              id="unit"
+              name={name}
+              className="select h-full rounded-md border-transparent bg-transparent py-0 pl-2 pr-7 text-right focus:outline-0"
+              value={unit}
+              onChange={onChangeUnit}
+            >
+              {unitOptions.map((unitOption: UnitOption, index: number) => {
+                return (
+                  <option key={index} value={unitOption.value}>
+                    {unitOption.label}
+                  </option>
+                )
+              })}
+            </select>
+          )}
+        </div>
+      </div>
+      <label className="label hidden py-0 peer-focus-within:block">
+        <span className={`label-text-alt ${error ? 'text-error' : ' text-base-content'}`}>
+          {disabled ? '' : focusText}
+        </span>
+      </label>
+
+      {error && (
+        <label className="peer label py-0">
+          <span className="label-text-alt text-error">{error}</span>
+        </label>
+      )}
+    </div>
+  )
+}

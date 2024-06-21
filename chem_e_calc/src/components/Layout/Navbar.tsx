@@ -111,6 +111,11 @@ const DesktopMenu = () => {
                 <a className="hover:bg-neutral-focus">Log Reduction</a>
               </Link>
             </li>
+            <li>
+              <Link href={'/fermentation/molarity'}>
+                <a className="hover:bg-neutral-focus">Molarity</a>
+              </Link>
+            </li>
           </ul>
         </li>
         <li tabIndex={0}>
@@ -287,6 +292,11 @@ const MobileMenu = () => {
               <li>
                 <Link href={'/fermentation/logreduction'}>
                   <a className="hover:bg-neutral-focus">Log Reduction</a>
+                </Link>
+              </li>
+              <li>
+                <Link href={'/fermentation/molarity'}>
+                  <a className="hover:bg-neutral-focus">Molarity</a>
                 </Link>
               </li>
             </ul>

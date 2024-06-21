@@ -23,6 +23,11 @@ const Page = () => {
           <GridCard name="Agitation Scale Up" description="Scaleup to a larger vessel" link="/fermentation/scaleup" />
           <GridCard name="Respiration" description="Calculate OUR, CER, and RQ" link="/fermentation/our" />
           <GridCard
+            name="Molarity"
+            description="Calculate molarity of chemical solutions"
+            link="/fermentation/molarity"
+          />
+          <GridCard
             name="Biokinetics"
             description="Model fermentation growth rate and substrate consumption"
             link="/fermentation/biokinetics"
