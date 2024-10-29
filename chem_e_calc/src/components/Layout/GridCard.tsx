@@ -40,8 +40,8 @@ export const GridCard = ({ name, children, description, link, span, animated = t
       >
         <div className="absolute -inset-0.5 rounded-xl bg-secondary opacity-75 blur duration-500 group-hover:-inset-1 group-hover:opacity-100"></div>
         <div className="relative rounded-xl bg-neutral p-6 text-left text-neutral-content">
-          <h3 className="mb-3 flex items-center text-2xl font-semibold tracking-tight">{name}</h3>
-          <p className="text-sm opacity-75">{description}</p>
+          <h3 className="mb-1 flex items-center text-2xl font-semibold tracking-tight">{name}</h3>
+          <p className="text-xs opacity-75">{description}</p>
           {children && <div className="flex justify-center">{children}</div>}
         </div>
       </motion.div>
